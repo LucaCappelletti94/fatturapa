@@ -35,39 +35,56 @@ println!("invoice number: {numero}");
 ```
 
 ```rust
-use fatturapa::builder::{Invoice, InvoiceBody, Line};
-use fatturapa::generated::fpr12 as g;
+use fatturapa::ids::{Provincia, RegimeFiscale};
+use fatturapa::invoice::{Invoice, InvoiceCurrency, SevenTerLine};
+use fatturapa::party::{Address, Business, Seller};
 use fatturapa::Document;
 
-let seller = g::CedentePrestatoreType::new(
-    g::IdFiscaleType::new("IT", "01234567890"),
-    g::AnagraficaType::denominazione("ALPHA SRL"),
-    g::RegimeFiscaleType::Rf01,
-    g::IndirizzoType::new("VIA ROMA 1", "00100", "ROMA", "IT"),
+let seller = Seller::denomination(
+    "ALPHA SRL".parse().unwrap(),
+    "02222222222".parse().unwrap(),
+    Address::italian(
+        "VIA ROMA 1".parse().unwrap(),
+        "00100".parse().unwrap(),
+        "ROMA".parse().unwrap(),
+        Provincia::Rm,
+    ),
+    RegimeFiscale::Rf01,
 );
-let buyer = g::CessionarioCommittenteType::new(
-    g::IdFiscaleType::new("IT", "09876543210"),
-    g::AnagraficaType::denominazione("BETA SRL"),
-    g::IndirizzoType::new("VIA MILANO 2", "20100", "MILANO", "IT"),
-);
-let doc = Invoice::new(g::FormatoTrasmissioneType::Fpr12, "00001", seller, buyer)
-    .codice_destinatario("ABC1234")
-    .body(
-        InvoiceBody::new(
-            g::TipoDocumentoType::Td01,
-            "EUR",
-            "2026-11-04".parse().unwrap(),
-            "00013",
-        )
-        .line(
-            Line::new(1, "MATERIALE UFFICIO", "10.00".parse().unwrap(), "22.00".parse().unwrap())
-                .quantita("3.00".parse().unwrap()),
-        ),
+let client = Business::foreign(
+    iso_country::Country::US,
+    "ACME INC".parse().unwrap(),
+    "US123456789".parse().unwrap(),
+    Address::foreign(
+        "FIFTH AVENUE 1".parse().unwrap(),
+        Some("10001".parse().unwrap()),
+        "NEW YORK".parse().unwrap(),
+        iso_country::Country::US,
     )
+    .unwrap(),
+);
+let line = SevenTerLine::builder()
+    .description("SERVIZIO DI CONSULENZA".parse().unwrap())
+    .quantity("1.00".parse().unwrap())
+    .unit_price("150.00".parse().unwrap())
+    .build();
+let doc = Invoice::cross_border_services(&seller, &client, line)
+    .progressivo("00001".parse().unwrap())
+    .date("2026-11-04".parse().unwrap())
+    .numero("00012".parse().unwrap())
+    .causali(vec![
+        "CONSULENZA AI SENSI DELL'ART. 7-TER DPR 633/72".parse().unwrap(),
+    ])
+    .currency(InvoiceCurrency::Foreign {
+        currency: iso_currency::Currency::USD,
+        rate: "1.08".parse().unwrap(),
+        rate_date: "2026-11-04".parse().unwrap(),
+    })
     .build()
     .unwrap();
 let xml = doc.to_xml_string().unwrap();
 assert!(xml.contains("versione=\"FPR12\""));
+assert!(xml.contains("<CodiceDestinatario>XXXXXXX</CodiceDestinatario>"));
 ```
 
-`build` runs the official SDI checks of `spec/Elenco-Controlli` before it returns. Signed files read through `fatturapa::signed::unwrap` and `fatturapa::signed::verify`, and the transmission file name builds through `fatturapa::InvoiceName`.
+The construction API is typed. The identifiers validate on construction, the scenario constructors fill what the specification dictates, and the lines of the art. 7-ter invoice carry no VAT treatment, the scenario writing the `N2.1` nature and its reference. A document priced in a foreign currency keeps the `Divisa` `EUR` and every amount in euros, the art. 13 convention, the original amount and the rate carried as management data. `build` runs the official SDI checks of `spec/Elenco-Controlli` before it returns. Signed files read through `fatturapa::signed::unwrap` and `fatturapa::signed::verify`, and the transmission file name builds through `fatturapa::InvoiceName`.

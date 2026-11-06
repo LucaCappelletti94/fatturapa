@@ -9,9 +9,11 @@
 #[path = "support/mod.rs"]
 mod support;
 
-use fatturapa::builder::{Invoice, InvoiceBody, Line};
 use fatturapa::generated::fpr12 as g;
 use fatturapa::generated::fsm10 as sg;
+use fatturapa::ids::{Provincia, RegimeFiscale};
+use fatturapa::invoice::{Invoice, Line, Recipient, VatTreatment};
+use fatturapa::party::{Address, Buyer, Seller};
 use fatturapa::validate::{Violation, validate, validate_simplified};
 use fatturapa::{Amount, Date, FatturaElettronica, FatturaElettronicaSemplificata};
 
@@ -39,53 +41,71 @@ fn assert_absent(violations: &[Violation], code: &str) {
     );
 }
 
-fn seller() -> g::CedentePrestatoreType {
-    g::CedentePrestatoreType::new(
-        g::IdFiscaleType::new("IT", "01234567890"),
-        g::AnagraficaType::denominazione("ALPHA SRL"),
-        g::RegimeFiscaleType::Rf01,
-        g::IndirizzoType::new("VIA ROMA 1", "00100", "ROMA", "IT"),
+fn seller() -> Seller {
+    Seller::denomination(
+        "ALPHA SRL".parse().expect("a valid denomination"),
+        "01234567897".parse().expect("a valid partita IVA"),
+        Address::italian(
+            "VIA ROMA 1".parse().expect("a valid address"),
+            "00100".parse().expect("a valid CAP"),
+            "ROMA".parse().expect("a valid comune"),
+            Provincia::Rm,
+        ),
+        RegimeFiscale::Rf01,
     )
 }
 
-fn buyer_iva() -> g::CessionarioCommittenteType {
-    g::CessionarioCommittenteType::new(
-        g::IdFiscaleType::new("IT", "09876543210"),
-        g::AnagraficaType::denominazione("BETA SRL"),
-        g::IndirizzoType::new("VIA MILANO 2", "20100", "MILANO", "IT"),
+fn buyer_iva() -> Buyer {
+    Buyer::denomination(
+        "BETA SRL".parse().expect("a valid denomination"),
+        "09876543217".parse().expect("a valid partita IVA"),
+        Address::italian(
+            "VIA MILANO 2".parse().expect("a valid address"),
+            "20100".parse().expect("a valid CAP"),
+            "MILANO".parse().expect("a valid comune"),
+            Provincia::Mi,
+        ),
     )
 }
 
-fn buyer_cf() -> g::CessionarioCommittenteType {
-    g::CessionarioCommittenteType::codice_fiscale(
-        "AB123456789",
-        g::AnagraficaType::denominazione("BETA SRL"),
-        g::IndirizzoType::new("VIA MILANO 2", "20100", "MILANO", "IT"),
+fn buyer_cf() -> Buyer {
+    Buyer::consumer(
+        "MARIO".parse().expect("a valid name"),
+        "ROSSI".parse().expect("a valid name"),
+        "12345678903".parse().expect("a valid tax code"),
+        Address::italian(
+            "VIA TORINO 3".parse().expect("a valid address"),
+            "10100".parse().expect("a valid CAP"),
+            "TORINO".parse().expect("a valid comune"),
+            Provincia::To,
+        ),
     )
 }
 
-fn body_22() -> InvoiceBody {
-    InvoiceBody::new(g::TipoDocumentoType::Td01, "EUR", date(2026, 11, 4), "42").line(
-        Line::new(
-            1,
-            "SERVIZIO DI CONSULENZA",
-            amount("100.00"),
-            amount("22.00"),
+fn base_line() -> Line {
+    Line::builder()
+        .description(
+            "SERVIZIO DI CONSULENZA"
+                .parse()
+                .expect("a valid description"),
         )
-        .quantita(amount("2.00")),
-    )
+        .quantity("2.00".parse().expect("a valid decimal"))
+        .unit_price("100.00".parse().expect("a valid decimal"))
+        .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
+        .build()
 }
 
 /// A valid domestic `TD01` invoice with one 22 percent line.
 fn base() -> FatturaElettronica {
-    Invoice::new(
-        g::FormatoTrasmissioneType::Fpr12,
-        "00001",
-        seller(),
-        buyer_iva(),
+    Invoice::domestic(
+        &seller(),
+        &buyer_iva(),
+        Recipient::Codice("ABC1234".parse().expect("a valid recipient code")),
+        base_line(),
     )
-    .codice_destinatario("ABC1234")
-    .body(body_22())
+    .progressivo("00001".parse().expect("a valid progressive"))
+    .date(date(2026, 11, 4))
+    .numero("42".parse().expect("a valid number"))
     .build()
     .expect("the base document passes every check")
 }
@@ -123,6 +143,41 @@ fn cassa(
             ritenuta: ritenuta.then_some(g::RitenutaType::Si),
             natura,
             riferimento_amministrazione: None,
+        },
+    }
+}
+
+fn id_iva(paese: &str, codice: &str) -> g::IdFiscaleType {
+    g::IdFiscaleType {
+        content: g::IdFiscaleTypeContent {
+            id_paese: paese.to_string(),
+            id_codice: codice.to_string(),
+        },
+    }
+}
+
+const fn sconto_importo(
+    tipo: g::TipoScontoMaggiorazioneType,
+    importo: Amount,
+) -> g::ScontoMaggiorazioneType {
+    g::ScontoMaggiorazioneType {
+        content: g::ScontoMaggiorazioneTypeContent {
+            tipo,
+            percentuale: None,
+            importo: Some(importo),
+        },
+    }
+}
+
+const fn sconto_percentuale(
+    tipo: g::TipoScontoMaggiorazioneType,
+    percentuale: Amount,
+) -> g::ScontoMaggiorazioneType {
+    g::ScontoMaggiorazioneType {
+        content: g::ScontoMaggiorazioneTypeContent {
+            tipo,
+            percentuale: Some(percentuale),
+            importo: None,
         },
     }
 }
@@ -181,21 +236,15 @@ fn code_00409_duplicate_number_in_the_document() {
         .push(doc.content.fattura_elettronica_body[0].clone());
     assert_has(&validate(&doc), "00409");
 
-    let doc = Invoice::new(
-        g::FormatoTrasmissioneType::Fpr12,
-        "00001",
-        seller(),
-        buyer_iva(),
-    )
-    .codice_destinatario("ABC1234")
-    .body(body_22())
-    .body(
-        InvoiceBody::new(g::TipoDocumentoType::Td04, "EUR", date(2026, 11, 4), "42").line(
-            Line::new(1, "Rettifica", amount("-100.00"), amount("22.00")).quantita(amount("1.00")),
-        ),
-    )
-    .build()
-    .expect("a lot with one credit note assembles fine");
+    let mut doc = base();
+    let mut body = doc.content.fattura_elettronica_body[0].clone();
+    body.content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = g::TipoDocumentoType::Td04;
+    doc.content.fattura_elettronica_body.push(body);
     assert_absent(&validate(&doc), "00409");
 }
 
@@ -313,14 +362,15 @@ fn code_00415_cassa_ritenuta_without_dati_ritenuta() {
 /// it; a buyer with a VAT number passes.
 #[test]
 fn code_00417_buyer_without_fiscal_identifiers() {
-    let doc = Invoice::new(
-        g::FormatoTrasmissioneType::Fpr12,
-        "00001",
-        seller(),
-        buyer_cf(),
+    let doc = Invoice::domestic(
+        &seller(),
+        &buyer_cf(),
+        Recipient::Codice("ABC1234".parse().expect("a valid recipient code")),
+        base_line(),
     )
-    .codice_destinatario("ABC1234")
-    .body(body_22())
+    .progressivo("00001".parse().expect("a valid progressive"))
+    .date(date(2026, 11, 4))
+    .numero("42".parse().expect("a valid number"))
     .build()
     .expect("a buyer identified by tax code assembles fine");
     assert_absent(&validate(&doc), "00417");
@@ -710,7 +760,7 @@ fn code_00471_identical_parties_for_td16() {
         .content
         .dati_anagrafici
         .content;
-    buyer.id_fiscale_iva = Some(g::IdFiscaleType::new("IT", "01234567890"));
+    buyer.id_fiscale_iva = Some(id_iva("IT", "01234567897"));
     assert_has(&validate(&doc), "00471");
 
     let doc = base();
@@ -747,7 +797,7 @@ fn code_00472_different_parties_for_td21() {
         .content
         .dati_anagrafici
         .content;
-    buyer.id_fiscale_iva = Some(g::IdFiscaleType::new("IT", "01234567890"));
+    buyer.id_fiscale_iva = Some(id_iva("IT", "01234567897"));
     assert_absent(&validate(&doc), "00472");
 }
 
@@ -903,11 +953,10 @@ fn code_00476_both_parties_outside_italy() {
 fn code_00423_discount_amount() {
     let mut doc = base();
     let l = line(&mut doc);
-    l.sconto_maggiorazione
-        .push(g::ScontoMaggiorazioneType::importo(
-            g::TipoScontoMaggiorazioneType::Sc,
-            amount("10.00"),
-        ));
+    l.sconto_maggiorazione.push(sconto_importo(
+        g::TipoScontoMaggiorazioneType::Sc,
+        amount("10.00"),
+    ));
     l.prezzo_totale = amount("180.00");
     assert_absent(&validate(&doc), "00423");
 }
@@ -918,11 +967,10 @@ fn code_00423_discount_amount() {
 fn code_00423_markup_amount() {
     let mut doc = base();
     let l = line(&mut doc);
-    l.sconto_maggiorazione
-        .push(g::ScontoMaggiorazioneType::importo(
-            g::TipoScontoMaggiorazioneType::Mg,
-            amount("10.00"),
-        ));
+    l.sconto_maggiorazione.push(sconto_importo(
+        g::TipoScontoMaggiorazioneType::Mg,
+        amount("10.00"),
+    ));
     l.prezzo_totale = amount("220.00");
     assert_absent(&validate(&doc), "00423");
 }
@@ -933,16 +981,14 @@ fn code_00423_markup_amount() {
 fn code_00423_cascading_percentages() {
     let mut doc = base();
     let l = line(&mut doc);
-    l.sconto_maggiorazione
-        .push(g::ScontoMaggiorazioneType::percentuale(
-            g::TipoScontoMaggiorazioneType::Sc,
-            amount("10.00"),
-        ));
-    l.sconto_maggiorazione
-        .push(g::ScontoMaggiorazioneType::percentuale(
-            g::TipoScontoMaggiorazioneType::Mg,
-            amount("10.00"),
-        ));
+    l.sconto_maggiorazione.push(sconto_percentuale(
+        g::TipoScontoMaggiorazioneType::Sc,
+        amount("10.00"),
+    ));
+    l.sconto_maggiorazione.push(sconto_percentuale(
+        g::TipoScontoMaggiorazioneType::Mg,
+        amount("10.00"),
+    ));
     l.prezzo_totale = amount("198.00");
     assert_absent(&validate(&doc), "00423");
 }
@@ -1288,21 +1334,16 @@ fn code_00409_same_number_different_years() {
 /// pass.
 #[test]
 fn code_00409_credit_note_and_ordinary_invoice() {
-    let doc = Invoice::new(
-        g::FormatoTrasmissioneType::Fpr12,
-        "00001",
-        seller(),
-        buyer_iva(),
-    )
-    .codice_destinatario("ABC1234")
-    .body(
-        InvoiceBody::new(g::TipoDocumentoType::Td04, "EUR", date(2026, 11, 4), "42").line(
-            Line::new(1, "RETTIFICA", amount("-100.00"), amount("22.00")).quantita(amount("1.00")),
-        ),
-    )
-    .body(body_22())
-    .build()
-    .expect("a lot with a credit note assembles fine");
+    let mut doc = base();
+    let ordinary = doc.content.fattura_elettronica_body[0].clone();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = g::TipoDocumentoType::Td04;
+    doc.content.fattura_elettronica_body.push(ordinary);
     assert_absent(&validate(&doc), "00409");
 }
 

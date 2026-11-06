@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/compile_fail/cross_border_to_an_italian_buyer.rs:30:73
+   |
+30 |     let _ = fatturapa::invoice::Invoice::cross_border_services(&seller, &buyer, line);
+   |             --------------------------------------------------          ^^^^^^ expected `&Business`, found `&Buyer`
+   |             |
+   |             arguments to this function are incorrect
+   |
+   = note: expected reference `&Business`
+              found reference `&Buyer`
+note: associated function defined here
+  --> src/invoice.rs
+   |
+   |     pub fn cross_border_services(
+   |            ^^^^^^^^^^^^^^^^^^^^^
