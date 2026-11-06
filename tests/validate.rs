@@ -83,16 +83,14 @@ fn buyer_cf() -> Buyer {
 }
 
 fn base_line() -> Line {
-    Line::builder()
-        .description(
-            "SERVIZIO DI CONSULENZA"
-                .parse()
-                .expect("a valid description"),
-        )
-        .quantity("2.00".parse().expect("a valid decimal"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
+    let line: Line = Line::builder()
+        .description("SERVIZIO DI CONSULENZA")
+        .quantity("2.00")
+        .unit_price("100.00")
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
         .build()
+        .expect("the line builds");
+    line
 }
 
 /// A valid domestic `TD01` invoice with one 22 percent line.
@@ -103,9 +101,9 @@ fn base() -> FatturaElettronica {
         Recipient::Codice("ABC1234".parse().expect("a valid recipient code")),
         base_line(),
     )
-    .progressivo("00001".parse().expect("a valid progressive"))
+    .progressivo("00001")
     .date(date(2026, 11, 4))
-    .numero("42".parse().expect("a valid number"))
+    .numero("42")
     .build()
     .expect("the base document passes every check")
 }
@@ -368,9 +366,9 @@ fn code_00417_buyer_without_fiscal_identifiers() {
         Recipient::Codice("ABC1234".parse().expect("a valid recipient code")),
         base_line(),
     )
-    .progressivo("00001".parse().expect("a valid progressive"))
+    .progressivo("00001")
     .date(date(2026, 11, 4))
-    .numero("42".parse().expect("a valid number"))
+    .numero("42")
     .build()
     .expect("a buyer identified by tax code assembles fine");
     assert_absent(&validate(&doc), "00417");

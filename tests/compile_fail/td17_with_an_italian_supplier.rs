@@ -2,41 +2,42 @@
 //! `Seller` is a type error.
 
 fn main() {
-    let supplier = fatturapa::party::Seller::denomination(
-        "ALPHA SRL".parse().expect("a valid denomination"),
-        "02222222222".parse().expect("a valid partita IVA"),
-        fatturapa::party::Address::italian(
-            "VIA ROMA 1".parse().expect("a valid address"),
-            "00100".parse().expect("a valid CAP"),
-            "ROMA".parse().expect("a valid comune"),
+    let supplier = fatturapa::party::Seller::try_denomination(
+        "ALPHA SRL",
+        "02222222222",
+        fatturapa::party::Address::try_italian(
+            "VIA ROMA 1",
+            "00100",
+            "ROMA",
             fatturapa::ids::Provincia::Rm,
-        ),
+        )
+        .expect("a valid address"),
         fatturapa::ids::RegimeFiscale::Rf01,
-    );
-    let buyer = fatturapa::party::Company::denomination(
-        "BETA SRL".parse().expect("a valid denomination"),
-        "04444444444".parse().expect("a valid partita IVA"),
-        fatturapa::party::Address::italian(
-            "VIA MILANO 2".parse().expect("a valid address"),
-            "20100".parse().expect("a valid CAP"),
-            "MILANO".parse().expect("a valid comune"),
+    )
+    .expect("a valid seller");
+    let buyer = fatturapa::party::Company::try_denomination(
+        "BETA SRL",
+        "04444444444",
+        fatturapa::party::Address::try_italian(
+            "VIA MILANO 2",
+            "20100",
+            "MILANO",
             fatturapa::ids::Provincia::Mi,
-        ),
-    );
+        )
+        .expect("a valid address"),
+    )
+    .expect("a valid buyer");
     let line = fatturapa::invoice::Line::builder()
-        .description("SERVIZIO".parse().expect("a valid description"))
-        .quantity("1.00".parse().expect("a valid decimal"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
-        .vat(fatturapa::invoice::VatTreatment::Taxed(
-            "22.00".parse().expect("a valid rate"),
-        ))
-        .build();
+        .description("SERVIZIO")
+        .quantity("1.00")
+        .unit_price("100.00")
+        .vat(fatturapa::invoice::VatTreatment::taxed("22.00").expect("a valid rate"))
+        .build()
+        .expect("the line builds");
     let _ = fatturapa::invoice::SelfInvoice::td17(
         &supplier,
         &buyer,
-        fatturapa::invoice::Recipient::Codice(
-            "ABC1234".parse().expect("a valid code"),
-        ),
+        fatturapa::invoice::Recipient::try_codice("ABC1234").expect("a valid code"),
         line,
     );
 }

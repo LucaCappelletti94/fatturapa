@@ -4,10 +4,8 @@
 
 fn main() {
     let _ = fatturapa::invoice::SevenTerLine::builder()
-        .description("SERVIZIO".parse().expect("a valid description"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
-        .vat(fatturapa::invoice::VatTreatment::Taxed(
-            "22.00".parse().expect("a valid rate"),
-        ))
+        .description("SERVIZIO")
+        .unit_price("100.00")
+        .vat(fatturapa::invoice::VatTreatment::taxed("22.00").expect("a valid rate"))
         .build();
 }

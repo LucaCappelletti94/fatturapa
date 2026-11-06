@@ -60,6 +60,14 @@ macro_rules! id_newtype {
             }
         }
 
+        impl TryFrom<String> for $name {
+            type Error = IdError;
+
+            fn try_from(s: String) -> Result<Self, Self::Error> {
+                Self::from_str(&s)
+            }
+        }
+
         impl AsRef<str> for $name {
             fn as_ref(&self) -> &str {
                 &self.0
@@ -86,6 +94,14 @@ macro_rules! id_newtype {
 
             fn try_from(s: &str) -> Result<Self, Self::Error> {
                 Self::from_str(s)
+            }
+        }
+
+        impl TryFrom<String> for $name {
+            type Error = IdError;
+
+            fn try_from(s: String) -> Result<Self, Self::Error> {
+                Self::from_str(&s)
             }
         }
 
@@ -196,6 +212,27 @@ pub enum IdError {
     /// `RegimeFiscale` is not one of the codes of the XSD enumeration.
     #[error("not a valid regime fiscale code: {0}")]
     RegimeFiscale(String),
+    /// The `Amount` is not a decimal number.
+    #[error("not a valid amount, a decimal number: {0}")]
+    Amount(String),
+    /// The `Date` is not a `YYYY-MM-DD` date.
+    #[error("not a valid date, the YYYY-MM-DD form: {0}")]
+    Date(String),
+    /// The `DateTime` is not an `xs:dateTime` value.
+    #[error("not a valid date and time, the xs:dateTime form: {0}")]
+    DateTime(String),
+}
+
+impl From<core::convert::Infallible> for IdError {
+    fn from(value: core::convert::Infallible) -> Self {
+        match value {}
+    }
+}
+
+impl From<rust_decimal::Error> for IdError {
+    fn from(error: rust_decimal::Error) -> Self {
+        Self::Amount(error.to_string())
+    }
 }
 
 /// The `IdCodice` of an Italian party, the 11-digit `partita IVA` with the
@@ -340,6 +377,14 @@ impl TryFrom<&str> for Cap {
     }
 }
 
+impl TryFrom<String> for Cap {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
 /// Declares the `Provincia` enum and its `ALL`, `code`, `Display`,
 /// `FromStr` and `TryFrom` impls from a list of `name code city` rows.
 macro_rules! provincia {
@@ -392,6 +437,14 @@ macro_rules! provincia {
 
             fn try_from(s: &str) -> Result<Self, Self::Error> {
                 Self::from_str(s)
+            }
+        }
+
+        impl TryFrom<String> for Provincia {
+            type Error = IdError;
+
+            fn try_from(s: String) -> Result<Self, Self::Error> {
+                Self::from_str(&s)
             }
         }
     };
@@ -850,6 +903,22 @@ impl TryFrom<&str> for Aliquota {
     }
 }
 
+impl TryFrom<String> for Aliquota {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl TryFrom<Decimal> for Aliquota {
+    type Error = IdError;
+
+    fn try_from(value: Decimal) -> Result<Self, Self::Error> {
+        Self::try_new(value)
+    }
+}
+
 /// The `RiferimentoNormativo` of the riepilogo, one to 100 characters of
 /// the XSD `String100Latin` type.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -938,6 +1007,22 @@ impl TryFrom<&str> for ExchangeRate {
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for ExchangeRate {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl TryFrom<Decimal> for ExchangeRate {
+    type Error = IdError;
+
+    fn try_from(value: Decimal) -> Result<Self, Self::Error> {
+        Self::try_new(value)
     }
 }
 
@@ -1418,6 +1503,14 @@ impl TryFrom<&str> for EuCountry {
     }
 }
 
+impl TryFrom<String> for EuCountry {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
 /// The `Natura` of a non-taxable line, per the codes of the specification.
 /// The generic values the `SDI` retired (`N2`, `N3`, `N6`, check 00445)
 /// are not constructible.
@@ -1716,6 +1809,14 @@ impl TryFrom<&str> for RegimeFiscale {
     }
 }
 
+impl TryFrom<String> for RegimeFiscale {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
 impl FromStr for Natura {
     type Err = IdError;
 
@@ -1733,6 +1834,14 @@ impl TryFrom<&str> for Natura {
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for Natura {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
     }
 }
 

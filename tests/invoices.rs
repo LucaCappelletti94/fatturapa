@@ -133,19 +133,21 @@ fn buyer_company() -> Company {
 
 fn seven_ter_line(description: &str, price: &str) -> SevenTerLine {
     SevenTerLine::builder()
-        .description(description.parse().expect("a valid description"))
-        .quantity("1.00".parse().expect("a valid decimal"))
-        .unit_price(price.parse().expect("a valid decimal"))
+        .description(description)
+        .quantity("1.00")
+        .unit_price(price)
         .build()
+        .expect("the line builds")
 }
 
 fn taxed_line(description: &str, price: &str) -> Line {
     Line::builder()
-        .description(description.parse().expect("a valid description"))
-        .quantity("1.00".parse().expect("a valid decimal"))
-        .unit_price(price.parse().expect("a valid decimal"))
+        .description(description)
+        .quantity("1.00")
+        .unit_price(price)
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
         .build()
+        .expect("the line builds")
 }
 
 /// Fixture 1: services to a non-EU business client, the art. 7-ter case.
@@ -234,9 +236,9 @@ fn td01_non_eu_us_client_matches_the_constructor() {
         &buyer_us(),
         seven_ter_line("SERVIZIO DI CONSULENZA", "150.00"),
     )
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00012".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00012")
     .causali(vec![
         "CONSULENZA AI SENSI DELL'ART. 7-TER DPR 633/72"
             .parse()
@@ -367,9 +369,9 @@ fn td01_eu_de_client_matches_the_constructor() {
         &buyer_de(),
         seven_ter_line("SERVIZIO DI CONSULENZA", "50.00"),
     )
-    .progressivo("00002".parse().expect("a valid progressivo"))
-    .date("2026-11-05".parse().expect("a valid date"))
-    .numero("00013".parse().expect("a valid number"))
+    .progressivo("00002")
+    .date("2026-11-05")
+    .numero("00013")
     .causali(vec![
         "CONSULENZA INVERSE CHARGE AI SENSI DELL'ART. 7-TER DPR 633/72"
             .parse()
@@ -484,9 +486,9 @@ fn td01_non_eu_us_client_priced_in_usd_matches_the_constructor() {
         &buyer_us(),
         seven_ter_line("SERVIZIO DI CONSULENZA", "150.00"),
     )
-    .progressivo("00003".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00011".parse().expect("a valid number"))
+    .progressivo("00003")
+    .date("2026-11-04")
+    .numero("00011")
     .causali(vec![
         "CONSULENZA AI SENSI DELL'ART. 7-TER DPR 633/72"
             .parse()
@@ -851,9 +853,9 @@ fn td17_build(
         Recipient::Codice("ABC1234".parse().expect("a valid code")),
         line,
     )
-    .progressivo(progressivo.parse().expect("a valid progressivo"))
-    .date(date.parse().expect("a valid date"))
-    .numero(numero.parse().expect("a valid number"))
+    .progressivo(progressivo)
+    .date(date)
+    .numero(numero)
     .causali(vec![
         "AUTOFATTURA PER SERVIZI ACQUISITI DALL'ESTERO, AI SENSI DELL'ART. 7-TER DPR 633/72"
             .parse()
