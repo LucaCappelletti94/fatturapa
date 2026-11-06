@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02469135780</IdCodice>
+      <?x    -9"?><?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encod="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encol="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="    -9"?;?xml vemenc&?*			oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0"              d="UTF-2"?><?xml vxml="UTF-8"?><?xml vxm><?xml vxml="UTF-8"<?xml </IdTrasmittente>
+      <Progressivvxmlnsers[ion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0TF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0"              d="UTF-2"?><?xml vxml="UTF-8"?><?xml vxm><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsers[ion="1.0" encoding=F-2"?><?xmml vxml="UTFoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>BPA12</FormatoTrasmissio-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding=dCodice>
+      <?x    -9"?><?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encod="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encol="UTF-8"?><?xml vxmlns-8"?><?xml vrio>
+  -  </DatiTrasmi:s8"?><?xml vione>

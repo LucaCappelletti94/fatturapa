@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>PQ</IdPaese>
+        <IdCodice>nulla Ut vel</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>co</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>TX3EE08</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>JH</IdPaese>
+          <IdCodice>commodo ipsum magna eiusmo</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>esse</Denominazione>
+          <Cognome>reprehenderit sed Excepteur eiusmod</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF76</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>officia ipsum sit proiden</Indirizzo>
+        <CAP>80708</CAP>
+        <Comune>laborum incididunt enim</Comune>
+        <Nazione>EU</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <Anagrafica>
+          <Denominazione>eu quis occaecat</Denominazione>
+          <Nome>sint</Nome>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Lorem reprehenderit laborum nisi pariatur</Indirizzo>
+        <CAP>96019</CAP>
+        <Comune>laborum velit ex</Comune>
+        <Nazione>QL</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD49</TipoDocumento>
+        <Divisa>CYD</Divisa>
+        <Data>6926-26-85</Data>
+        <Numero>pr</Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>Duis consequat cupidatat</Descrizione>
+        <PrezzoUnitario>733581272.1450</PrezzoUnitario>
+        <PrezzoTotale>0987.433082</PrezzoTotale>
+        <AliquotaIVA>81.14</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>297</NumeroLinea>
+        <Descrizione>ex ut do</Descrizione>
+        <PrezzoUnitario>1308.094990</PrezzoUnitario>
+        <PrezzoTotale>-0725175359.879498</PrezzoTotale>
+        <AliquotaIVA>01.12</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>62.99</AliquotaIVA>
+        <ImponibileImporto>-4419256.32</ImponibileImporto>
+        <Imposta>-815544.14</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>6.25</AliquotaIVA>
+        <ImponibileImporto>-9690287.64</ImponibileImporto>
+        <Imposta>-06.43</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>2.50</AliquotaIVA>
+        <ImponibileImporto>-91.29</ImponibileImporto>
+        <Imposta>4041689272.14</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>11.75</AliquotaIVA>
+        <ImponibileImporto>-2.32</ImponibileImporto>
+        <Imposta>-811630.13</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
+

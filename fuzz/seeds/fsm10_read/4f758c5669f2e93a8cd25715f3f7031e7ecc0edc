@@ -1,0 +1,16 @@
+<?xml version="1.0" uncodi<Cedent<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaOlettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XM(Schema-instance" xmlns:p="http://ivaservizi.gaenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </Iï»¿
+
+>dTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+  ( <FormatoTrasmissiodFiscaleIVA 
+ > i>
+    <DatiGeneraliDocumento>
+      <TipePrea xmlns:ds="http://www.w3.gro/2000/09<?xml version="2. €ericÿSe<?lif,,,,,,,,,,,,.,,,,,mittronicaSemplificata>caSmmplif:d
+s

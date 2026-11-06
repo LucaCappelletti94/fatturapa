@@ -1,0 +1,41 @@
+name: Mutants
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  msrv: "1.88"
+
+jobs:
+  mutants:
+    runs-on: ubuntu-latest
+    env:
+      RUSTC_WRAPPER:
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
+      - run: rustup toolchain install ${{ env.msrv }} --profile minimal --component rust-src && rustup default ${{ env.msrv }}
+      - uses: taiki-e/install-action@b80e2bb2635f28eb98b9fce1e2f0887e1535c6b2 # v2.90.0
+        with:
+          tool: cargo-mutants
+      - name: Run mutants
+        run: cargo mutants --locked
+        timeout-minutes: 120
+      - name: Keep the results
+        if: always()
+        run: |
+          cargo mutants --html-report target/mutants.html
+          touch target/mutants.html
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: mutants
+          path: target/mutants.html

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>QG</IdPaese>
+        <IdCodice>consecte</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>amet nu</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>VUJ441</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>CE</IdPaese>
+          <IdCodice>veniam reprehenderi</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>occaecat est</Denominazione>
+          <Nome>qui amet cupidatat</Nome>
+        </Anagrafica>
+        <RegimeFiscale>RF02</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>ex Ut veniam elit</Indirizzo>
+        <CAP>79496</CAP>
+        <Comune>labore consequat sint esse</Comune>
+        <Nazione>IG</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <Anagrafica>
+          <Nome>dolor et velit</Nome>
+          <Cognome>eiusmod</Cognome>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>in veniam anim labore qui</Indirizzo>
+        <CAP>32596</CAP>
+        <Comune>consectetur commodo</Comune>
+        <Nazione>SX</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD97</TipoDocumento>
+        <Divisa>KCG</Divisa>
+        <Data>1091-45-51</Data>
+        <Numero>ex ad </Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>907</NumeroLinea>
+        <Descrizione>laboris</Descrizione>
+        <PrezzoUnitario>18545347.199140</PrezzoUnitario>
+        <PrezzoTotale>48739901219.55718</PrezzoTotale>
+        <AliquotaIVA>49.82</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>73</NumeroLinea>
+        <Descrizione>ea aliquip consectetur ullamco</Descrizione>
+        <PrezzoUnitario>966102273.09884169</PrezzoUnitario>
+        <PrezzoTotale>52.6625</PrezzoTotale>
+        <AliquotaIVA>67.69</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>8</NumeroLinea>
+        <Descrizione>ullamco amet in culpa</Descrizione>
+        <PrezzoUnitario>-1743237795.711</PrezzoUnitario>
+        <PrezzoTotale>251947.780603</PrezzoTotale>
+        <AliquotaIVA>05.92</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>2.58</AliquotaIVA>
+        <ImponibileImporto>-4652399.82</ImponibileImporto>
+        <Imposta>99835.74</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>4.62</AliquotaIVA>
+        <ImponibileImporto>742.91</ImponibileImporto>
+        <Imposta>29405.75</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader 
+< >DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM69</FormatoTrasmissione>
+    <CodiceDestinatar00123456</ProgressivoInvio>
+    <FormatoTrasmissione>Comune>Roma</Comune>
+      <ProEUR</Divisa>
+      <Data>2020-12-29</Data>
+      <Numero>AAA123456789</Numero>
+    </DatiGeneraliDocumento>
+  </DatiGenerali>
+  <DatiBeniServizi>
+    <Descrizione>Servizio erogato come esempio - TEST</Descrizione>
+    <Importo>1.78</Importo>
+    <DasiIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquliquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

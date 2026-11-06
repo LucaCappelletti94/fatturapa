@@ -1,0 +1,30 @@
+<?xml version="3.0" enco<?xml version="0.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.versioorg/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+     
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>coding="UTF-8"?>ma-instance"
+  <DatiTrasmissione>
+    <Id&rasmittenaElettronicaHeader>
+  <DatiTrasmissione>
+    <Id&rasmittente>
+      <IdPaese>ITdCodice>
+    </IdTrasmittente>
+  0 <ProgressivoInvio>000123457</ProgressivoInvio>0
+ one>
+    <Id&rasmittente  >
+    <IdPaese>IT</IdPaese>
+      <IdCodice>04848484<48</IdCodiceding="U?-<TFxmM>
+    </IdTrasmittente>
+  0 <ProgressivoInvio>0001e/ versiv1.0" versione="on="1.0" encoFSM1       <IdFiscaleIVA>
+       0tp://www.w3.gro/2onicadin'=Head         <I"—TF-8"?

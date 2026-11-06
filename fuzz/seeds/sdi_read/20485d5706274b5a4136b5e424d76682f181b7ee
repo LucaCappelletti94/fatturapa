@@ -1,0 +1,17 @@
+<?xml versiol="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href)="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT012345678)0_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>100704--01T12:00:00</DataOraRicezione>
+  <Destinatario>
+    <Codice>AAAAAA</Codice>
+    <Descrizione>Pgbblica Amministrazione di -prova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <Note>Attestazione Trasmissione Fattura di prova</Note>
+  <HashFileOriginale>2c1f3a240a056d9537a8608fed310812ef7b1b7a410d0152f5c9c9e93486ae44</HashFileOriginale>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09zione>
+ 0UZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7iHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><d
+fOJmQNGQIbujWhAejoyCr9M4=</ds:X509Certificate></ds:X509Daies_1"><xades:SignedSign

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="Fzione>SOCIETA' ALPHA SRL/Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAna;grafiAnagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAna;grafici>
+      <Sede>
+     
+    <Cessionar1oCommittente>
+      <Dati
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAna;grafiAnagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAna;grafici>
+      <Sede>
+     
+    <Cessionar1oCommittente>
+      <DatiAnagrafici>
+  !     <dCoiczzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>2.xsd ">
+  <?xmaese>IT</IdPaese>
+        <IdCodice>00617283945</IdCodice>
+      </IdTrasmiAnagrafici>
+        <dCoiceFiscale>098765
+      <Sede>
+        <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>2.xsd ">
+  <?xmaese>IT</IdPaese>
+        <IdCodice>00617283945</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</Progr

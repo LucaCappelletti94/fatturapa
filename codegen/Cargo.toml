@@ -1,0 +1,22 @@
+[package]
+name = "codegen"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.88"
+publish = false
+description = "Generates the src/generated modules from the vendored FatturaPA schemas"
+
+[dependencies]
+anyhow = "1"
+prettyplease = "0.3.0"
+quote = "1.0.47"
+syn = "3.0.9"
+url = "2.5.8"
+xsd-parser = "1.6.0"
+xsd-parser-types = { version = "0.3.0", features = ["quick-xml"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"
+
+[lints]
+workspace = true

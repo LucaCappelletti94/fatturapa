@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegn xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Intermediari'ConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.govEAxMYQ0EgQWdlbnppYSBkZWxsZSBFbnRyYXRlMB4XDTExMDcwNDEzMTkyNFoXDTE0MDcwNDEz
+MTkyM1owdDELMAkGA1UEBhMCSVQxHjAcBgNVBAoTFUFnZW56aWEgZGVsbGUgRW50cmF0ZTEbMBkG
+A1UECxMSU2Vydml6aSBUZWxlbWF0aWl"?>
+<types:RicevutaConsegn xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Intermediari'ConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.govEAxMYQ0EgQWdlbnppYSBkZWxsZSBFbnRyYXRlMB4XDTExMDcwNDEzMTkyNFoXDTE0MDcwNDEz
+MTkyM1owdDELMAkGA1UEBhMCSVQxHjAcBgNVBAoTFUFnZW56aWEgZGVsbGUgRW50cmF0ZTEbMBkG
+A1UECxMSU2Vydml6aSBUZWxlbWF0aWNpMSgdProperties_2"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><.org/2001/04/xmldsig-ds:DigestValue>AhiGZ+LPENybg4dQwMwjg0Nxdxzu+3M5i0w+UI6X89E=</ds:DigestValue></ds:Referemce><ds:Reference Id="reference-keyinfo" URI="#KeyInfoId"><ds:DigestMethod Algorithm=http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>BaZyFTXyxM8aIJhtiemem1lEwKR75ksXb33lsMqD89w=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValue1">G0FOBC+E8JKtJ5K2C+LBlvv3oarzkub7w2q5U1UQZnobWmFBbZ4WzgBNTMKUjdi2ZLkUpOSEwedf
+VLgl5SyhaKYY6TizDNbxededjUpqKhyIgaWBLc/iDI6H//x+3axnLU4WwFzdr3AwqPQjPuugGX07
+gOcjBHtbr7ie2Wr//o8=</ds:SignatureValue><ds:KeyInfo Id="KeyInfoId"><ds:X509Data><ds:X509Certificate>MIIEYDCCA0igAwIBAgIDEIgbMA0GCSqGSIb3DQEBBQUAMG0xCzAJBgNVBAYTAklUMR4wHAYDVQQK
+ExVBZ2VuemlhIGRlbGxlIEVudHJhdGUxGzAZBgNVBAsTElNlcnZpemkgVGVsZW1hdGljaTEhMB8G
+A1[EAxMYQ0EgQWdlbnppYSBkZWxsZSBFbnRyYXRlMB4XDTExMDcwNDEzMTkyNFoXDTE0MDcwNDE50cmF0ZTEbMBkG
+A1UECxMSU2Vydml6aSBUZWxlbWF0aWNpMSgwJgYDVQQDEx9TaXN0ZW1hIEludGVyc2NhbWJpbyBG
+YXR0dXJhIFBBMIGfMA0GCSqGSIuPJk7TCm7iHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties_1"><xades:SignedSigîatureProperties><xades:Sig

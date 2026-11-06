@@ -1,0 +1,25 @@
+<?xmnte><?xml8vere?scescodingggggggggggggggggggggggg=="UTF-1"?><?xml vxmlnsersion="0.0" encoding="UTO-8"?><?xml vere.gov.it/<?xml version="2.0Fiscencoding="UTF<?xml version<?ntmxe=ï»¿c"vizi.ag.gov.it/doscdFiscencodin=="UTF-8"?cencoding="UTF-8"?><?xml vxmlnsersion="1.0" encoding="@UTO-8"?><?xml8vere.gov.it/<?scencodin=="UTF-8"?><?xml vxmlnsersion="1.0" encoding="U="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w4.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrat =  v.it/docs/xsd/fGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <?xmnte><?xml8vere?scescodingggggggggggggggggggggggg=="UTF-1"?><?xml vxmlnsersion="0.0" encoding="UTO-8"?><?xml vere.gov.it/<?xml version="2.0Fiscencoding="UTF<?xml version<?ntmxe=ï»¿c"vizi.ag.gov.it/doscdFiscencodin=="UTF-8"?cencoding="UTF-8"?><?xml vxmlnsersion="1.0" encoding="@UTO-8"?><?xml8vere.gov.it/<?scencodin=="UTF-8"?><?xml vxmlnsersion="1.0" encoding="U="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="Fturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMturaordinaria_v1.2.1.xslsl"?>
+  <FatturaProgressivoInvio>00001ÄÐ¯‰ogressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOTO-8"?>CIETA<?xml ve' ArLe

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>PC</IdPaese>
+        <IdCodice>cupidatat dolore repreh</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>et eni</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>6115GU</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>FW</IdPaese>
+          <IdCodice>ut Ut irure ad</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>in fugiat</Denominazione>
+          <Cognome>eiusmod Ex</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF38</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>culpa </Indirizzo>
+        <CAP>12541</CAP>
+        <Comune>ad</Comune>
+        <Nazione>FV</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <Anagrafica>
+          <Nome>velit dolo</Nome>
+          <Cognome>exercitation dolore occaecat incididunt</Cognome>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>ullamco in</Indirizzo>
+        <CAP>82391</CAP>
+        <Comune>velit</Comune>
+        <Nazione>UM</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD81</TipoDocumento>
+        <Divisa>XZV</Divisa>
+        <Data>8439-06-47</Data>
+        <Numero>cul</Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>ea minim eu</Descrizione>
+        <PrezzoUnitario>3830.44017571</PrezzoUnitario>
+        <PrezzoTotale>83.24930</PrezzoTotale>
+        <AliquotaIVA>8.34</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>99</NumeroLinea>
+        <Descrizione>minim qui mollit nulla in</Descrizione>
+        <PrezzoUnitario>-5225.4474283</PrezzoUnitario>
+        <PrezzoTotale>314659.021521</PrezzoTotale>
+        <AliquotaIVA>49.39</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>54.52</AliquotaIVA>
+        <ImponibileImporto>-477173923.93</ImponibileImporto>
+        <Imposta>1408490333.21</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>05.04</AliquotaIVA>
+        <ImponibileImporto>-753252858.06</ImponibileImporto>
+        <Imposta>968732942.05</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>7.58</AliquotaIVA>
+        <ImponibileImporto>-93332769593.63</ImponibileImporto>
+        <Imposta>581407791.76</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>71.98</AliquotaIVA>
+        <ImponibileImporto>37470.80</ImponibileImporto>
+        <Imposta>5715681.84</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD94</TipoDocumento>
+        <Divisa>EUU</Divisa>
+        <Data>9869-56-76</Data>
+        <Numero>eiusmod qui </Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>0395</NumeroLinea>
+        <Descrizione>in nisi</Descrizione>
+        <PrezzoUnitario>-897155862.1997</PrezzoUnitario>
+        <PrezzoTotale>0669.10</PrezzoTotale>
+        <AliquotaIVA>1.78</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <Descrizione>deserunt dolore</Descrizione>
+        <PrezzoUnitario>-023.857698</PrezzoUnitario>
+        <PrezzoTotale>-52780933.48722284</PrezzoTotale>
+        <AliquotaIVA>43.28</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>63.25</AliquotaIVA>
+        <ImponibileImporto>2447.12</ImponibileImporto>
+        <Imposta>4020935457.97</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>2.90</AliquotaIVA>
+        <ImponibileImporto>-85227.53</ImponibileImporto>
+        <Imposta>727.46</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>15.02</AliquotaIVA>
+        <ImponibileImporto>08592.76</ImponibileImporto>
+        <Imposta>-78077992311.13</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>57.44</AliquotaIVA>
+        <ImponibileImporto>-947.78</ImponibileImporto>
+        <Imposta>-87849647726.03</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
+

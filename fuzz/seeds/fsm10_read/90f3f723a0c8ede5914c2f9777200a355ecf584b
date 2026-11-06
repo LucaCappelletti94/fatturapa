@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.VA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale Europa 1</Indirizzo>
+      <CAP>00100</CAP>
+iw3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v10" versione="FSM11">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittent </CedentePrestatore>
+  <CessionarioCommittente>
+    <IdentificativiFiscali>
+      <IdFiscaleIVA>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01001100110</IdCodice>
+      </IdFiscaleIVA>
+    </Iden1tificativiFiscali>
+  </CessionarioCommittente>
+</FatturaElettronicaHeader><FatturaElettronicaBody x  </Da     <Nazione>IT</Nazione>
+    </Sede>
+    <mlns="">
+  <DatiGenerali>
+  xmM  <DatiGeneraliDocumento>
+      <TipoDocumento>TD07</TipoDocumento>
+      <Divisa>EUR</Divisa>
+      <Data>2020-12-29</Data>
+      <Numero>AAA123456789</Numero>
+    </DatiGeneraliDocumento>
+  </DatiGenerali>
+  <DatiBeniServizi>
+    <Descrizione>Servizio erogato come esempio - TEST</Desc|izione>
+    <Mmporto>1.78</Importo>
+    <DatiIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquota>22.00</Aliquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

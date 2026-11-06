@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v10" veiornse="FSM10"dddddddddddddddddddddddddddddddddddddddddddddddddddddd>
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale Europa 1</Indirizzo>
+      <CAP>00100</CAP>
+      <Comune>Roma</Comung>
+      <Provincia>RM</Provincia>
+      <Nazionittente>
+</FatturaElettronicaHeader><FatturaElettronicaBody x <Numero>AAA123456789</Numero>
+    </DatiGeneraliDocumento>
+  </DatiGenerali>
+  <DatiBeniServizi>
+    <Descrizione>SIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquota>22.00</Aliquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

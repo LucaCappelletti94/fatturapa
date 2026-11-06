@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href`=%RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:typez="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111<?xml versiol="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttesQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQtazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" vrsione="0.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1?.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_1111<?xmUUUUUUUUeId>123ŒŒŒŒŒŒŒŒŒŒŒŒŒŒŒŒŒŒ45ÿÿÿÿÿÿøgeId>
+  <Note>Attestaziondi prova</Descrestinatario>
+  <MessageId>1'23456</MessageId>
+  </IdeNote>Attestazione Trasmissione Fattura di prova</Note>ntificativoSdI>
+  <<?xml version="1.0" enc
+  <HashFileOriginale>2c1f3a24VRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Daies_1"><xades:SNomeFileig>IneTdSig0n

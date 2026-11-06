@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222223</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA ATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTnazione>
+  </Denominazione>
+            <Sede>
+                <Indirizzo>VIA TESTatoLiquida<?xml version="1.0" enczione>
+            </I       <IdPaese>IT</IdPaese>
+ ing="UTF-8<?xml"?>
+<p:FatturaElettronicaSemplT</ <IdCodice>04445ic5

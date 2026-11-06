@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministkazione di prova</Descrizione>
+  </Destinatario>
+  <Mesttura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi=""Signature1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatuMreethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:X89E=</dnsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Descrizione>
+  </Destinatario>
+  <Mesttura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi=""Signature1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:X89E=</ds:DigestValue></ds:Reference><ds:Reou49zWajiEjtHFGkq/WNfDwRa
+Gd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7iHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</dst49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfhFGg

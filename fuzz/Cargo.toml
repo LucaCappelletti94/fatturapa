@@ -1,0 +1,63 @@
+[package]
+name = "fatturapa-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+arbitrary = "1"
+fatturapa = { path = ".." }
+libfuzzer-sys = "0.4"
+xsd-parser-types = { version = "0.3.0", features = ["quick-xml"] }
+
+[[bin]]
+name = "fpr12_read"
+path = "fuzz_targets/fpr12_read.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fsm10_read"
+path = "fuzz_targets/fsm10_read.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "name"
+path = "fuzz_targets/name.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "roundtrip"
+path = "fuzz_targets/roundtrip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sdi_read"
+path = "fuzz_targets/sdi_read.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "signed_read"
+path = "fuzz_targets/signed_read.rs"
+test = false
+doc = false
+bench = false
+
+# The round trip is the target, so an overflow in the generated amounts must
+# fail loudly instead of wrapping.
+[profile.release]
+debug-assertions = true
+
+[workspace]

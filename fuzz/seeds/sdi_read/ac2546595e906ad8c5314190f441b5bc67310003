@@ -1,0 +1,8 @@
+<?xml versiol="1.0& encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href-"AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.issaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <?xml versiol="1.0" encoding="UTF-8"?><?xmlcezione>
+  <Destinatario>
+    <CoAd>eAciAAAA</Codice>
+    <Descrizione>P bblica Amministrazione di prova</Descrizionoding="UTFypeUTF-4i"?><?ion="1.0"eet typtne.0" encoding=shFileOriginale>2c1f3240a056d9537a"UTFypaUTF-4i"?><?i8608fed310812ef7b1b7a410d0152f5c9c9e93486ae44</HashFileOrigina<NomeFile>IT01mlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:ds="http:/le>
+/www.w3.org/2<ds:00

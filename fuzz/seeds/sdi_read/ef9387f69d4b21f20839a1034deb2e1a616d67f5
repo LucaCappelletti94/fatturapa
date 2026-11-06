@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UxmlTF-5"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<tpyes:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messawgi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.i"refng="UTF-8"?[><?xml-iTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT0ымлк567890_11111.xml.p7m</NomeFile>
+ nc
