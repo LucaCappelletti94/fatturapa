@@ -5,7 +5,7 @@
     <DatiTrasmissione>
       <IdTrasmittente>
         <IdPaese>IT</IdPaese>
-        <IdCodice>01234567890</IdCodice>
+        <IdCodice>02222222222</IdCodice>
       </IdTrasmittente>
       <ProgressivoInvio>00002</ProgressivoInvio>
       <FormatoTrasmissione>FPR12</FormatoTrasmissione>
@@ -15,7 +15,7 @@
       <DatiAnagrafici>
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>01234567890</IdCodice>
+          <IdCodice>02222222222</IdCodice>
         </IdFiscaleIVA>
         <Anagrafica>
           <Denominazione>ALPHA SRL</Denominazione>
@@ -26,6 +26,7 @@
         <Indirizzo>VIA ROMA 1</Indirizzo>
         <CAP>00100</CAP>
         <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
         <Nazione>IT</Nazione>
       </Sede>
     </CedentePrestatore>
@@ -40,8 +41,8 @@
         </Anagrafica>
       </DatiAnagrafici>
       <Sede>
-        <Indirizzo>BEISPIELSTRASSE 1</Indirizzo>
-        <CAP>10115</CAP>
+        <Indirizzo>BEISPIELSTRASSE 1 10115</Indirizzo>
+        <CAP>00000</CAP>
         <Comune>BERLIN</Comune>
         <Nazione>DE</Nazione>
       </Sede>
@@ -54,6 +55,9 @@
         <Divisa>EUR</Divisa>
         <Data>2026-11-05</Data>
         <Numero>00013</Numero>
+        <DatiBollo>
+          <BolloVirtuale>SI</BolloVirtuale>
+        </DatiBollo>
         <ImportoTotaleDocumento>50.00</ImportoTotaleDocumento>
         <Causale>CONSULENZA INVERSE CHARGE AI SENSI DELL'ART. 7-TER DPR 633/72</Causale>
       </DatiGeneraliDocumento>

@@ -8,4 +8,8 @@ test_workspace = true
 # The strict fast path of `cms_structure` only skips the `rasn` re-encode; the
 # re-encode yields the same `SignedData` structure and the `CMS` bytes are not
 # part of the public output.
-exclude_re = ["signed_data_parses -> bool with false"]
+# `norm2` rescales only below two decimals and a `rescale(2)` at two decimals is the identity, so `scale < 2` and `scale <= 2` agree on every input.
+exclude_re = [
+    "signed_data_parses -> bool with false",
+    "replace < with <= in norm2",
+]

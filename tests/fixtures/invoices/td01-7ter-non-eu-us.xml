@@ -5,7 +5,7 @@
     <DatiTrasmissione>
       <IdTrasmittente>
         <IdPaese>IT</IdPaese>
-        <IdCodice>01234567890</IdCodice>
+        <IdCodice>02222222222</IdCodice>
       </IdTrasmittente>
       <ProgressivoInvio>00001</ProgressivoInvio>
       <FormatoTrasmissione>FPR12</FormatoTrasmissione>
@@ -15,7 +15,7 @@
       <DatiAnagrafici>
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>01234567890</IdCodice>
+          <IdCodice>02222222222</IdCodice>
         </IdFiscaleIVA>
         <Anagrafica>
           <Denominazione>ALPHA SRL</Denominazione>
@@ -26,6 +26,7 @@
         <Indirizzo>VIA ROMA 1</Indirizzo>
         <CAP>00100</CAP>
         <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
         <Nazione>IT</Nazione>
       </Sede>
     </CedentePrestatore>
@@ -40,8 +41,8 @@
         </Anagrafica>
       </DatiAnagrafici>
       <Sede>
-        <Indirizzo>FIFTH AVENUE 1</Indirizzo>
-        <CAP>10001</CAP>
+        <Indirizzo>FIFTH AVENUE 1 10001</Indirizzo>
+        <CAP>00000</CAP>
         <Comune>NEW YORK</Comune>
         <Nazione>US</Nazione>
       </Sede>

@@ -5,7 +5,7 @@
     <DatiTrasmissione>
       <IdTrasmittente>
         <IdPaese>IT</IdPaese>
-        <IdCodice>09876543210</IdCodice>
+        <IdCodice>04444444444</IdCodice>
       </IdTrasmittente>
       <ProgressivoInvio>00002</ProgressivoInvio>
       <FormatoTrasmissione>FPR12</FormatoTrasmissione>
@@ -23,8 +23,8 @@
         <RegimeFiscale>RF01</RegimeFiscale>
       </DatiAnagrafici>
       <Sede>
-        <Indirizzo>FIFTH AVENUE 1</Indirizzo>
-        <CAP>10001</CAP>
+        <Indirizzo>FIFTH AVENUE 1 10001</Indirizzo>
+        <CAP>00000</CAP>
         <Comune>NEW YORK</Comune>
         <Nazione>US</Nazione>
       </Sede>
@@ -33,7 +33,7 @@
       <DatiAnagrafici>
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>09876543210</IdCodice>
+          <IdCodice>04444444444</IdCodice>
         </IdFiscaleIVA>
         <Anagrafica>
           <Denominazione>BETA SRL</Denominazione>

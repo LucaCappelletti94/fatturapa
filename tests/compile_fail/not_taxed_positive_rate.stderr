@@ -1,0 +1,7 @@
+error[E0559]: variant `VatTreatment::NotTaxed` has no field named `aliquota`
+  --> tests/compile_fail/not_taxed_positive_rate.rs:10:9
+   |
+10 |         aliquota: fatturapa::ids::Aliquota::try_new(22).expect("a valid rate"),
+   |         ^^^^^^^^ `VatTreatment::NotTaxed` does not have this field
+   |
+   = note: all struct fields are already assigned

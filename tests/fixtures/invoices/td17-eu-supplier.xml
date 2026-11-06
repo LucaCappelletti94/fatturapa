@@ -5,7 +5,7 @@
     <DatiTrasmissione>
       <IdTrasmittente>
         <IdPaese>IT</IdPaese>
-        <IdCodice>09876543210</IdCodice>
+        <IdCodice>04444444444</IdCodice>
       </IdTrasmittente>
       <ProgressivoInvio>00001</ProgressivoInvio>
       <FormatoTrasmissione>FPR12</FormatoTrasmissione>
@@ -23,8 +23,8 @@
         <RegimeFiscale>RF01</RegimeFiscale>
       </DatiAnagrafici>
       <Sede>
-        <Indirizzo>BEISPIELSTRASSE 1</Indirizzo>
-        <CAP>10115</CAP>
+        <Indirizzo>BEISPIELSTRASSE 1 10115</Indirizzo>
+        <CAP>00000</CAP>
         <Comune>BERLIN</Comune>
         <Nazione>DE</Nazione>
       </Sede>
@@ -33,7 +33,7 @@
       <DatiAnagrafici>
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>09876543210</IdCodice>
+          <IdCodice>04444444444</IdCodice>
         </IdFiscaleIVA>
         <Anagrafica>
           <Denominazione>BETA SRL</Denominazione>

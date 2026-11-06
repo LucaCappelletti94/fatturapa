@@ -1,0 +1,11 @@
+error[E0599]: no method named `vat` found for struct `SevenTerLineBuilder<S>` in the current scope
+ --> tests/compile_fail/cross_border_line_vat.rs:9:10
+  |
+6 |       let _ = fatturapa::invoice::SevenTerLine::builder()
+  |  _____________-
+7 | |         .description("SERVIZIO".parse().expect("a valid description"))
+8 | |         .unit_price("100.00".parse().expect("a valid decimal"))
+9 | |         .vat(fatturapa::invoice::VatTreatment::Taxed(
+  | |         -^^^ method not found in `SevenTerLineBuilder<invoice::seven_ter_line_builder::SetUnitPrice<invoice::seven_ter_line_builder::SetDescription>>`
+  | |_________|
+  |

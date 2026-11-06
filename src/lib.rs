@@ -2,11 +2,13 @@
 #![doc = include_str!("../README.md")]
 
 pub mod amount;
-pub mod builder;
 pub mod date;
 pub mod error;
 pub mod filename;
 pub mod generated;
+pub mod ids;
+pub mod invoice;
+pub mod party;
 pub mod signed;
 #[cfg(feature = "trust-list")]
 pub mod trust_list;
@@ -18,7 +20,6 @@ use quick_xml::events::{BytesDecl, Event};
 use xsd_parser_types::quick_xml::{DeserializeSync, Error as XmlError, SerializeSync, SliceReader};
 
 pub use amount::Amount;
-pub use builder::{BuildError, Invoice, InvoiceBody, Line};
 pub use date::{Date, DateTime};
 pub use error::Error;
 pub use filename::{InvoiceName, MessageKind, MessageName, NameError};
@@ -32,6 +33,11 @@ pub use generated::sdi::{
     NotificaMancataConsegnaType as NotificaMancataConsegna, NotificaScartoType as NotificaScarto,
     RicevutaConsegnaType as RicevutaConsegna, ScartoEsitoCommittenteType as ScartoEsitoCommittente,
 };
+pub use invoice::{
+    BuildError, Invoice, InvoiceCurrency, Line, Recipient, Sconto, SelfInvoice, SevenTerLine,
+    VatTreatment,
+};
+pub use party::{Address, Business, Buyer, Company, Party, Seller, TaxIdentity};
 pub use validate::Violation;
 
 /// A `FatturaPA` invoice or SDI message that reads from XML and writes back

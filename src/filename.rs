@@ -392,8 +392,9 @@ impl<'a> CheckedIdentifier<'a> {
     }
 }
 
-/// Checks the file progressive, 1 to 5 alphanumeric characters.
-fn check_progressive(progressive: &str) -> Result<String, NameError> {
+/// Checks the file progressive, 1 to 5 alphanumeric characters, shared
+/// with the `ProgressivoInvio` of the typed construction.
+pub(crate) fn check_progressive(progressive: &str) -> Result<String, NameError> {
     if (1..=5).contains(&progressive.chars().count()) && alphanumeric(progressive) {
         Ok(progressive.to_string())
     } else {

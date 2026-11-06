@@ -115,6 +115,25 @@ fn from_reader_matches_from_xml_slice() {
     );
 }
 
+/// `from_xml_str` and `to_xml_string` agree with the slice and vector
+/// forms on the same document.
+#[test]
+fn str_and_string_forms_match_the_slice_forms() {
+    let file = "IT01234567890_FPR03.xml";
+    let bytes = support::sample_bytes(file);
+    let text = String::from_utf8(bytes).expect("the sample is UTF-8");
+    let invoice = FatturaElettronica::from_xml_slice(text.as_bytes()).expect("the sample reads");
+    assert_eq!(
+        FatturaElettronica::from_xml_str(&text).expect("the text reads"),
+        invoice
+    );
+    let written = invoice.to_xml_vec().expect("the invoice serialises");
+    assert_eq!(
+        invoice.to_xml_string().expect("the invoice serialises"),
+        String::from_utf8(written).expect("the written bytes are UTF-8")
+    );
+}
+
 /// `FPR02` is officially invalid against `Schema_VFPR12_v1.2.3.xsd`, because
 /// it places `PECDestinatario` before `ContattiTrasmittente` inside
 /// `DatiTrasmissione`, and the generated deserialiser must reject it with an
