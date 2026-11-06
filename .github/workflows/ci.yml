@@ -54,9 +54,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
       - run: rustup toolchain install nightly --profile minimal && rustup default nightly
       - run: cargo update -Z direct-minimal-versions
-      - run: cargo test -p fatturapa --all-targets
+      - run: cargo test -p fatturapa --all-targets --all-features
 
   coverage:
     runs-on: ubuntu-latest
