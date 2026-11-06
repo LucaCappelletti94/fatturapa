@@ -254,7 +254,7 @@ fn ess_signing_certificate_v2_custom(
     };
     let entry = EssSigningCertificate {
         hash_algorithm,
-        hash: OctetString::new(Vec::from(hash.digest(&der).as_slice())).expect("the hash encodes"),
+        hash: OctetString::new(hash.digest(&der)).expect("the hash encodes"),
         issuer: issuer.unwrap_or_else(|| cert.tbs_certificate.issuer.clone()),
         serial: serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
     };
@@ -280,7 +280,7 @@ fn ess_signing_certificate_v1_custom(
 ) -> Attributes {
     let der = cert.to_der().expect("the certificate encodes");
     let entry = EssSigningCertificateV1 {
-        hash: OctetString::new(Sha1::digest(&der).as_slice().to_vec()).expect("the hash encodes"),
+        hash: OctetString::new(Sha1::digest(&der).to_vec()).expect("the hash encodes"),
         issuer_serial: Some(IssuerAndSerialNumber {
             issuer: cert.tbs_certificate.issuer.clone(),
             serial_number: serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
@@ -318,7 +318,7 @@ fn resign_cms(der: &[u8], scalar: &[u8], f: impl FnOnce(&mut Vec<Attribute>)) ->
         .expect("der");
     let key = SigningKey::<NistP256>::from_slice(scalar).expect("a valid scalar");
     let signature: ecdsa::Signature<NistP256> = key
-        .sign_prehash(Sha256::digest(&to_sign).as_slice())
+        .sign_prehash(&Sha256::digest(&to_sign))
         .expect("the signature");
     signer.signature = OctetString::new(signature.to_vec()).expect("octets");
     signed_data.signer_infos = SignerInfos(SetOfVec::try_from(signers).expect("the signers sort"));
@@ -1678,7 +1678,7 @@ fn ess_v2_explicit_sha256_hash_algorithm_verifies() {
             oid: db::rfc5912::ID_SHA_256,
             parameters: None,
         }),
-        Sha256::digest(der.as_slice()).as_slice(),
+        &Sha256::digest(der.as_slice())[..],
     );
     let t = signing_time(&signer);
     let scalar = ec_signer_scalar();
@@ -1709,7 +1709,7 @@ fn ess_v2_sha1_hash_algorithm_verifies() {
             oid: db::rfc5912::ID_SHA_1,
             parameters: None,
         }),
-        Sha1::digest(der.as_slice()).as_slice(),
+        &Sha1::digest(der.as_slice())[..],
     );
     let t = signing_time(&signer);
     let scalar = ec_signer_scalar();
@@ -1739,7 +1739,7 @@ fn ess_v2_unsupported_hash_algorithm_does_not_match() {
             oid: db::rfc5912::ID_SHA_224,
             parameters: None,
         }),
-        Sha1::digest(der.as_slice()).as_slice(),
+        &Sha1::digest(der.as_slice())[..],
     );
     let t = signing_time(&signer);
     let scalar = ec_signer_scalar();
@@ -1774,7 +1774,7 @@ fn ess_v2_unsupported_hash_algorithm_with_sha512_hash_does_not_match() {
             oid: db::rfc5912::ID_SHA_224,
             parameters: None,
         }),
-        Sha512::digest(der.as_slice()).as_slice(),
+        &Sha512::digest(der.as_slice())[..],
     );
     let t = signing_time(&signer);
     let scalar = ec_signer_scalar();

@@ -653,7 +653,7 @@ enum Family {
 }
 
 /// The schema file of the family.
-fn schema_for(family: Family) -> &'static str {
+const fn schema_for(family: Family) -> &'static str {
     match family {
         Family::Ordinary => "spec/Schema_VFPR12_v1.2.3.xsd",
         Family::Simplified => "spec/Schema_VFSM10v_1.0.2.xsd",

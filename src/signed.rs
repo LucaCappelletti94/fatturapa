@@ -792,7 +792,7 @@ fn ess_v1_references(value: &Any, signer_der: &[u8], signer: &Certificate) -> bo
         return false;
     };
     // The v1 hash is `SHA-1` by definition.
-    if entry.hash.as_bytes() != Sha1::digest(signer_der).as_slice() {
+    if entry.hash.as_bytes() != &Sha1::digest(signer_der)[..] {
         return false;
     }
     match entry.issuer_serial {
