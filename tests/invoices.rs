@@ -206,9 +206,8 @@ fn td01_non_eu_us_client_wrong_length_code() {
 }
 
 /// Fixture 2: services to an EU business client, the reverse charge resting
-/// on the client, `N2.1` at a zero rate. The `DatiBollo` block declares the
-/// virtual stamp duty without the amount, the total being below the
-/// 77.47 EUR threshold.
+/// on the client, `N2.1` at a zero rate. The total of 50.00 is at most
+/// 77.47 EUR, so the document writes no `DatiBollo` block.
 #[test]
 fn td01_services_to_an_eu_de_client() {
     let doc = fixture_round_trips("td01-7ter-eu-de.xml");
@@ -270,12 +269,10 @@ fn td01_services_to_an_eu_de_client() {
         .content
         .dati_generali_documento
         .content;
-    let bollo = generali
-        .dati_bollo
-        .as_ref()
-        .expect("the stamp duty is declared");
-    assert_eq!(bollo.content.bollo_virtuale, g::BolloVirtualeType::Si);
-    assert_eq!(bollo.content.importo_bollo, None);
+    assert!(
+        generali.dati_bollo.is_none(),
+        "the total at most 77.47 writes no stamp duty"
+    );
     assert_eq!(generali.importo_totale_documento, Some(amount("50.00")));
 }
 

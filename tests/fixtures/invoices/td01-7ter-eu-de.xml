@@ -55,9 +55,6 @@
         <Divisa>EUR</Divisa>
         <Data>2026-11-05</Data>
         <Numero>00013</Numero>
-        <DatiBollo>
-          <BolloVirtuale>SI</BolloVirtuale>
-        </DatiBollo>
         <ImportoTotaleDocumento>50.00</ImportoTotaleDocumento>
         <Causale>CONSULENZA INVERSE CHARGE AI SENSI DELL'ART. 7-TER DPR 633/72</Causale>
       </DatiGeneraliDocumento>
