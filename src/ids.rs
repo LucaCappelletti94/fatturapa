@@ -413,9 +413,11 @@ impl From<Cap> for String {
 /// `FromStr` and `TryFrom` impls from a list of `name code city` rows.
 macro_rules! provincia {
     ($($name:ident $code:literal $city:literal),* $(,)?) => {
-        /// The `Provincia` of an Italian seat, the code of the current
-        /// provinces and metropolitan cities, from the Istat census of
-        /// administrative units of 21/02/2026.
+        /// The `Provincia` of an Italian seat.
+        ///
+        /// The codes of the current provinces and metropolitan cities come
+        /// from the Istat census of administrative units of 21/02/2026, and
+        /// the Sardinian sigle from DPR 4 agosto 2026 n. 183.
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
@@ -592,7 +594,7 @@ provincia! {
     Og "OG" "Ogliastra",
     Vs "VS" "Medio Campidano",
     Ca "CA" "Cagliari",
-    Ci "CI" "Sulcis Iglesiente",
+    Su "SU" "Sulcis Iglesiente",
 }
 
 /// The `CodiceDestinatario` that identifies the buyer at the `IPA` and the
@@ -2154,9 +2156,9 @@ mod tests {
     fn provincia_round_trips_and_rejects() {
         assert_eq!(Provincia::To.code(), "TO");
         assert_eq!("TO".parse::<Provincia>(), Ok(Provincia::To));
-        assert_eq!(Provincia::Ci.code(), "CI");
-        assert!(matches!("CI".parse::<Provincia>(), Ok(Provincia::Ci)));
-        for bad in ["to", "TOO", "XX", "12", "SU"] {
+        assert_eq!(Provincia::Su.code(), "SU");
+        assert_eq!("SU".parse::<Provincia>(), Ok(Provincia::Su));
+        for bad in ["to", "TOO", "XX", "12", "CI"] {
             assert!(
                 matches!(bad.parse::<Provincia>(), Err(IdError::Provincia(_))),
                 "{bad} must be rejected"
