@@ -185,8 +185,8 @@ invoice with a 1.4 MB attachment.
 
 Every reported violation is a true SDI finding about the file, checked against
 the Elenco Controlli v2.0 text, and against the Allegato A 1.9.1 operative
-specification for the 00313, 00330, 00471 and 00472 criteria, which its
-version 2.0 list predates. Every other readable invoice is clean.
+specification, which refines the 00313, 00330, 00401, 00430, 00471 and 00472
+criteria of the version 2.0 list. Every other readable invoice is clean.
 
 | File | Codes | What the file does |
 | --- | --- | --- |
@@ -212,14 +212,13 @@ version 2.0 list predates. Every other readable invoice is clean.
 | `estratto/08-imposta-errata.xml` | 00421 | riepilogo `Imposta` off from the recomputed value |
 | `estratto/09-zero-senza-natura.xml` | 00400, 00429 | a zero-rate line and a riepilogo missing `Natura` |
 | `odoo-fatturapa-viewer/test.xml` | 00471 | a `TD01` with a seller and a buyer sharing the same `IdFiscaleIVA` |
-| `tappoz/sample_data/IT01234567890_GCE004_fail_BR_GCE004_GCE007a.xml` | 00401, 00430 | a non-zero-rate line and a riepilogo with `Natura` present |
 | `tappoz/sample_data/IT01234567890_GCE009_fail_BR_00473_GCE009.xml` | 00473 | seller `IdPaese` not allowed for the document type |
 | `tappoz/sample_data/IT12345678901_ddddd_ALIQUOTA_FRACTION_fail_BR_00424.xml` | 00424 three times | a rate not expressed as a percentage on two lines and the riepilogo |
 | `tappoz/sample_data/IT12345678901_ddddd_ALIQUOTA_MISSING_RIEPILOGO_fail_BR_00443.xml` | 00419, 00443, 00422 | a line rate missing from `DatiRiepilogo`, plus a riepilogo `ImponibileImporto` off |
 | `tappoz/sample_data/IT12345678901_ddddd_BOTH_FOREIGN_fail_BR_00476.xml` | 00476 | seller and buyer `IdPaese` both different from `IT` |
 | `tappoz/sample_data/IT12345678901_ddddd_CASSA_ALIQ0_NO_NATURA_fail_BR_00413.xml` | 00413 | a cassa `Natura` missing at a zero `AliquotaIVA` |
 | `tappoz/sample_data/IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414.xml` | 00414, 00444, 00422 | a cassa `Natura` present at a non-zero rate and missing from the riepilogo, plus a riepilogo `ImponibileImporto` off |
-| `tappoz/sample_data/IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414_00444_GCE004.xml` | 00414, 00444, 00430 | a cassa `Natura` present at a non-zero rate and missing from the riepilogo, plus a riepilogo `Natura` present |
+| `tappoz/sample_data/IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414_00444_GCE004.xml` | 00414, 00444 | a cassa `Natura` present at a non-zero rate and missing from the riepilogo |
 | `tappoz/sample_data/IT12345678901_ddddd_CASSA_RITENUTA_NO_DATIRIT_fail_BR_00415.xml` | 00415 | `DatiRitenuta` missing for a cassa with `Ritenuta SI` |
 | `tappoz/sample_data/IT12345678901_ddddd_CC_NO_IDS_fail_BR_00417.xml` | 00417 | buyer `IdFiscaleIVA` and `CodiceFiscale` both absent |
 | `tappoz/sample_data/IT12345678901_ddddd_CEDENTE_EQ_CESSIONARIO_fail_BR_00471.xml` | 00471 | seller and buyer identical for the document type |
