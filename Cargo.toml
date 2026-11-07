@@ -46,11 +46,12 @@ const-oid = "0.9.6"
 der = { version = "0.7.10", features = ["derive"] }
 digest = "0.10.7"
 email_address = { version = "0.2.9", default-features = false }
+encoding_rs = "0.8"
 iban_validate = "5.0.1"
 iso_country = "0.1.4"
 iso_currency = "0.7.1"
 jiff = "0.2.39"
-quick-xml = "0.42.0"
+quick-xml = { version = "0.42.0", features = ["encoding"] }
 rasn = "0.30"
 rasn-cms = "0.30"
 rust_decimal = { version = "1.43.0", default-features = false, features = ["std"] }

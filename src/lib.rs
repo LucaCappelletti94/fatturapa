@@ -14,8 +14,11 @@ pub mod signed;
 pub mod trust_list;
 pub mod validate;
 
+use std::borrow::Cow;
 use std::io::{Read, Write};
 
+use encoding_rs::Encoding;
+use quick_xml::Reader;
 use quick_xml::events::{BytesDecl, Event};
 use xsd_parser_types::quick_xml::{DeserializeSync, Error as XmlError, SerializeSync, SliceReader};
 
@@ -53,12 +56,14 @@ pub trait Document:
     /// The prefixed root element name of the document.
     const ROOT: &'static str;
 
-    /// Reads the document from `input`.
+    /// Reads the document from `input`, decoding the `encoding` the XML
+    /// declaration names, or `UTF-8` when it names none.
     ///
     /// # Errors
     ///
-    /// Fails with [`Error`] when the input cannot be read to the end or is
-    /// not a well-formed document of this type.
+    /// Fails with [`Error`] when the input cannot be read to the end, when
+    /// the declared `encoding` is unsupported or the bytes do not decode, or
+    /// when the input is not a well-formed document of this type.
     fn from_reader(input: impl Read) -> Result<Self, Error>
     where
         Self: Sized,
@@ -81,17 +86,20 @@ pub trait Document:
         Ok(DeserializeSync::deserialize(&mut reader)?)
     }
 
-    /// Reads the document from the UTF-8 bytes in `input`.
+    /// Reads the document from the bytes in `input`, decoding the `encoding`
+    /// the XML declaration names, or `UTF-8` when it names none.
     ///
     /// # Errors
     ///
-    /// Fails with [`Error`] when `input` is not a well-formed document of
-    /// this type.
+    /// Fails with [`Error`] when the declared `encoding` is unsupported or
+    /// the bytes do not decode, or when `input` is not a well-formed document
+    /// of this type.
     fn from_xml_slice(input: &[u8]) -> Result<Self, Error>
     where
         Self: Sized,
     {
-        let mut reader = SliceReader::from_bytes(input);
+        let utf8 = to_utf8(input)?;
+        let mut reader = SliceReader::from_bytes(&utf8);
         Ok(DeserializeSync::deserialize(&mut reader)?)
     }
 
@@ -183,6 +191,71 @@ impl Document for RicevutaConsegna {
 impl Document for ScartoEsitoCommittente {
     /// The root element name of the `SE` message.
     const ROOT: &'static str = "types:ScartoEsitoCommittente";
+}
+
+/// The `encoding` the XML declaration of `input` names, resolved to the
+/// `encoding_rs` encoding it names, or `UTF-8` when the declaration is absent
+/// or names no `encoding`.
+///
+/// # Errors
+///
+/// Fails with [`Error::QuickXml`] when the first event cannot be read, and
+/// with [`Error::UnsupportedEncoding`] when the declaration names an
+/// `encoding` the `WHATWG` labels do not resolve.
+fn declared_encoding(input: &[u8]) -> Result<&'static Encoding, Error> {
+    // The declaration, when present, is the first event, and its bytes are
+    // `ASCII`, so it reads regardless of the body encoding. A document opening
+    // without a declaration uses the `UTF-8` default.
+    let mut reader = Reader::from_reader(input);
+    let mut buffer = Vec::new();
+    let Event::Decl(decl) = reader.read_event_into(&mut buffer)? else {
+        return Ok(encoding_rs::UTF_8);
+    };
+    // A declaration resolving to an `encoding` decodes in it.
+    let Some(encoding) = decl.encoder() else {
+        // An `encoding` the `WHATWG` labels do not resolve is rejected, naming
+        // it. A declaration without an `encoding` keeps the `UTF-8` default.
+        let name = decl.encoding().and_then(Result::ok).map(Cow::into_owned);
+        return name.map_or_else(
+            || Ok(encoding_rs::UTF_8),
+            |name| Err(Error::UnsupportedEncoding(name)),
+        );
+    };
+    Ok(encoding)
+}
+
+/// Decodes the bytes of `input` to `UTF-8`.
+///
+/// A leading byte order mark decides the `encoding` and is stripped before
+/// decoding. Without a BOM the `encoding` the XML declaration names is used,
+/// the `UTF-16` family reading its bytes as `UTF-8` per its `WHATWG` output
+/// encoding. A `UTF-8` document passes through borrowed and every other
+/// supported `encoding` is transcoded to fresh bytes.
+///
+/// # Errors
+///
+/// Fails with [`Error`] when the declared `encoding` is unsupported or the
+/// bytes do not decode as it.
+fn to_utf8(input: &[u8]) -> Result<Cow<'_, [u8]>, Error> {
+    // A byte order mark decides the `encoding` on its own, so the declaration
+    // is ignored and the mark is stripped before decoding.
+    if let Some((encoding, bom_len)) = Encoding::for_bom(input) {
+        let body = &input[bom_len..];
+        if encoding == encoding_rs::UTF_8 {
+            return Ok(Cow::Borrowed(body));
+        }
+        let decoded = quick_xml::encoding::decode(body, encoding)?;
+        return Ok(Cow::Owned(decoded.into_owned().into_bytes()));
+    }
+    // A BOM-less `UTF-16` declaration names bytes that are not actually
+    // `UTF-16`, so the resolved `encoding` is lowered by its `WHATWG` output
+    // encoding, which the `UTF-16` family maps to `UTF-8`.
+    let encoding = declared_encoding(input)?.output_encoding();
+    if encoding == encoding_rs::UTF_8 {
+        return Ok(Cow::Borrowed(input));
+    }
+    let decoded = quick_xml::encoding::decode(input, encoding)?;
+    Ok(Cow::Owned(decoded.into_owned().into_bytes()))
 }
 
 /// Reads `input` to the end into a fresh buffer.

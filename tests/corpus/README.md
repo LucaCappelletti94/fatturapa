@@ -23,7 +23,7 @@ Each source directory carries the upstream `LICENSE` file next to the copied fil
 | `fatturaelettronica-net/` | [FatturaElettronica/FatturaElettronica.NET](https://github.com/FatturaElettronica/FatturaElettronica.NET) | MIT style, (c) 2017 Nicola Iarocci, Gestionali Amica and contributors | `Samples/*.xml`, `Samples/*.p7m` |
 | `fatturaelettronica-php/` | [fatturaelettronicaphp/FatturaElettronica](https://github.com/fatturaelettronicaphp/FatturaElettronica) | MIT | `tests/*.xml`, `tests/*.p7m`, `tests/semplificata/*.xml` |
 | `fatturapa-php-sdk/` | [italia/fatturapa-php-sdk](https://github.com/italia/fatturapa-php-sdk) | BSD 3-Clause | `tests/.../IT01234567890_FPA02.xml` |
-| `fatture-elettroniche-explorer/` | [N1K1TAS95/fatture_elettroniche_explorer](https://github.com/N1K1TAS95/fatture_elettroniche_explorer) | MIT | `carburante/*.xml`, `casi-limite/*.xml`, `emesse/*.xml`, `ricevute/*.xml`, `firmate/*.p7m`, twenty seven files |
+| `fatture-elettroniche-explorer/` | [N1K1TAS95/fatture_elettroniche_explorer](https://github.com/N1K1TAS95/fatture_elettroniche_explorer) | MIT | `carburante/*.xml`, `casi-limite/*.xml`, `emesse/*.xml`, `ricevute/*.xml`, `firmate/*.p7m`, twenty eight files |
 | `fexplorer/` | [EtheaDev/FExplorer](https://github.com/EtheaDev/FExplorer) | Apache 2.0 | `IT02408280960_FPA01.xml` |
 | `gobl-sdi/` | [invopop/gobl.it.sdi](https://github.com/invopop/gobl.it.sdi) | Apache 2.0 | `fatturapa.gobl/*.xml`, `gobl.fatturapa/out/*.xml` |
 | `horstoeko-invoicesuite/` | [horstoeko/invoicesuite](https://github.com/horstoeko/invoicesuite) | MIT | `tests/.../02_technical_xml_fatturapa.xml` |
@@ -79,15 +79,13 @@ copied, the `fatture-elettroniche-explorer/ATTESO.json` file, the
 `p7m-apri/documento.pdf` and `p7m-fattura-decoder/not-base64.txt`.
 `odoo-fatturapa-viewer/test.xml.p7m` and `p7m-apri/TEST.p7m` carry the
 certificates of real persons and are excluded. `merge-invoices/02_invoice.xml`
-and `fatture-elettroniche-explorer/casi-limite/codifica-iso-8859-1.xml` are
-valid against the `XSD` but the generated reader rejects them, a
-`dsig-xpath:XPath` filter-2 element in `ds:Transform` and non-`UTF-8` bytes
-respectively, so the two files are excluded and the reader defects are
-reported.
+is valid against the `XSD` but the generated reader rejects it, a
+`dsig-xpath:XPath` filter-2 element in `ds:Transform`, so the file is
+excluded and the reader defect is reported.
 
 ## Outcomes
 
-Four hundred and ninety files. Three hundred and seventy six read,
+Four hundred and ninety one files. Three hundred and seventy seven read,
 validate and round-trip, including the signed files unwrapped from their
 `.p7m` wrapper. One hundred and eight fail the `XSD` validation of `spec/`,
 listed below with the reason `xmllint` reports. Six signed files do not unwrap
