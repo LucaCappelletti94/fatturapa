@@ -457,6 +457,7 @@ dependencies = [
  "digest",
  "ecdsa",
  "email_address",
+ "encoding_rs",
  "iban_validate",
  "iso_country",
  "iso_currency",
