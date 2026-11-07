@@ -7,11 +7,19 @@ use std::str::FromStr;
 /// A decimal number that keeps the scale of its text form, so that `5.00`
 /// survives a read and a write as `5.00` and not as `5`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Amount(pub Decimal);
 
 impl Display for Amount {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
+    }
+}
+
+impl From<Amount> for String {
+    fn from(value: Amount) -> Self {
+        value.to_string()
     }
 }
 

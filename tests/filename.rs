@@ -199,6 +199,35 @@ fn message_kinds_round_trip() {
     }
 }
 
+/// The `TryFrom<&str>` impls of the three name types agree with their
+/// `FromStr` impls on every valid and invalid form.
+#[test]
+fn try_from_str_agrees_with_from_str() {
+    for code in ["RC", "NS", "MC", "NE", "MT", "EC", "SE", "DT", "AT"] {
+        assert_eq!(MessageKind::try_from(code), code.parse::<MessageKind>());
+    }
+    for code in ["RX", "RC1", "rc", ""] {
+        assert_eq!(MessageKind::try_from(code), code.parse::<MessageKind>());
+    }
+
+    for name in [
+        NAME,
+        "IT01234567890_00001.xml.p7m",
+        "IT01234567890_00001",
+        "it01234567890_00001.xml",
+    ] {
+        assert_eq!(InvoiceName::try_from(name), name.parse::<InvoiceName>());
+    }
+
+    for name in [
+        "IT01234567890_00001_RC_001.xml",
+        "IT01234567890_00001_RC_001",
+        "IT01234567890_00001_RR_001.xml",
+    ] {
+        assert_eq!(MessageName::try_from(name), name.parse::<MessageName>());
+    }
+}
+
 #[test]
 fn message_name_round_trips() {
     for (name, kind, invoice, progressive) in [

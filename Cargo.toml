@@ -24,6 +24,7 @@ include = [
     "/tests/roundtrip.proptest-regressions",
     "/tests/roundtrip.rs",
     "/tests/samples.rs",
+    "/tests/serde.rs",
     "/tests/signed.rs",
     "/tests/support",
     "/tests/totals.rs",
@@ -41,7 +42,7 @@ cms = "0.2.3"
 const-oid = "0.9.6"
 der = { version = "0.7.10", features = ["derive"] }
 digest = "0.10.7"
-email_address = "0.2.9"
+email_address = { version = "0.2.9", default-features = false }
 iban_validate = "5.0.1"
 iso_country = "0.1.4"
 iso_currency = "0.7.1"
@@ -49,9 +50,10 @@ jiff = "0.2.39"
 quick-xml = "0.42.0"
 rasn = "0.30"
 rasn-cms = "0.30"
-rust_decimal = "1.43.0"
+rust_decimal = { version = "1.43.0", default-features = false, features = ["std"] }
 rustls-pki-types = "1.15"
 rustls-webpki = { version = "0.103.16", features = ["ring", "std"] }
+serde = { version = "1.0.225", features = ["derive"], optional = true }
 sha1 = "0.10.6"
 sha2 = { version = "0.10.8", features = ["oid"] }
 spki = "0.7.3"
@@ -61,6 +63,8 @@ xsd-parser-types = { version = "0.3.0", features = ["quick-xml"] }
 
 [features]
 trust-list = []
+# Identifiers, amounts and dates serialise through their own string forms, so only the country and currency enums need their crates' serde support.
+serde = ["dep:serde", "iso_country/serde", "iso_currency/with-serde"]
 
 [dev-dependencies]
 base64 = "0.23.1"
@@ -69,8 +73,11 @@ const-oid = "0.9.6"
 der = { version = "0.7.10", features = ["derive"] }
 digest = "0.10.7"
 ecdsa = "0.16.9"
+iso_country = "0.1.4"
+iso_currency = "0.7.1"
 p256 = "0.13.2"
 proptest = { version = "1.12.0", features = ["attr-macro"] }
+serde_json = "1.0.110"
 sha2 = "0.10.8"
 spki = "0.7.3"
 trybuild = "1.0.122"

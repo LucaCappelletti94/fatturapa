@@ -10,11 +10,19 @@ use std::str::FromStr;
 
 /// A calendar date in the `YYYY-MM-DD` lexical form of `xs:date`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Date(pub CivilDate);
 
 impl Display for Date {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
+    }
+}
+
+impl From<Date> for String {
+    fn from(value: Date) -> Self {
+        value.to_string()
     }
 }
 
@@ -87,6 +95,8 @@ impl TryFrom<String> for DateTime {
 /// A text form without an offset, such as `2014-01-01T00:00:00`, is
 /// interpreted as UTC and written back without an offset.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct DateTime {
     /// The instant this value refers to.
     pub instant: Timestamp,
@@ -113,6 +123,12 @@ impl Display for DateTime {
         } else {
             Ok(())
         }
+    }
+}
+
+impl From<DateTime> for String {
+    fn from(value: DateTime) -> Self {
+        value.to_string()
     }
 }
 

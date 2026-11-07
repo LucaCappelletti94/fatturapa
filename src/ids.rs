@@ -73,6 +73,12 @@ macro_rules! id_newtype {
                 &self.0
             }
         }
+
+        impl From<$name> for String {
+            fn from(value: $name) -> Self {
+                value.to_string()
+            }
+        }
     };
     ($name:ident, accessor) => {
         impl fmt::Display for $name {
@@ -110,11 +116,17 @@ macro_rules! id_newtype {
                 self.as_str()
             }
         }
+
+        impl From<$name> for String {
+            fn from(value: $name) -> Self {
+                value.to_string()
+            }
+        }
     };
 }
 
 /// Why an identifier does not fit the element it would fill.
-#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(Clone, Debug, thiserror::Error, PartialEq, Eq)]
 pub enum IdError {
     /// `PartitaIva` is not 11 digits or fails its check digit.
     #[error("not a valid partita IVA: {0}")]
@@ -237,7 +249,9 @@ impl From<rust_decimal::Error> for IdError {
 
 /// The `IdCodice` of an Italian party, the 11-digit `partita IVA` with the
 /// Luhn check digit of DM 23/12/1976.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct PartitaIva(String);
 
 impl PartitaIva {
@@ -277,7 +291,9 @@ id_newtype!(PartitaIva, field);
 /// and the omocodia letters `LMNPQRSTUV` in the digit positions, per D.P.R.
 /// 29/9/1973 n. 605. The 11-digit form of a non-natural person is the
 /// `partita IVA` with its check digit.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct CodiceFiscale(String);
 
 impl CodiceFiscale {
@@ -320,7 +336,9 @@ impl CodiceFiscale {
 id_newtype!(CodiceFiscale, field);
 
 /// The `CAP` of a seat, five digits.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Cap([u8; 5]);
 
 impl Cap {
@@ -385,6 +403,12 @@ impl TryFrom<String> for Cap {
     }
 }
 
+impl From<Cap> for String {
+    fn from(value: Cap) -> Self {
+        value.to_string()
+    }
+}
+
 /// Declares the `Provincia` enum and its `ALL`, `code`, `Display`,
 /// `FromStr` and `TryFrom` impls from a list of `name code city` rows.
 macro_rules! provincia {
@@ -392,7 +416,9 @@ macro_rules! provincia {
         /// The `Provincia` of an Italian seat, the code of the current
         /// provinces and metropolitan cities, from the Istat census of
         /// administrative units of 21/02/2026.
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
         pub enum Provincia {
             $( #[doc = concat!("The province of ", $city, ", code `", $code, "`.")]
             $name, )*
@@ -445,6 +471,12 @@ macro_rules! provincia {
 
             fn try_from(s: String) -> Result<Self, Self::Error> {
                 Self::from_str(&s)
+            }
+        }
+
+        impl From<Provincia> for String {
+            fn from(value: Provincia) -> Self {
+                value.to_string()
             }
         }
     };
@@ -566,7 +598,9 @@ provincia! {
 /// The `CodiceDestinatario` that identifies the buyer at the `IPA` and the
 /// `SDI`, six characters for a public administration and seven for a
 /// private party.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct CodiceDestinatario(String);
 
 impl CodiceDestinatario {
@@ -613,7 +647,9 @@ id_newtype!(CodiceDestinatario, field);
 
 /// The `ProgressivoInvio` of the transmission, one to five alphanumeric
 /// characters, shared with the file progressive of `InvoiceName`.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct ProgressivoInvio(String);
 
 impl ProgressivoInvio {
@@ -647,7 +683,9 @@ id_newtype!(ProgressivoInvio, field);
 
 /// The `CodiceDestinatario` of a seat with a `BIC`, the eight or eleven
 /// character code of the XSD.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Bic(String);
 
 impl Bic {
@@ -692,7 +730,9 @@ id_newtype!(Bic, field);
 /// The `IdCodice` of a non-Italian party, one to 28 uppercase alphanumeric
 /// characters, as the Agenzia FAQ allows with no validity check by the
 /// `SDI`.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct ForeignTaxId(String);
 
 impl ForeignTaxId {
@@ -727,7 +767,9 @@ id_newtype!(ForeignTaxId, field);
 
 /// The `Telefono` of the party contacts, five to 12 printable ASCII
 /// characters per `TelFaxType`.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Telefono(String);
 
 impl Telefono {
@@ -758,7 +800,9 @@ id_newtype!(Telefono, field);
 
 /// The `PECDestinatario` of the transmission, an e-mail of at most 256
 /// characters.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Pec(email_address::EmailAddress);
 
 impl Pec {
@@ -790,7 +834,9 @@ impl Pec {
 id_newtype!(Pec, accessor);
 
 /// The `Email` of the party contacts, an e-mail of seven to 256 characters.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Email(email_address::EmailAddress);
 
 impl Email {
@@ -823,6 +869,8 @@ id_newtype!(Email, accessor);
 
 /// The `IBAN` of the payment details, with the mod-97 check digits.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Iban(iban::Iban);
 
 impl Iban {
@@ -850,7 +898,9 @@ id_newtype!(Iban, accessor);
 
 /// The `AliquotaIVA` of a taxable line or riepilogo, a percentage above
 /// zero and at most 100 with two decimals.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Aliquota(Decimal);
 
 impl Aliquota {
@@ -911,6 +961,12 @@ impl TryFrom<String> for Aliquota {
     }
 }
 
+impl From<Aliquota> for String {
+    fn from(value: Aliquota) -> Self {
+        value.to_string()
+    }
+}
+
 impl TryFrom<Decimal> for Aliquota {
     type Error = IdError;
 
@@ -921,7 +977,9 @@ impl TryFrom<Decimal> for Aliquota {
 
 /// The `RiferimentoNormativo` of the riepilogo, one to 100 characters of
 /// the XSD `String100Latin` type.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct RiferimentoNormativo(String);
 
 impl RiferimentoNormativo {
@@ -957,7 +1015,9 @@ id_newtype!(RiferimentoNormativo, field);
 /// d'Italia rates published under the art. 13 convention, and is above
 /// zero, since a zero or negative rate cannot convert an amount. The
 /// value is written with four decimals, that precision.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct ExchangeRate(Decimal);
 
 impl ExchangeRate {
@@ -1018,6 +1078,12 @@ impl TryFrom<String> for ExchangeRate {
     }
 }
 
+impl From<ExchangeRate> for String {
+    fn from(value: ExchangeRate) -> Self {
+        value.to_string()
+    }
+}
+
 impl TryFrom<Decimal> for ExchangeRate {
     type Error = IdError;
 
@@ -1029,7 +1095,9 @@ impl TryFrom<Decimal> for ExchangeRate {
 /// The `Numero` of the `DatiGeneraliDocumento`, one to 20 printable basic
 /// Latin characters, with at least one digit per the 00425 check of the
 /// Elenco Controlli.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Numero(String);
 
 impl Numero {
@@ -1060,7 +1128,9 @@ id_newtype!(Numero, field);
 
 /// The `IdDocumento` of the `DatiFattureCollegate`, one to 20 printable
 /// basic Latin characters.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct IdDocumento(String);
 
 impl IdDocumento {
@@ -1091,7 +1161,9 @@ id_newtype!(IdDocumento, field);
 
 /// The `Causale` of the `DatiGeneraliDocumento`, one to 200 characters of
 /// basic Latin and the Latin-1 supplement.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Causale(String);
 
 impl Causale {
@@ -1122,7 +1194,9 @@ id_newtype!(Causale, field);
 
 /// The `Descrizione` of the `DettaglioLinee`, one to 1000 characters of
 /// basic Latin and the Latin-1 supplement.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Description(String);
 
 impl Description {
@@ -1153,7 +1227,9 @@ id_newtype!(Description, field);
 
 /// The `Denominazione` of the `Anagrafica` of a business, one to 80
 /// characters of basic Latin and the Latin-1 supplement.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Denomination(String);
 
 impl Denomination {
@@ -1184,7 +1260,9 @@ id_newtype!(Denomination, field);
 
 /// The `Nome` and the `Cognome` of the `Anagrafica` of a person, one to 60
 /// characters of basic Latin and the Latin-1 supplement.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct PersonName(String);
 
 impl PersonName {
@@ -1215,7 +1293,9 @@ id_newtype!(PersonName, field);
 
 /// The `Indirizzo` of a seat, one to 60 characters of basic Latin and the
 /// Latin-1 supplement, before the foreign postal code is appended.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Indirizzo(String);
 
 impl Indirizzo {
@@ -1246,7 +1326,9 @@ id_newtype!(Indirizzo, field);
 
 /// The `Comune` of a seat, one to 60 characters of basic Latin and the
 /// Latin-1 supplement.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Comune(String);
 
 impl Comune {
@@ -1277,7 +1359,9 @@ id_newtype!(Comune, field);
 
 /// The `UnitaMisura` of a line, one to 10 printable basic Latin
 /// characters.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct UnitaMisura(String);
 
 impl UnitaMisura {
@@ -1308,7 +1392,9 @@ id_newtype!(UnitaMisura, field);
 
 /// The foreign postal code appended to the `Indirizzo` of a foreign seat,
 /// one to 10 uppercase alphanumeric characters, spaces or hyphens.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct PostalCode(String);
 
 impl PostalCode {
@@ -1352,7 +1438,9 @@ id_newtype!(PostalCode, field);
 /// VAT directive does not appear in a `FatturaPA` document, whose
 /// `IdPaese` and `Nazione` are `ISO 3166-1` codes, so the variant is
 /// `EuCountry::Gr`.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub enum EuCountry {
     /// `AT`, Austria.
     At,
@@ -1511,10 +1599,18 @@ impl TryFrom<String> for EuCountry {
     }
 }
 
+impl From<EuCountry> for String {
+    fn from(value: EuCountry) -> Self {
+        value.to_string()
+    }
+}
+
 /// The `Natura` of a non-taxable line, per the codes of the specification.
 /// The generic values the `SDI` retired (`N2`, `N3`, `N6`, check 00445)
 /// are not constructible.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub enum Natura {
     /// `N1`, the operation excluded from VAT, ex art. 15 DPR 633/72.
     N1,
@@ -1655,7 +1751,9 @@ impl fmt::Display for Natura {
 
 /// The `RegimeFiscale` of the `CedentePrestatore`, one of the codes of the
 /// XSD enumeration.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub enum RegimeFiscale {
     /// `RF01`, the ordinary regime.
     Rf01,
@@ -1817,6 +1915,12 @@ impl TryFrom<String> for RegimeFiscale {
     }
 }
 
+impl From<RegimeFiscale> for String {
+    fn from(value: RegimeFiscale) -> Self {
+        value.to_string()
+    }
+}
+
 impl FromStr for Natura {
     type Err = IdError;
 
@@ -1842,6 +1946,12 @@ impl TryFrom<String> for Natura {
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
         Self::from_str(&s)
+    }
+}
+
+impl From<Natura> for String {
+    fn from(value: Natura) -> Self {
+        value.to_string()
     }
 }
 

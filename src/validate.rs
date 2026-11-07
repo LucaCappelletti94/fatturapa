@@ -95,7 +95,8 @@ use crate::{FatturaElettronica, FatturaElettronicaSemplificata};
 use rust_decimal::{Decimal, RoundingStrategy};
 
 /// One SDI check violation.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Violation {
     /// The SDI error code, such as `00400`.
     pub code: String,

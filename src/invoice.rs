@@ -54,9 +54,11 @@ use std::marker::PhantomData;
 #[doc(hidden)]
 pub mod typestate {
     /// The required field of a builder that has not been set yet.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Unset;
 
     /// The required field of a builder that has been set.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Set;
 }
 
@@ -127,7 +129,7 @@ fn quantity_bound() -> Decimal {
 }
 
 /// What a `build` refuses when the document cannot be assembled.
-#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(Clone, Debug, thiserror::Error, PartialEq, Eq)]
 pub enum BuildError {
     /// The amount of a line does not fit the XSD amount types of the
     /// document.
@@ -159,7 +161,7 @@ pub enum BuildError {
 }
 
 /// The amount field of a line.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum AmountField {
     /// The `PrezzoUnitario`.
     UnitPrice,
@@ -177,7 +179,8 @@ impl std::fmt::Display for AmountField {
 }
 
 /// The channel the `SDI` uses to reach the buyer of a domestic invoice.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Recipient {
     /// The `CodiceDestinatario` of the buyer, seven characters for the
     /// `FPR12` format and six characters for the `FPA12` format.
@@ -221,7 +224,8 @@ impl Recipient {
 
 /// The `AliquotaIVA` and the `Natura` of a line, one of the two, so a
 /// taxed nature or a non-taxed rate with a percentage cannot be written.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VatTreatment {
     /// A taxable line, with the `AliquotaIVA` the rate.
     Taxed(Aliquota),
@@ -291,7 +295,8 @@ impl VatTreatment {
 /// original amount, the currency and the rate in the
 /// `AltriDatiGestionali` of each line. The `rate` is the units of
 /// `currency` per euro, the European Central Bank convention of art. 13.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum InvoiceCurrency {
     /// The `Divisa` `EUR`, the amounts as given.
     #[default]
@@ -342,7 +347,7 @@ impl InvoiceCurrency {
 
 /// A `ScontoMaggiorazione` block, either a percentage or an amount, of the
 /// discount or the markup kind.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Sconto {
     /// Whether the block is the `SC` discount or the `MG` markup.
     discount: bool,
@@ -471,13 +476,63 @@ impl Sconto {
     }
 }
 
+/// The serialised form of a [`Sconto`], the kind flags and the value as a
+/// decimal string, re-validated on the way in.
+#[cfg(feature = "serde")]
+#[derive(serde::Serialize, serde::Deserialize)]
+struct ScontoForm {
+    /// Whether the block is the `SC` discount.
+    discount: bool,
+    /// Whether the value is the `Percentuale`.
+    percent: bool,
+    /// The value, as a decimal string.
+    value: String,
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Sconto {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        ScontoForm {
+            discount: self.discount,
+            percent: self.percent,
+            value: self.value.to_string(),
+        }
+        .serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Sconto {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let ScontoForm {
+            discount,
+            percent,
+            value,
+        } = ScontoForm::deserialize(deserializer)?;
+        match (discount, percent) {
+            (true, true) => Self::discount_percent(value.as_str()),
+            (false, true) => Self::markup_percent(value.as_str()),
+            (true, false) => Self::discount_amount(value.as_str()),
+            (false, false) => Self::markup_amount(value.as_str()),
+        }
+        .map_err(serde::de::Error::custom)
+    }
+}
+
 /// One `DettaglioLinee` of a typed invoice.
 ///
 /// The `NumeroLinea` is assigned by the invoice at `build`, in document
 /// order. The `PrezzoUnitario` is in the currency the invoice carries, and
 /// the `PrezzoTotale` is computed by the invoice from the unit price, the
 /// quantity and the `ScontoMaggiorazione` blocks, per the 00423 rule.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Line {
     /// The `Descrizione`.
     description: Description,
@@ -497,6 +552,7 @@ pub struct Line {
 /// The optional fields of a document line, embedded by the
 /// [`LineBuilder`] and the [`SevenTerLineBuilder`], with their shared
 /// setters and the first conversion error of the builders.
+#[derive(Clone, Debug, PartialEq, Eq)]
 struct LineOptionals {
     /// The `Quantita`, absent when the line is not quantity-priced and the
     /// total reads the unit price.
@@ -599,6 +655,7 @@ impl LineOptionals {
 /// `unit_of_measure` and the `sconti`, carry plain slots with their
 /// setters available in every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LineBuilder<D = typestate::Unset, P = typestate::Unset, V = typestate::Unset> {
     /// The `Descrizione`.
     description: Option<Description>,
@@ -889,7 +946,8 @@ fn seven_ter_treatment() -> VatTreatment {
 /// carries, and the `PrezzoTotale` is computed by the invoice from the
 /// unit price, the quantity and the `ScontoMaggiorazione` blocks, per the
 /// 00423 rule.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SevenTerLine {
     /// The `Descrizione`.
     description: Description,
@@ -917,6 +975,7 @@ pub struct SevenTerLine {
 /// fields, the `quantity`, the `unit_of_measure` and the `sconti`, carry
 /// plain slots with their setters available in every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SevenTerLineBuilder<D = typestate::Unset, P = typestate::Unset> {
     /// The `Descrizione`.
     description: Option<Description>,
@@ -1106,6 +1165,7 @@ enum Scenario {
 
 /// A `FatturaElettronica` of one seller and one buyer, in the scenario a
 /// named constructor fills.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Invoice;
 
 /// The builder of the domestic invoice, which checks the required fields
@@ -1120,6 +1180,7 @@ pub struct Invoice;
 /// `causali`, the `currency` and the `bollo`, carry plain slots with
 /// their setters available in every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InvoiceDomesticBuilder<
     'a,
     'b,
@@ -1338,6 +1399,7 @@ impl InvoiceDomesticBuilder<'_, '_, typestate::Set, typestate::Set, typestate::S
 /// `causali` and the `currency`, carry plain slots with their setters
 /// available in every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InvoiceCrossBorderServicesBuilder<
     'a,
     'b,
@@ -1585,6 +1647,7 @@ impl Invoice {
 
 /// A self-invoice of a buyer integrating the reverse charge of a foreign
 /// supplier, the `TD17` of services and the `TD19` of goods.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SelfInvoice;
 
 /// The document kinds of the self-invoice, the `TD17` of the services and
@@ -1593,10 +1656,12 @@ pub struct SelfInvoice;
 pub mod kind {
     /// The `TD17` document kind, the services bought from a non-Italian
     /// supplier.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Td17;
 
     /// The `TD19` document kind, the goods bought from a non-Italian
     /// supplier.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Td19;
 
     impl super::sealed::Sealed for Td17 {}
@@ -1651,6 +1716,7 @@ impl SelfInvoiceKind for kind::Td19 {
 /// `original_invoice`, carry plain slots with their setters available in
 /// every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SelfInvoiceBuilder<
     'a,
     'b,
