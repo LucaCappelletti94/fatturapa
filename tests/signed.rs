@@ -1989,21 +1989,19 @@ fn unsupported_signature_algorithm_fails() {
     );
 }
 
-/// A `signing-certificate` attribute that does not decode as an
-/// `ESSCertID` is a mismatch.
-#[test]
-fn malformed_signing_certificate_v1_fails() {
+/// A `signing-certificate` or `signing-certificate-v2` attribute whose
+/// value does not decode as an `ESSCertID` list is a mismatch.
+fn malformed_signing_certificate_fails(oid: ObjectIdentifier) {
     let invoice = invoice();
     let signer = cert("ec-signer.pem");
     let t = signing_time(&signer);
     let scalar = ec_signer_scalar();
-    let v1 =
-        SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE, &[0x05_u8, 0x00])]).expect("a value");
+    let v = SetOfVec::try_from(vec![attr(oid, &[0x05_u8, 0x00])]).expect("a value");
     let p7m = build_cms(
         &invoice,
         vec![signer, cert("intermediate.pem"), cert("ca.pem")],
         Some(t),
-        Some(v1),
+        Some(v),
         None,
         &scalar,
         &default_algs(),
@@ -2014,6 +2012,13 @@ fn malformed_signing_certificate_v1_fails() {
         matches!(err, SignedError::SigningCertificateMismatch),
         "{err:?}"
     );
+}
+
+/// A `signing-certificate` attribute that does not decode as an
+/// `ESSCertID` is a mismatch.
+#[test]
+fn malformed_signing_certificate_v1_fails() {
+    malformed_signing_certificate_fails(ESS_SIGNING_CERTIFICATE);
 }
 
 /// A `signing-certificate` attribute with the hash of the signer and no
@@ -2049,27 +2054,7 @@ fn signing_certificate_v1_without_serial_verifies() {
 /// `ESSCertIDv2` list is a mismatch.
 #[test]
 fn malformed_signing_certificate_v2_fails() {
-    let invoice = invoice();
-    let signer = cert("ec-signer.pem");
-    let t = signing_time(&signer);
-    let scalar = ec_signer_scalar();
-    let v2 = SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE_V2, &[0x05_u8, 0x00])])
-        .expect("a value");
-    let p7m = build_cms(
-        &invoice,
-        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
-        Some(t),
-        Some(v2),
-        None,
-        &scalar,
-        &default_algs(),
-        vec![],
-    );
-    let err = verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the attribute does not decode");
-    assert!(
-        matches!(err, SignedError::SigningCertificateMismatch),
-        "{err:?}"
-    );
+    malformed_signing_certificate_fails(ESS_SIGNING_CERTIFICATE_V2);
 }
 
 /// The certificate in `cert` with the `keyUsage` extension's inner value tag

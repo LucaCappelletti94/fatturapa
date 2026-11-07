@@ -25,33 +25,6 @@ fn amount(text: &str) -> Amount {
     text.parse().expect("a valid decimal")
 }
 
-fn seller() -> Seller {
-    Seller::denomination(
-        "ALPHA SRL".parse().expect("a valid denomination"),
-        "02222222222".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA ROMA 1".parse().expect("a valid address"),
-            "00100".parse().expect("a valid CAP"),
-            "ROMA".parse().expect("a valid comune"),
-            Provincia::Rm,
-        ),
-        RegimeFiscale::Rf01,
-    )
-}
-
-fn buyer() -> Buyer {
-    Buyer::denomination(
-        "BETA SRL".parse().expect("a valid denomination"),
-        "04444444444".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA MILANO 2".parse().expect("a valid address"),
-            "20100".parse().expect("a valid CAP"),
-            "MILANO".parse().expect("a valid comune"),
-            Provincia::Mi,
-        ),
-    )
-}
-
 fn code() -> Recipient {
     Recipient::Codice("ABC1234".parse().expect("a valid code"))
 }
@@ -90,8 +63,8 @@ fn domestic_invoice_totals_and_rounding() {
         .build()
         .expect("the line builds");
     let doc = Invoice::domestic(
-        &seller(),
-        &buyer(),
+        &support::seller(),
+        &support::buyer(),
         code(),
         taxed_line("MATERIALE UFFICIO", "10.00", "3.00", "22.00"),
     )
@@ -161,7 +134,7 @@ fn a_percentage_discount_adjusts_the_unit_price() {
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
         .build()
         .expect("the line builds");
-    let doc = Invoice::domestic(&seller(), &buyer(), code(), line)
+    let doc = Invoice::domestic(&support::seller(), &support::buyer(), code(), line)
         .progressivo("00001")
         .date("2026-11-04")
         .numero("00014")
@@ -195,7 +168,7 @@ fn line_total_applies_several_sconto_maggiorazione_blocks() {
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
         .build()
         .expect("the line builds");
-    let doc = Invoice::domestic(&seller(), &buyer(), code(), line)
+    let doc = Invoice::domestic(&support::seller(), &support::buyer(), code(), line)
         .progressivo("00001")
         .date("2026-11-04")
         .numero("00022")
@@ -218,8 +191,8 @@ fn line_total_applies_several_sconto_maggiorazione_blocks() {
 fn stamp_duty_applies_strictly_above_the_threshold() {
     for price in ["77.47", "77.48"] {
         let doc = Invoice::domestic(
-            &seller(),
-            &buyer(),
+            &support::seller(),
+            &support::buyer(),
             code(),
             Line::builder()
                 .description("FORNITURA ESCLUSA")
@@ -265,8 +238,8 @@ fn stamp_duty_applies_strictly_above_the_threshold() {
 #[test]
 fn fpa12_invoice_from_a_six_character_code() {
     let doc = Invoice::domestic(
-        &seller(),
-        &buyer(),
+        &support::seller(),
+        &support::buyer(),
         Recipient::Codice("AAAAAA".parse().expect("a valid code")),
         taxed_line("FORNITURA", "100.00", "1.00", "22.00"),
     )
@@ -287,8 +260,8 @@ fn fpa12_invoice_from_a_six_character_code() {
 #[test]
 fn the_pec_recipient_writes_the_generic_code_and_the_pec() {
     let doc = Invoice::domestic(
-        &seller(),
-        &buyer(),
+        &support::seller(),
+        &support::buyer(),
         Recipient::Pec("beta@pec.it".parse().expect("a valid pec")),
         taxed_line("FORNITURA", "100.00", "1.00", "22.00"),
     )
@@ -317,8 +290,8 @@ fn the_pec_recipient_writes_the_generic_code_and_the_pec() {
 #[test]
 fn riepilogo_order_follows_the_lines() {
     let doc = Invoice::domestic(
-        &seller(),
-        &buyer(),
+        &support::seller(),
+        &support::buyer(),
         code(),
         taxed_line("COMPONENTE 22", "10.00", "1.00", "22.00"),
     )
@@ -360,8 +333,8 @@ fn riepilogo_order_follows_the_lines() {
 #[test]
 fn domestic_invoice_priced_in_usd() {
     let doc = Invoice::domestic(
-        &seller(),
-        &buyer(),
+        &support::seller(),
+        &support::buyer(),
         code(),
         taxed_line("SERVIZIO IN DOLLARI", "150.00", "1.00", "22.00"),
     )

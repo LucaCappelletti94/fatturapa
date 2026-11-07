@@ -494,6 +494,100 @@ pub struct Line {
     vat: VatTreatment,
 }
 
+/// The optional fields of a document line, embedded by the
+/// [`LineBuilder`] and the [`SevenTerLineBuilder`], with their shared
+/// setters and the first conversion error of the builders.
+struct LineOptionals {
+    /// The `Quantita`, absent when the line is not quantity-priced and the
+    /// total reads the unit price.
+    quantity: Option<Amount>,
+    /// The `UnitaMisura`.
+    unit_of_measure: Option<UnitaMisura>,
+    /// The `ScontoMaggiorazione` blocks, in document order.
+    sconti: Option<Vec<Sconto>>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+}
+
+impl LineOptionals {
+    /// The empty fields, no value set and no error kept.
+    const fn new() -> Self {
+        Self {
+            quantity: None,
+            unit_of_measure: None,
+            sconti: None,
+            error: None,
+        }
+    }
+
+    /// The `Quantita`, converted from `value`.
+    pub(crate) fn quantity<G>(&mut self, value: G)
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(quantity) = convert(&mut self.error, "quantity", value) {
+            self.quantity = Some(quantity);
+        }
+    }
+
+    /// The `Quantita`, converted from `value`, absent when `value` is
+    /// `None`.
+    pub(crate) fn maybe_quantity<G>(&mut self, value: Option<G>)
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        match value {
+            Some(value) => {
+                if let Some(quantity) = convert(&mut self.error, "quantity", value) {
+                    self.quantity = Some(quantity);
+                }
+            }
+            None => self.quantity = None,
+        }
+    }
+
+    /// The `UnitaMisura`, converted from `value`.
+    pub(crate) fn unit_of_measure<G>(&mut self, value: G)
+    where
+        UnitaMisura: TryFrom<G>,
+        <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
+            self.unit_of_measure = Some(unit_of_measure);
+        }
+    }
+
+    /// The `UnitaMisura`, converted from `value`, absent when `value` is
+    /// `None`.
+    pub(crate) fn maybe_unit_of_measure<G>(&mut self, value: Option<G>)
+    where
+        UnitaMisura: TryFrom<G>,
+        <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
+    {
+        match value {
+            Some(value) => {
+                if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
+                    self.unit_of_measure = Some(unit_of_measure);
+                }
+            }
+            None => self.unit_of_measure = None,
+        }
+    }
+
+    /// The `ScontoMaggiorazione` blocks, in document order.
+    pub(crate) fn sconti<G>(&mut self, value: G)
+    where
+        Vec<Sconto>: TryFrom<G>,
+        <Vec<Sconto> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(sconti) = convert(&mut self.error, "sconti", value) {
+            self.sconti = Some(sconti);
+        }
+    }
+}
+
 /// The builder of a [`Line`], which checks the required fields at compile
 /// time and defers the first conversion error of the setters to `build`.
 ///
@@ -508,19 +602,13 @@ pub struct Line {
 pub struct LineBuilder<D = typestate::Unset, P = typestate::Unset, V = typestate::Unset> {
     /// The `Descrizione`.
     description: Option<Description>,
-    /// The `Quantita`, absent when the line is not quantity-priced and the
-    /// total reads the unit price.
-    quantity: Option<Amount>,
-    /// The `UnitaMisura`.
-    unit_of_measure: Option<UnitaMisura>,
+    /// The optional fields, their shared setters and the first conversion
+    /// error of the builders.
+    optional: LineOptionals,
     /// The `PrezzoUnitario`, in the currency the invoice carries.
     unit_price: Option<Amount>,
-    /// The `ScontoMaggiorazione` blocks, in document order.
-    sconti: Option<Vec<Sconto>>,
     /// The `AliquotaIVA` or the `Natura` of the line.
     vat: Option<VatTreatment>,
-    /// The first conversion error of the setters, if any.
-    error: Option<BuildError>,
     /// The typestate the builder has reached.
     _state: PhantomData<(D, P, V)>,
 }
@@ -530,22 +618,16 @@ impl<D, P, V> LineBuilder<D, P, V> {
     fn advance<ND, NP, NV>(self) -> LineBuilder<ND, NP, NV> {
         let Self {
             description,
-            quantity,
-            unit_of_measure,
+            optional,
             unit_price,
-            sconti,
             vat,
-            error,
             ..
         } = self;
         LineBuilder {
             description,
-            quantity,
-            unit_of_measure,
+            optional,
             unit_price,
-            sconti,
             vat,
-            error,
             _state: PhantomData,
         }
     }
@@ -556,9 +638,7 @@ impl<D, P, V> LineBuilder<D, P, V> {
         Amount: TryFrom<G>,
         <Amount as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(quantity) = convert(&mut self.error, "quantity", value) {
-            self.quantity = Some(quantity);
-        }
+        self.optional.quantity(value);
         self
     }
 
@@ -569,14 +649,7 @@ impl<D, P, V> LineBuilder<D, P, V> {
         Amount: TryFrom<G>,
         <Amount as TryFrom<G>>::Error: Into<IdError>,
     {
-        match value {
-            Some(value) => {
-                if let Some(quantity) = convert(&mut self.error, "quantity", value) {
-                    self.quantity = Some(quantity);
-                }
-            }
-            None => self.quantity = None,
-        }
+        self.optional.maybe_quantity(value);
         self
     }
 
@@ -586,9 +659,7 @@ impl<D, P, V> LineBuilder<D, P, V> {
         UnitaMisura: TryFrom<G>,
         <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
-            self.unit_of_measure = Some(unit_of_measure);
-        }
+        self.optional.unit_of_measure(value);
         self
     }
 
@@ -599,14 +670,7 @@ impl<D, P, V> LineBuilder<D, P, V> {
         UnitaMisura: TryFrom<G>,
         <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
     {
-        match value {
-            Some(value) => {
-                if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
-                    self.unit_of_measure = Some(unit_of_measure);
-                }
-            }
-            None => self.unit_of_measure = None,
-        }
+        self.optional.maybe_unit_of_measure(value);
         self
     }
 
@@ -616,9 +680,7 @@ impl<D, P, V> LineBuilder<D, P, V> {
         Vec<Sconto>: TryFrom<G>,
         <Vec<Sconto> as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(sconti) = convert(&mut self.error, "sconti", value) {
-            self.sconti = Some(sconti);
-        }
+        self.optional.sconti(value);
         self
     }
 }
@@ -630,7 +692,7 @@ impl<P, V> LineBuilder<typestate::Unset, P, V> {
         Description: TryFrom<G>,
         <Description as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(description) = convert(&mut self.error, "description", value) {
+        if let Some(description) = convert(&mut self.optional.error, "description", value) {
             self.description = Some(description);
         }
         self.advance()
@@ -645,7 +707,7 @@ impl<D, V> LineBuilder<D, typestate::Unset, V> {
         Amount: TryFrom<G>,
         <Amount as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(unit_price) = convert(&mut self.error, "unit_price", value) {
+        if let Some(unit_price) = convert(&mut self.optional.error, "unit_price", value) {
             self.unit_price = Some(unit_price);
         }
         self.advance()
@@ -659,7 +721,7 @@ impl<D, P> LineBuilder<D, P, typestate::Unset> {
         VatTreatment: TryFrom<G>,
         <VatTreatment as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(vat) = convert(&mut self.error, "vat", value) {
+        if let Some(vat) = convert(&mut self.optional.error, "vat", value) {
             self.vat = Some(vat);
         }
         self.advance()
@@ -678,15 +740,15 @@ impl LineBuilder<typestate::Set, typestate::Set, typestate::Set> {
     /// Panics if a required field is unset, which the typestate of the
     /// setter chain prevents.
     pub fn build(self) -> Result<Line, BuildError> {
-        if let Some(error) = self.error {
+        if let Some(error) = self.optional.error {
             return Err(error);
         }
         Ok(Line {
             description: required(self.description),
-            quantity: self.quantity,
-            unit_of_measure: self.unit_of_measure,
+            quantity: self.optional.quantity,
+            unit_of_measure: self.optional.unit_of_measure,
             unit_price: required(self.unit_price),
-            sconti: self.sconti.unwrap_or_default(),
+            sconti: self.optional.sconti.unwrap_or_default(),
             vat: required(self.vat),
         })
     }
@@ -698,12 +760,9 @@ impl Line {
     pub const fn builder() -> LineBuilder {
         LineBuilder {
             description: None,
-            quantity: None,
-            unit_of_measure: None,
+            optional: LineOptionals::new(),
             unit_price: None,
-            sconti: None,
             vat: None,
-            error: None,
             _state: PhantomData,
         }
     }
@@ -861,17 +920,11 @@ pub struct SevenTerLine {
 pub struct SevenTerLineBuilder<D = typestate::Unset, P = typestate::Unset> {
     /// The `Descrizione`.
     description: Option<Description>,
-    /// The `Quantita`, absent when the line is not quantity-priced and the
-    /// total reads the unit price.
-    quantity: Option<Amount>,
-    /// The `UnitaMisura`.
-    unit_of_measure: Option<UnitaMisura>,
+    /// The optional fields, their shared setters and the first conversion
+    /// error of the builders.
+    optional: LineOptionals,
     /// The `PrezzoUnitario`, in the currency the invoice carries.
     unit_price: Option<Amount>,
-    /// The `ScontoMaggiorazione` blocks, in document order.
-    sconti: Option<Vec<Sconto>>,
-    /// The first conversion error of the setters, if any.
-    error: Option<BuildError>,
     /// The typestate the builder has reached.
     _state: PhantomData<(D, P)>,
 }
@@ -881,20 +934,14 @@ impl<D, P> SevenTerLineBuilder<D, P> {
     fn advance<ND, NP>(self) -> SevenTerLineBuilder<ND, NP> {
         let Self {
             description,
-            quantity,
-            unit_of_measure,
+            optional,
             unit_price,
-            sconti,
-            error,
             ..
         } = self;
         SevenTerLineBuilder {
             description,
-            quantity,
-            unit_of_measure,
+            optional,
             unit_price,
-            sconti,
-            error,
             _state: PhantomData,
         }
     }
@@ -905,9 +952,7 @@ impl<D, P> SevenTerLineBuilder<D, P> {
         Amount: TryFrom<G>,
         <Amount as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(quantity) = convert(&mut self.error, "quantity", value) {
-            self.quantity = Some(quantity);
-        }
+        self.optional.quantity(value);
         self
     }
 
@@ -918,14 +963,7 @@ impl<D, P> SevenTerLineBuilder<D, P> {
         Amount: TryFrom<G>,
         <Amount as TryFrom<G>>::Error: Into<IdError>,
     {
-        match value {
-            Some(value) => {
-                if let Some(quantity) = convert(&mut self.error, "quantity", value) {
-                    self.quantity = Some(quantity);
-                }
-            }
-            None => self.quantity = None,
-        }
+        self.optional.maybe_quantity(value);
         self
     }
 
@@ -935,9 +973,7 @@ impl<D, P> SevenTerLineBuilder<D, P> {
         UnitaMisura: TryFrom<G>,
         <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
-            self.unit_of_measure = Some(unit_of_measure);
-        }
+        self.optional.unit_of_measure(value);
         self
     }
 
@@ -948,14 +984,7 @@ impl<D, P> SevenTerLineBuilder<D, P> {
         UnitaMisura: TryFrom<G>,
         <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
     {
-        match value {
-            Some(value) => {
-                if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
-                    self.unit_of_measure = Some(unit_of_measure);
-                }
-            }
-            None => self.unit_of_measure = None,
-        }
+        self.optional.maybe_unit_of_measure(value);
         self
     }
 
@@ -965,9 +994,7 @@ impl<D, P> SevenTerLineBuilder<D, P> {
         Vec<Sconto>: TryFrom<G>,
         <Vec<Sconto> as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(sconti) = convert(&mut self.error, "sconti", value) {
-            self.sconti = Some(sconti);
-        }
+        self.optional.sconti(value);
         self
     }
 }
@@ -979,7 +1006,7 @@ impl<P> SevenTerLineBuilder<typestate::Unset, P> {
         Description: TryFrom<G>,
         <Description as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(description) = convert(&mut self.error, "description", value) {
+        if let Some(description) = convert(&mut self.optional.error, "description", value) {
             self.description = Some(description);
         }
         self.advance()
@@ -994,7 +1021,7 @@ impl<D> SevenTerLineBuilder<D, typestate::Unset> {
         Amount: TryFrom<G>,
         <Amount as TryFrom<G>>::Error: Into<IdError>,
     {
-        if let Some(unit_price) = convert(&mut self.error, "unit_price", value) {
+        if let Some(unit_price) = convert(&mut self.optional.error, "unit_price", value) {
             self.unit_price = Some(unit_price);
         }
         self.advance()
@@ -1013,15 +1040,15 @@ impl SevenTerLineBuilder<typestate::Set, typestate::Set> {
     /// Panics if a required field is unset, which the typestate of the
     /// setter chain prevents.
     pub fn build(self) -> Result<SevenTerLine, BuildError> {
-        if let Some(error) = self.error {
+        if let Some(error) = self.optional.error {
             return Err(error);
         }
         Ok(SevenTerLine {
             description: required(self.description),
-            quantity: self.quantity,
-            unit_of_measure: self.unit_of_measure,
+            quantity: self.optional.quantity,
+            unit_of_measure: self.optional.unit_of_measure,
             unit_price: required(self.unit_price),
-            sconti: self.sconti.unwrap_or_default(),
+            sconti: self.optional.sconti.unwrap_or_default(),
         })
     }
 }
@@ -1032,11 +1059,8 @@ impl SevenTerLine {
     pub const fn builder() -> SevenTerLineBuilder {
         SevenTerLineBuilder {
             description: None,
-            quantity: None,
-            unit_of_measure: None,
+            optional: LineOptionals::new(),
             unit_price: None,
-            sconti: None,
-            error: None,
             _state: PhantomData,
         }
     }
@@ -1563,26 +1587,79 @@ impl Invoice {
 /// supplier, the `TD17` of services and the `TD19` of goods.
 pub struct SelfInvoice;
 
-/// The builder of the `TD17` self-invoice, which checks the required
-/// fields at compile time and defers the first conversion error of the
-/// setters to `build`.
+/// The document kinds of the self-invoice, the `TD17` of the services and
+/// the `TD19` of the goods.
+#[doc(hidden)]
+pub mod kind {
+    /// The `TD17` document kind, the services bought from a non-Italian
+    /// supplier.
+    pub struct Td17;
+
+    /// The `TD19` document kind, the goods bought from a non-Italian
+    /// supplier.
+    pub struct Td19;
+
+    impl super::sealed::Sealed for Td17 {}
+    impl super::sealed::Sealed for Td19 {}
+}
+
+/// The unnameable supertrait that seals [`SelfInvoiceKind`] to the kinds of
+/// [`kind`].
+mod sealed {
+    /// Implemented by the two document kinds only, since no other crate
+    /// can name it.
+    pub trait Sealed {}
+}
+
+/// The document kind of the self-invoice, carrying the `TipoDocumento`
+/// the `build` of the kind's builder writes.
 ///
-/// The `progressivo`, the `date` and the `numero` are required, and the
-/// type parameters `P`, `D` and `N` carry the marker of each one, the
-/// `Set` marker once its setter was called, so a document missing a
-/// required field does not compile and the `build` is available only when
-/// every required field is set. The optional fields, the `lines`, the
-/// `causali`, the `currency` and the `original_invoice`, carry plain slots
-/// with their setters available in every state.
+/// The kind is the type parameter `K` of the [`SelfInvoiceBuilder`]. The
+/// trait is sealed, and the constructors [`SelfInvoice::td17`] and
+/// [`SelfInvoice::td19`] are the only way a builder of a kind is produced.
+#[doc(hidden)]
+pub trait SelfInvoiceKind: sealed::Sealed {
+    /// The `TipoDocumento` the kind writes.
+    fn tipo_documento() -> TipoDocumentoType;
+}
+
+impl SelfInvoiceKind for kind::Td17 {
+    fn tipo_documento() -> TipoDocumentoType {
+        TipoDocumentoType::Td17
+    }
+}
+
+impl SelfInvoiceKind for kind::Td19 {
+    fn tipo_documento() -> TipoDocumentoType {
+        TipoDocumentoType::Td19
+    }
+}
+
+/// The builder of the `TD17` and the `TD19` self-invoice, which checks
+/// the required fields at compile time and defers the first conversion
+/// error of the setters to `build`.
+///
+/// The type parameter `K` carries the document kind, the `Td17` of the
+/// services and the `Td19` of the goods, which the constructor
+/// [`SelfInvoice::td17`] or [`SelfInvoice::td19`] chose, and which the
+/// `build` reads for its `TipoDocumento`. The `progressivo`, the `date`
+/// and the `numero` are required, and the type parameters `P`, `D` and
+/// `N` carry the marker of each one, the `Set` marker once its setter was
+/// called, so a document missing a required field does not compile and
+/// the `build` is available only when every required field is set. The
+/// optional fields, the `lines`, the `causali`, the `currency` and the
+/// `original_invoice`, carry plain slots with their setters available in
+/// every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
-pub struct SelfInvoiceTd17Builder<
+pub struct SelfInvoiceBuilder<
     'a,
     'b,
+    K,
     P = typestate::Unset,
     D = typestate::Unset,
     N = typestate::Unset,
 > {
-    /// The non-Italian supplier of the service.
+    /// The non-Italian supplier of the service or the goods.
     supplier: &'a Business,
     /// The Italian buyer with its `partita IVA`.
     buyer: &'b Company,
@@ -1608,12 +1685,15 @@ pub struct SelfInvoiceTd17Builder<
     /// The first conversion error of the setters, if any.
     error: Option<BuildError>,
     /// The typestate the builder has reached.
-    _state: PhantomData<(P, D, N)>,
+    _state: PhantomData<(K, P, D, N)>,
 }
 
-impl<'a, 'b, P, D, N> SelfInvoiceTd17Builder<'a, 'b, P, D, N> {
+impl<'a, 'b, K, P, D, N> SelfInvoiceBuilder<'a, 'b, K, P, D, N>
+where
+    K: SelfInvoiceKind,
+{
     /// The builder moved into the typestate the setter advanced to.
-    fn advance<NP, ND, NN>(self) -> SelfInvoiceTd17Builder<'a, 'b, NP, ND, NN> {
+    fn advance<NP, ND, NN>(self) -> SelfInvoiceBuilder<'a, 'b, K, NP, ND, NN> {
         let Self {
             supplier,
             buyer,
@@ -1629,7 +1709,7 @@ impl<'a, 'b, P, D, N> SelfInvoiceTd17Builder<'a, 'b, P, D, N> {
             error,
             ..
         } = self;
-        SelfInvoiceTd17Builder {
+        SelfInvoiceBuilder {
             supplier,
             buyer,
             recipient,
@@ -1683,13 +1763,13 @@ impl<'a, 'b, P, D, N> SelfInvoiceTd17Builder<'a, 'b, P, D, N> {
     }
 }
 
-impl<'a, 'b, D, N> SelfInvoiceTd17Builder<'a, 'b, typestate::Unset, D, N> {
+impl<'a, 'b, K, D, N> SelfInvoiceBuilder<'a, 'b, K, typestate::Unset, D, N>
+where
+    K: SelfInvoiceKind,
+{
     /// The `ProgressivoInvio` of the transmission, converted from
     /// `value`.
-    pub fn progressivo<G>(
-        mut self,
-        value: G,
-    ) -> SelfInvoiceTd17Builder<'a, 'b, typestate::Set, D, N>
+    pub fn progressivo<G>(mut self, value: G) -> SelfInvoiceBuilder<'a, 'b, K, typestate::Set, D, N>
     where
         ProgressivoInvio: TryFrom<G>,
         <ProgressivoInvio as TryFrom<G>>::Error: Into<IdError>,
@@ -1701,9 +1781,12 @@ impl<'a, 'b, D, N> SelfInvoiceTd17Builder<'a, 'b, typestate::Unset, D, N> {
     }
 }
 
-impl<'a, 'b, P, N> SelfInvoiceTd17Builder<'a, 'b, P, typestate::Unset, N> {
+impl<'a, 'b, K, P, N> SelfInvoiceBuilder<'a, 'b, K, P, typestate::Unset, N>
+where
+    K: SelfInvoiceKind,
+{
     /// The `Data` of the document, converted from `value`.
-    pub fn date<G>(mut self, value: G) -> SelfInvoiceTd17Builder<'a, 'b, P, typestate::Set, N>
+    pub fn date<G>(mut self, value: G) -> SelfInvoiceBuilder<'a, 'b, K, P, typestate::Set, N>
     where
         Date: TryFrom<G>,
         <Date as TryFrom<G>>::Error: Into<IdError>,
@@ -1715,9 +1798,12 @@ impl<'a, 'b, P, N> SelfInvoiceTd17Builder<'a, 'b, P, typestate::Unset, N> {
     }
 }
 
-impl<'a, 'b, P, D> SelfInvoiceTd17Builder<'a, 'b, P, D, typestate::Unset> {
+impl<'a, 'b, K, P, D> SelfInvoiceBuilder<'a, 'b, K, P, D, typestate::Unset>
+where
+    K: SelfInvoiceKind,
+{
     /// The `Numero` of the document, converted from `value`.
-    pub fn numero<G>(mut self, value: G) -> SelfInvoiceTd17Builder<'a, 'b, P, D, typestate::Set>
+    pub fn numero<G>(mut self, value: G) -> SelfInvoiceBuilder<'a, 'b, K, P, D, typestate::Set>
     where
         Numero: TryFrom<G>,
         <Numero as TryFrom<G>>::Error: Into<IdError>,
@@ -1729,7 +1815,7 @@ impl<'a, 'b, P, D> SelfInvoiceTd17Builder<'a, 'b, P, D, typestate::Unset> {
     }
 }
 
-impl<P, D, N> SelfInvoiceTd17Builder<'_, '_, P, D, N> {
+impl<K, P, D, N> SelfInvoiceBuilder<'_, '_, K, P, D, N> {
     /// The `DatiFattureCollegate` to the original document, its
     /// `IdDocumento` and `Data`, converted.
     pub fn original_invoice<Id, Dt>(mut self, numero: Id, data: Dt) -> Self
@@ -1748,7 +1834,10 @@ impl<P, D, N> SelfInvoiceTd17Builder<'_, '_, P, D, N> {
     }
 }
 
-impl SelfInvoiceTd17Builder<'_, '_, typestate::Set, typestate::Set, typestate::Set> {
+impl<K> SelfInvoiceBuilder<'_, '_, K, typestate::Set, typestate::Set, typestate::Set>
+where
+    K: SelfInvoiceKind,
+{
     /// Finishes building the document, which runs the `SDI` checks of
     /// `validate::validate` before returning it.
     ///
@@ -1775,236 +1864,7 @@ impl SelfInvoiceTd17Builder<'_, '_, typestate::Set, typestate::Set, typestate::S
             &Scenario::Domestic {
                 recipient: self.recipient,
             },
-            TipoDocumentoType::Td17,
-            required(self.progressivo),
-            date,
-            required(self.numero),
-            self.causali.unwrap_or_default(),
-            false,
-            first_lines(self.line, self.lines.unwrap_or_default()),
-            self.currency.unwrap_or_default(),
-            vec![pagamento(date)],
-            self.original_invoice
-                .map(|(numero, data)| collegate(&numero, data))
-                .into_iter()
-                .collect(),
-        )
-    }
-}
-
-/// The builder of the `TD19` self-invoice, which checks the required
-/// fields at compile time and defers the first conversion error of the
-/// setters to `build`.
-///
-/// The `progressivo`, the `date` and the `numero` are required, and the
-/// type parameters `P`, `D` and `N` carry the marker of each one, the
-/// `Set` marker once its setter was called, so a document missing a
-/// required field does not compile and the `build` is available only when
-/// every required field is set. The optional fields, the `lines`, the
-/// `causali`, the `currency` and the `original_invoice`, carry plain slots
-/// with their setters available in every state.
-#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
-pub struct SelfInvoiceTd19Builder<
-    'a,
-    'b,
-    P = typestate::Unset,
-    D = typestate::Unset,
-    N = typestate::Unset,
-> {
-    /// The non-Italian supplier of the goods.
-    supplier: &'a Business,
-    /// The Italian buyer with its `partita IVA`.
-    buyer: &'b Company,
-    /// The recipient channel of the buyer.
-    recipient: Recipient,
-    /// The first line of the self-invoice, at the buyer's rate.
-    line: Line,
-    /// The `ProgressivoInvio` of the transmission.
-    progressivo: Option<ProgressivoInvio>,
-    /// The `Data` of the document.
-    date: Option<Date>,
-    /// The `Numero` of the document.
-    numero: Option<Numero>,
-    /// The remaining lines, in document order.
-    lines: Option<Vec<Line>>,
-    /// The `Causale` texts of the document.
-    causali: Option<Vec<Causale>>,
-    /// The currency of the document.
-    currency: Option<InvoiceCurrency>,
-    /// The `DatiFattureCollegate` to the original document, its
-    /// `IdDocumento` and `Data`.
-    original_invoice: Option<(IdDocumento, Date)>,
-    /// The first conversion error of the setters, if any.
-    error: Option<BuildError>,
-    /// The typestate the builder has reached.
-    _state: PhantomData<(P, D, N)>,
-}
-
-impl<'a, 'b, P, D, N> SelfInvoiceTd19Builder<'a, 'b, P, D, N> {
-    /// The builder moved into the typestate the setter advanced to.
-    fn advance<NP, ND, NN>(self) -> SelfInvoiceTd19Builder<'a, 'b, NP, ND, NN> {
-        let Self {
-            supplier,
-            buyer,
-            recipient,
-            line,
-            progressivo,
-            date,
-            numero,
-            lines,
-            causali,
-            currency,
-            original_invoice,
-            error,
-            ..
-        } = self;
-        SelfInvoiceTd19Builder {
-            supplier,
-            buyer,
-            recipient,
-            line,
-            progressivo,
-            date,
-            numero,
-            lines,
-            causali,
-            currency,
-            original_invoice,
-            error,
-            _state: PhantomData,
-        }
-    }
-
-    /// The remaining lines, in document order.
-    pub fn lines<G>(mut self, value: G) -> Self
-    where
-        Vec<Line>: TryFrom<G>,
-        <Vec<Line> as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(lines) = convert(&mut self.error, "lines", value) {
-            self.lines = Some(lines);
-        }
-        self
-    }
-
-    /// The `Causale` texts of the document.
-    pub fn causali<G>(mut self, value: G) -> Self
-    where
-        Vec<Causale>: TryFrom<G>,
-        <Vec<Causale> as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(causali) = convert(&mut self.error, "causali", value) {
-            self.causali = Some(causali);
-        }
-        self
-    }
-
-    /// The currency of the document.
-    pub fn currency<G>(mut self, value: G) -> Self
-    where
-        InvoiceCurrency: TryFrom<G>,
-        <InvoiceCurrency as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(currency) = convert(&mut self.error, "currency", value) {
-            self.currency = Some(currency);
-        }
-        self
-    }
-}
-
-impl<'a, 'b, D, N> SelfInvoiceTd19Builder<'a, 'b, typestate::Unset, D, N> {
-    /// The `ProgressivoInvio` of the transmission, converted from
-    /// `value`.
-    pub fn progressivo<G>(
-        mut self,
-        value: G,
-    ) -> SelfInvoiceTd19Builder<'a, 'b, typestate::Set, D, N>
-    where
-        ProgressivoInvio: TryFrom<G>,
-        <ProgressivoInvio as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(progressivo) = convert(&mut self.error, "progressivo", value) {
-            self.progressivo = Some(progressivo);
-        }
-        self.advance()
-    }
-}
-
-impl<'a, 'b, P, N> SelfInvoiceTd19Builder<'a, 'b, P, typestate::Unset, N> {
-    /// The `Data` of the document, converted from `value`.
-    pub fn date<G>(mut self, value: G) -> SelfInvoiceTd19Builder<'a, 'b, P, typestate::Set, N>
-    where
-        Date: TryFrom<G>,
-        <Date as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(date) = convert(&mut self.error, "date", value) {
-            self.date = Some(date);
-        }
-        self.advance()
-    }
-}
-
-impl<'a, 'b, P, D> SelfInvoiceTd19Builder<'a, 'b, P, D, typestate::Unset> {
-    /// The `Numero` of the document, converted from `value`.
-    pub fn numero<G>(mut self, value: G) -> SelfInvoiceTd19Builder<'a, 'b, P, D, typestate::Set>
-    where
-        Numero: TryFrom<G>,
-        <Numero as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(numero) = convert(&mut self.error, "numero", value) {
-            self.numero = Some(numero);
-        }
-        self.advance()
-    }
-}
-
-impl<P, D, N> SelfInvoiceTd19Builder<'_, '_, P, D, N> {
-    /// The `DatiFattureCollegate` to the original document, its
-    /// `IdDocumento` and `Data`, converted.
-    pub fn original_invoice<Id, Dt>(mut self, numero: Id, data: Dt) -> Self
-    where
-        IdDocumento: TryFrom<Id>,
-        <IdDocumento as TryFrom<Id>>::Error: Into<IdError>,
-        Date: TryFrom<Dt>,
-        <Date as TryFrom<Dt>>::Error: Into<IdError>,
-    {
-        if let Some(numero) = convert(&mut self.error, "original_invoice", numero)
-            && let Some(data) = convert(&mut self.error, "original_invoice", data)
-        {
-            self.original_invoice = Some((numero, data));
-        }
-        self
-    }
-}
-
-impl SelfInvoiceTd19Builder<'_, '_, typestate::Set, typestate::Set, typestate::Set> {
-    /// Finishes building the document, which runs the `SDI` checks of
-    /// `validate::validate` before returning it.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` with the first conversion error of the setters, with
-    /// the `BuildError::Amount` when a line amount does not fit the XSD
-    /// amount types, or with every `SDI` violation when the assembled
-    /// document fails a check.
-    ///
-    /// # Panics
-    ///
-    /// Panics if a required field is unset, which the typestate of the
-    /// setter chain prevents.
-    pub fn build(self) -> Result<FatturaElettronica, BuildError> {
-        if let Some(error) = self.error {
-            return Err(error);
-        }
-        let date = required(self.date);
-        build_invoice(
-            self.supplier.cedente(RegimeFiscale::Rf01),
-            self.buyer.id_trasmittente(),
-            self.buyer.party(),
-            &Scenario::Domestic {
-                recipient: self.recipient,
-            },
-            TipoDocumentoType::Td19,
+            K::tipo_documento(),
             required(self.progressivo),
             date,
             required(self.numero),
@@ -2030,22 +1890,8 @@ impl SelfInvoice {
         buyer: &'b Company,
         recipient: Recipient,
         line: Line,
-    ) -> SelfInvoiceTd17Builder<'a, 'b> {
-        SelfInvoiceTd17Builder {
-            supplier,
-            buyer,
-            recipient,
-            line,
-            progressivo: None,
-            date: None,
-            numero: None,
-            lines: None,
-            causali: None,
-            currency: None,
-            original_invoice: None,
-            error: None,
-            _state: PhantomData,
-        }
+    ) -> SelfInvoiceBuilder<'a, 'b, kind::Td17> {
+        Self::builder(supplier, buyer, recipient, line)
     }
 
     /// The `TD19` self-invoice of goods bought from a non-Italian
@@ -2056,8 +1902,19 @@ impl SelfInvoice {
         buyer: &'b Company,
         recipient: Recipient,
         line: Line,
-    ) -> SelfInvoiceTd19Builder<'a, 'b> {
-        SelfInvoiceTd19Builder {
+    ) -> SelfInvoiceBuilder<'a, 'b, kind::Td19> {
+        Self::builder(supplier, buyer, recipient, line)
+    }
+
+    /// The builder of the self-invoice, the document kind the constructor
+    /// names in the type parameter `K`.
+    const fn builder<'a, 'b, K: SelfInvoiceKind>(
+        supplier: &'a Business,
+        buyer: &'b Company,
+        recipient: Recipient,
+        line: Line,
+    ) -> SelfInvoiceBuilder<'a, 'b, K> {
+        SelfInvoiceBuilder {
             supplier,
             buyer,
             recipient,

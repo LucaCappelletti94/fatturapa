@@ -1,0 +1,2 @@
+# Generated from the official schemas by codegen, so its copies are the schemas' own.
+exclude = ["src/generated/**"]
