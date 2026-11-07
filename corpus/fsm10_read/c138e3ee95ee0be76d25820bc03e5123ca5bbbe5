@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-4"?>
+<ns3:F&atturaElettrSiaconemplificata xmlns:ns3="ht|p://ivaservizi.agenziae.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT												)												</IdPaese>
+                <IdCodice>01111118889</IdCodice>
+            </IdTrasmittente>
+            <rPsoegrsivo       <FormatoTrasmisice>0022222222</C

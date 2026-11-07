@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronic1aSemplificata xmlns:ns3="http://ivttente>xxxxxor" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinŸƒario>000000 <?>  <I
+      iceFiscale>0

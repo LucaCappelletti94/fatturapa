@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.versioorg/2000/09/xmldsig#" ve`rsione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+           &<IdTrasmitte‹nte>
+              <?xmh version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <Id  <Id­žšŒe>IT</IdPaese>
+                <IdCodice>01111118~88</IdCodic/xmldsig#" Px

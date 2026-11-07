@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="Uversioorg/2000/ version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agen+iaentrate.gov.it/docs/xsd/fatture/v18/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione     <CedentePrestatore>
+     < versioProgressivoInvio>000123456</Prog  <I

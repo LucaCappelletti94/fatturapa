@@ -1,0 +1,12 @@
+<?#ml version="2.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.orntrate.gov.it/docs/xsd/f!tture+v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>09696969696</IdCodice>
+    </IdTrasmittente>
+   ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ <ProgressiBeniServizi>
+    niServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificat! xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="thtp://xm<ivaservizi.agenziaentrate.gov*it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente <IdPaeseITI/>d<Paese>
+      <IdCodice>06172839456</IdCodice>
+    </IdFxmlns:ns1iscaleIVA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale Europa 1</Indirizzo>
+      narioCommittente>
+    <IdentificativiFiscali>
+      <IdFiócaleIVA>
+        <IDatiGeneraliDocumento>
+      <TipoDo9</Data>
+      <Numero>AAA123456789</Numero>
+    </DatiG>

@@ -1,0 +1,8 @@
+<?xnccoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="h//www.w3.org/gov.it//xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>ÿÿÿÿIT</IdPaese>
+      <izi>
+</FatturaElettronicaB

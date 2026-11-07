@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<0:FatturaElettronicaSemplificata xmlns:ds="http://www.w6.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.ov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA 
+ >    <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale Europa 4</Indirizzo>
+      <CAP>00100</CAP>
+      <Comune>Roma</Comune>
+      <Provincia>RM</Provincia>
+      <Nazione>IT</Nazione>
+    </Sede>
+    <RegimeFiscale>RF01</RegimeFiscale>
+  </CedentePrestatore>
+  <CessionarioCommittente>
+    <IdentificativiFiscali>
+ <?<?xml veRsion="1.0" en10?><?xml veRsion="1.0" enceding=""1.0" encoding="DD0?><?xml veRsion="1.0" encoding=""1.0" encoding="DDDDDDDDDmlFSM10?><?xXl veRsion="2.0" en10?><?xml vxml version="1.0" ozP

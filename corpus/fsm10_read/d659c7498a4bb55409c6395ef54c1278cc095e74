@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="hhttp://www.w3.org/2000/09/xmldsiw1.org/2001/XMLSchema-instance" xmlnsrvizi.agenziaentrattp://ivaservizi.agenziaentrate.gov.itone="FSttp://www.w3.org/2000/09/xmldsiw1.org/2001/XMLSchema-instance" xmlnsrvizi.aitone="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTraaSemplificata>

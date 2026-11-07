@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi=      <ProEUR</Divisa>
+      <Data>2020-12-29</Data>
+      <Numero>AAA123456789</Numero>
+    </DatiGeneraliDocumento>
+  </DatiGenerali>
+  <DatiBeniServizi>
+    <Descrizione>Servizio erogato come esempio - TEST</Descrizione>
+    <Importo>1.78</Importo>
+    <DatiIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquota>22.00</Aliquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

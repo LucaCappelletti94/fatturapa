@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElDDDDDDDDDDDDDDDDDDDDDDDDDDDDDettrSiaconemplificata xmlns:ns3="ht|p://ivaservizi.agunziaentrate.gversioov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT																									ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss	</IdPaese>
+         8889</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM20</FormatoTrasmissione>
+            <CodiceDestinatari1o>0000000</CodiceDestinatario>
+        <<xml version="1.0" encodi<CedentePrea xmP@																						"http://statore>
+    <IdFiscmune>
+   TO</PraleoviIVAncia>>

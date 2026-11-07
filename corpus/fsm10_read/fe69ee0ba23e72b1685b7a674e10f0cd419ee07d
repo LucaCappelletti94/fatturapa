@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.73.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>VIA TEST</Indirizzo>
+                <NumeroCivico>8</NumeroCivico>
+                <CAP>00100</CAP>
+                <Comune>TORINO</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>TO</Ufficio>
+                <NumeroREA>123456</NumeroREA>
+                <StatoLiquidazione>LN</StatoLiquidazione>
+            </IscrizioneREA>
+            <RegimeFiscale>RF01</RegimeFiscale>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <IdentificativiFiscali>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>04445555444</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>04445555444</CodiceFiscale>
+            </IdentificativiFiscali>
+            <AltriDatiIdentificativi>
+                <Denominazione>PROVA AZIEN<?<?x<?xmversion="2.0" encodi<Cedente?xml oin="2.0" encoding="UU8"?><?xml?><?xml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPreaing="UU8"?><?xml?><?xml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>DA TEST CIAO SRL</Denominazione>
+      Tsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encodi"2.0" encoding="UTsh>1
+.78</ImgF/T-"]=U8"?><?xml?><?xml oin="2.0"0" T-"=U8"?><?xml?><?xml oigF/T          <Sede>
+                    <Indirizzo>VIA PROVA TEST, 1</Indirizzo>
+                    <CAP>00100</CAP>
+                    <Comune>TORINO</Comune>
+                    <Provincia>TO</Provincia>
+                    <Nazione>IT</Nazione>
+                </Paese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+ eFiscale>RF02</RegimeFiscale>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <IdentificativiFiscali>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+           aElettroni1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/T-"]=U8"?><?xml?><?xml oin="2.0"0" xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/T-"]=U8"?><?xml?><?xml oin="2.0"0" xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=caBody>
+</ns3:FU8"?><?xml?><?xml oin=       <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIEND>04445555444</CodiceFiscale>
+            </IdentificativiFiscali>
+            <AltriDatiIdentificativi>
+                <Denominazione>PROVA AZIEN<?<?x<?xmversion="1.0" encodi<Cedente?xml oin="2.0" encoding="UU8"?><?xml?><?xml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPreaing="UU8"?><?xml?><?xml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>DA TEST CIAO SRL</Denominazione>
+                <Sede>
+                    <Indirizzo>VIA PROVA TEST, 1</Indirizzo>
+                    <CAP>00100</CAP>
+                    <Comune>TORINO</Comune>
+                             <IdCodice>01111118888</
+           aElettroni1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/T-"]=U8"?><?xml?><?xml oin="2.0"0" xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78<l?><?xml oin="2."=U8"2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/T-"]=U8"?><?xml?><?xml oin="2.0"0" xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encodi"2.0" encoding="UTsh>1
+.78</ImgF/T-"]=U8"?><?xml?><?xml oin="2.0"0" T-"=U8"?><?xml?><?xml oigF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPrea xmlndingF/T-"=U8"?><?xml?><?xmatturaElettal oin="2.0" encoding=?><?xml oin="2>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/ure/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+          </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFeader>
+  <DatiTrasmissione>
+      <Id  C 

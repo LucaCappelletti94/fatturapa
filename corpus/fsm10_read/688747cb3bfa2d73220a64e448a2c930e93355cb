@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:FatturaElettroni#aSemplificata versione="FSM10" SistemaEmittente="abc" xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567890</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>00p01</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+            <PECDestinatario>bdtSM10?>cat<?xml version="1.0" eninglt=<m?x Pers="0?><?xml versiozn="1.0" enc<?xml ver-sion="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:pfx1="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_FAT_WRITER/Schemari=""1.0=

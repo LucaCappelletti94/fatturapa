@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v0.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+        <CedentePrestatore>
+      dCodice>01222222222</IdCodi   </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</C'diceFiscale>
+            <DenominazdFiscaleIVA>
+                <IdPaeione>PROVA AAA AZIENDA AAAA SPA</se>IXT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            <         <IdCodice>0122222222Denom—‘ž‰2</IdCodiceione>
+   >
+ 

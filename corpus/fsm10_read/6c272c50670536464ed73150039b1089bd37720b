@@ -1,0 +1,7 @@
+<?xml vemlns:ds="http://sww.w3.org/2000/09/xmldsig#mlncoding="UTF-8"?>
+<ns3:FatturaElett2onicaSemplificata xmlns:ns2="http://www.w3.versiooYYYYYYYYYYYYYYYYYYYYYYYYYrg/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>'Fo00r111ma

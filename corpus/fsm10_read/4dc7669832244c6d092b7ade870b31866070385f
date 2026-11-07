@@ -1,0 +1,8 @@
+<?xml versn="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmlzsig#" xmlns:xsi="http://www.w3ziaentrate.gov.it/docc/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>0ProgressivoInvio>000123456<orP/grInvi/>o>
+    <FormatoTrasmissione0</FormatoTraa xmlns:dh

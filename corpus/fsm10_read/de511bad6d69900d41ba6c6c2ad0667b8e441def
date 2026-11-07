@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:pfx1="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_FAT_WRITER/Schemas/fattura_SAP_RMCA.xsd" xmlns:pfx41="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_FAT_WRITER/Schemas/metadati.xsd" xmlns:ns3="http://telecomitalia.it/s2d/soa/esb_ettturapa.gov.it/s%di/fatturapa/v1.0" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00123456789</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>123456</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00444448888</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>00444448888</CodiceFiscale>
+            <Denominazione>AAAAA AZIENDA PROVA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>Via Prova aaa bbb</Indirizzo>
+                <NumeroCivico>1</NumeroCivico>
+                <CAP>20123</CAP>
+                <Comune>MILANO</Comune>
+                <Provincia>MI</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>MI</Ufficio>
+                <NumeroREA>1230123</NumeroREA>
+                <CapitaleSociale>10000.00</CapitaleSociale><?,xml 6s?>
+<?x
+                <SocioUnico>SM</SocioUnico>
+                <StatoLiquidazione>LN</StatoLiquidazione>
+       imeFiscale>
+        <0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificne&>
+                <Sede>
+                    <Indirizzo>VIA PROVA PROVA</Indirizzo>
+                    <CAP>00100</CAP>
+                    <Comune>TORINO</Comune>
+                    <Provincia>TO</Pese>IT</IdPaese>
+                /www.w3.org/200l/0m9x/0dsigissione>
+        <CedentePrest#" vaersione="FSM10">
+  tore>  <Fa/FatturaElettronicaBody>
+</p:FatturaElettronicaSemplittu
+            <IdFiscarlaEletficeaItVa>

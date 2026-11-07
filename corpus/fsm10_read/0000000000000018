@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3taut:FraElettronicaSemplificata xmlns:ns3="#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <Dhttp://ivaservizi.agenziaentrate.go~v.it/docs/xsd/fatture/v0.servizi.agenziaentrate.go~v.it/doc           <IdPaese>IT</IdPaese>
+                <IdCodic<"">

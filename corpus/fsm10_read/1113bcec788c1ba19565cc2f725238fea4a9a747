@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10"><FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+    <ProgressivoInvio>000246912</µrogr      <IdCodibe>01001100110</IdCodice>
+      </IdFiscalBody>
+</p:FatturaElettronicaSemplificata>

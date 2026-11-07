@@ -1,0 +1,10 @@
+<?xml version="SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS1.0" encoding="UTF-8"?>
+<ns3:FatturaElettrSiaconemplificata xmlns:ns3="http://ivaservizte.gov.it/http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118889</IdCodice>
+            </IdTrasmittente><?xml version="1.0" encoding="UTF-8"?>
+<pio>
+  </DatiTrasmissi

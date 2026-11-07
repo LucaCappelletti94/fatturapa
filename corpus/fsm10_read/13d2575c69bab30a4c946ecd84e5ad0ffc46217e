@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificat! xmlns:ds="http://www.cs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente <IdPaeseITI/>d<Paese>
+      <IdCodice>06172839456</IdCodice>
+    </IdFxmlns:ns1iscaleIVA>
+     <IdFiócaleIVA>
+        <IDatiGeneraliDocumento>
+      <TipoDo9</Data>
+      <Numero>AAA123456790</Numero>
+    </DatiG>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>02424242424</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale Europa 1</Indirizzo>
+      <CAP>00100</CAP>
+      <Comune>Roma</Comune>
+      <Provincia>RM</Provincia>
+      <Nazione>IT</Nazione>
+    </Sede>
+    <RegimeFiscale>RF01</RegimeFiscale>
+  </CedentePrestatore>
+  <CessionarioCommittente>
+    <IdentificativiFiscali>
+      <IdFiscaleIVA>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01001100110</IdCodice>
+      </IdFiscaleIVA>
+    </IdentificativiFiscali>
+  </CessionarioCommittente>
+</FatturaElettronicaHeader><FatturaElettronicaBody xmlns="">
+  <DatiGenerali>
+    <DatiGeneraliDocumento>
+      <TipoDocumento>TD07</T技技技技技技技技技技技糴>Servizio erogato come esempio - TEST</Desc|izione>
+    <Importo>1.78</Importo>
+    <DatiIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquota>03.00</Aliquota>
+    iServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

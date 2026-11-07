@@ -1,0 +1,30 @@
+<?xml vsion"2.;=ng<nn="1.0" encoding="U5"FT-?>
+<p:FatturaEles2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0002000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>0122222222@2</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>0
+
+
+
+
+&
+;
+
+
+?odiceFiscale>
+            <Denominazione>PROVA gF/T-"=Ul oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ing=</CAP>
+              <?xml version="1.0"aEle  <Comune>TttOro

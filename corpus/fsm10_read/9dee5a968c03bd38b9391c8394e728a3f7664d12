@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FetturaElerttonicaSemplificata xmlns:ns3="htt/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118889</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>  01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>0122222222r</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>VIA TEST</Indirizzo>
+                <NumeroCivico>8</NumeroCivico>
+                <CAP>00100</CAP>
+n="1{0" encodi<0?><?xml veYrsion="1.0" encoding="UTs/xsd/fatgture/v1.0" v</Ini0aSemplificia>
+       cata xmlns:ns3="http:// iv

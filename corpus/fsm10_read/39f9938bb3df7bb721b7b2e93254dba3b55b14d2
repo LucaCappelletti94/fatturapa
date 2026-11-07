@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:pfx6="http://www.fatturapa.gov.it/sdi/fatturapa/v1.0" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00123456789</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>123456</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00444448888</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>00444448888</CodiceFiscale>
+            <Denominazione>AAAAA AZIENDA PROVA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>Via Prova aaa bbb</Indirizzo>
+                <NumeroCivico>1</NumeroCivico>
+                <CAP>20123</CAP>
+                <Comune>MILANO</Comune>
+                <Provincia>MI</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>MI</Ufficio>
+                <NumeroREA>1230123</NumeroREA>
+                <CapitaleSociale>010000.0</CapitaleSociale>
+                <SocioUnico>SM</SocioUnico>
+                <StatoLiquidazione>LJ</Statone>rvizi
+            <>
+ /Sed   <

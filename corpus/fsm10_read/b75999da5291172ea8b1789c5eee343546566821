@@ -1,0 +1,10 @@
+<?xml .0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="v1.0"versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>                           (          IT</IdPaese>
+      <IdCodice>04848484850</IdCodice>
+    </IdTr¦sasmissione>
+    <CodiceDestmestinatarioronicaHeader>
+ > 

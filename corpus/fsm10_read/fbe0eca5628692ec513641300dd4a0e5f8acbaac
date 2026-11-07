@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2aentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+  Ûßßß<Indirizzo>Viale Europa 1</Indirizzo>
+ 78</Importo>
+    <DatiIVA>
+      <Imposta>0.32</Imposta>lettronicaBody>
+</p:FatturaElettronicaSemplificata>

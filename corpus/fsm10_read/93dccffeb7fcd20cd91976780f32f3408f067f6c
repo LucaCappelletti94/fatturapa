@@ -1,0 +1,12 @@
+<?xml? version="1.0" encoding="UTF-8"?  <IdPaese>IT</IdPaese>
+                <IdCodice>01111118887</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmisle>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</DeCo<?xml version="1.0" encoding="UTF-8"?>
+<nraElettronicaSemplif;icata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/do<?xtucs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>011111188/88;;;;Co

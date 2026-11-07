@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaE-lettronicaSemplificata xmlns:ds="http://www.w3.org/2MLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848404848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Aziend"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" exml oin="2."=U8"?><?CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmiss78912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Aziend"?><?xml?ml?><?xml oin="2."U8"=?><?xml?><?xml o/ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2.0"0" T-"=U8"?><icaSemplificata>

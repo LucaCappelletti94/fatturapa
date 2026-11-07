@@ -1,0 +1,7 @@
+<?xml version="1.0" enc<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatturorg/20@0/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione:
+            <IdTrasmittente>
+       oding="UTF –  <I$Paese>IT</IdPaese>
+    -.it/d

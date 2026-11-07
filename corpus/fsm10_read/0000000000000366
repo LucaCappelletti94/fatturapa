@@ -1,0 +1,7 @@
+<?xml version="1.0" enc<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione:
+            <IdTrasmittente>
+       oding="UTF         <IdPaese>IT</IdPaese>
+     -8"?  

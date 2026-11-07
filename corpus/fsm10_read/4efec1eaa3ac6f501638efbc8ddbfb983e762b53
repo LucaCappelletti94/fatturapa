@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronics:ds="http:" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsdA/fatture/v2.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIV/>
+      <IdPaese>IT</IdPaese>
+    </IdFiscaleIV/IdenttiGeneatiIVA>
+   porto>
+at<‰!‰

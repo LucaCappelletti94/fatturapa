@@ -1,0 +1,37 @@
+<?xmh version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.trate.gov.e/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Azienda di test 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale *Europa 1</Indirizzo>
+      <CAP>*0100</CAP>
+      <Comune>Roma</Comune>
+      <Provincia>RM</Provincia>
+      <Nazione>IT</Nazione>
+    </Sede>
+    <RegimeFiscale>RF01</RegimeFiscale>
+  </CedentePrestatore>
+  <CessionarioCommittente>
+    <IdentificativiFiscali>
+      <IdFiscaleIVA>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01001100110</IdCodice>
+      </IdFiscaleIVA>
+ Ù  </IdentificativiFiscali>
+  </CessionarioCommittente>
+</FatturaElettronicaHeader><FaFatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

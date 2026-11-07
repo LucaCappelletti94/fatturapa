@@ -1,0 +1,44 @@
+<?xml ]]version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>00624912958</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>VIA ]EST</Indirizzo>
+                <NumeroCivico>6</NumeroCivico>
+                <CAP>00100</CAP>
+                <Comune>TORINO</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>TO</Ufficio>
+                <NumeroREA>123456</NumeroREA>
+                <StatoLiquidazione>LN</StatoLiquidazione>
+            </IscrizioneREA>
+            <RegimeFiscale>RF01</RegimeFiscale>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <IdentificativiFiscali>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>04445555444</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>04445555444</CodiceFiscale>
+            </IdentificativiFiscali>
+            <AltriDatiIdentificativi>
+                <Denominazione>PROVA AZIEN<?<?x<?xmversion="2.0" encodi<Cedente?xml oin="2.0" encoding="UU8"?><?xml?><?xml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPreaing="UU8"?><?xml?><?xml oin=à2."U8"=?><?xml?><?xml oin="1.0" e"=U8"?gimeFiscale>l version="1M.0"

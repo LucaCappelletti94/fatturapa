@@ -1,0 +1,5 @@
+< xmlns:p="rate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <>
+<ns6:FatturaEls3:e

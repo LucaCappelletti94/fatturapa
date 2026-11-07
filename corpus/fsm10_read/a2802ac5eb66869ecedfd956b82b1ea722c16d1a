@@ -1,0 +1,8 @@
+<?xmh version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w2.org/2000/09/xmldsig#" xmlns:xsi="http://www.w1.org/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaeseU>IT<<IdFiscal
+A VI>e     viz=			i>
+</Fattura

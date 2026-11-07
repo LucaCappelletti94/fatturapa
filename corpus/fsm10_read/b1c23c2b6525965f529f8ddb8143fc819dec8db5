@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore    <IdFiscaleIVA>
+       <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>04445555444</IdCodice>
+                </IdFiscaleIVA>
+                <Codicσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσne>PROVA AZIENDA                <Data>2020-05-15</Dadotti di prova</Descrizione>
+            <Importo>120.00</Importo>
+    1.78</Importo>
+    <DatiIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquota>22.00</Aliquota>
+    </DatiIVA>
+  </DatituraElettronicaBody>
+</ns3:FatturaElettronicaSemplificata>

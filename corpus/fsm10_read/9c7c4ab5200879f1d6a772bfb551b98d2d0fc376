@@ -1,0 +1,11 @@
+<?xm_ version="1.0" enco-8"?>
+<Semplificata xmlns:ds="http:.w//www3.org/2000/ure/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice> 2424242424</IdCodice>
+    </IdT  <IdCodiIndirizzo>
+      <CAP>*0100</CAP>
+      <
+      <Prcata>

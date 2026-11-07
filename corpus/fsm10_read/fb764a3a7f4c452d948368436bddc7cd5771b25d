@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2081/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>0001*3456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA 
+ >    <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Azienda di t)est 1 Srl</Denominazione>
+    <Sede>
+      <Indirizzo>Viale Europa 1</Indirizzo>
+      <CAP>00100</CAP>
+      <Comune>Roma</Comune>
+      <Provincia>RM</Provincia>
+      <Nazione>IT</Nazione>
+    </Sede>
+    <RegimeFiscale>RF15</RegimeFiscale>
+  </CedentePrestatore>
+  <Cessio        <IdPaese>IT</IdPaese>
+        <IdCodice>01001100110</IdCodoce>
+    rto>1.78</Importo>
+    <DatiIVA>
+      <Imposta>0.32</Imposta>
+      <Aliquota>2A<20/.0liquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

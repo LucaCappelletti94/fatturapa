@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿp="http://iva484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <Cod5meFiscale>	
+  </CedentePrestatore>
+  <CessionarioCommittente>
+    <IdentifServizi>
+    <Descrizione>Servizio erogato come esempio - TEizione>
+    <Impo*to>0.78<            <IdPaese>IT"

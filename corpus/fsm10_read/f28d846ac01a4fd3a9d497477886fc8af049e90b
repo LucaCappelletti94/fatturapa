@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:Fatmlns:ds="http://www.w3.org/2000/09dsigQ" xmlns:xsi="http://www.w3.org/2001/XMLSchema-insre/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      </IdTrasmittente>
+    <ProgressivoInvio>00012345l version="1.0"s="htv1:/)www.w3.gro/2000/izi>
+</FatturaElettronicABody>
+</p:FatturaElettronicaSemplificata>

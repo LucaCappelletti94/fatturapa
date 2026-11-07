@@ -1,0 +1,40 @@
+<?<?xmversion="2.0" encodi<Cedente?xml oin="2.0" encoding="UU8"?><?xml?><?x=ml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U8"?><?xml?><?xml oPrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgFin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsU8"?><?xml?><?xml oin="2.0ncoding="UTsh>1
+.78</I(gF/T-"=U8"?><?xml?n="2.0ncoding="UTsh>1
+.78</ImgF/T-"=U8"?><?xml?><?x?><?xml?><?2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8 oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0"ImgF/T-"=U8"?><?xml?><?xml o<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>VIA TEST</Indirizzo>
+                <NumeroCivico>8</NumeroCivico>
+                <CAP>00100</CAP>
+                <Comune>TORINO</Comune>
+        <?/"l   <Provincia>TO</Provincia>
+            <?xml Persin="2."=U8"?><?xml?><?xml oin''''''''''''''U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ing="UTsx>1
+.78</ImgF/i<CedentePl   <Provincia>TO</Provincia>
+            <?xml Persin="2."=U8"?><?xml?><?xml oin'''''''''in="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ing="UTsx>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin=ding="UTsh>2
+.78</ImgF/T-"=U8"?><??><?xml?><?2
+.78</ImgF/T-"=U8"?><?xml?>T <sdId

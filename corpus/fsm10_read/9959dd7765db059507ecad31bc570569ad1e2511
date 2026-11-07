@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>VIA TEST</Indirizzo>
+                <NumeroCivico>7</NumeroCivico>
+                <CAP>00100</CAP>
+                <Comune>TORINO</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+        <?<?x.0" versione="FSM10?><?xmÿl versio.0" versione="FSM10"UTs/xsd/fattu<?xml version="1.0" encoding<#="UTs/xsd/fatture/ione="FSM10?><?xml ver" encoding<#="UTfattu<?xml version="1.0" encoding<#="UTs/xsd/f       atture/v1.0" versione="FSM10?><?xml version="1.0" enne="FSM10?><?x/xsd/fat   </IscrizioneREA>
+         ture/v1   <Re.

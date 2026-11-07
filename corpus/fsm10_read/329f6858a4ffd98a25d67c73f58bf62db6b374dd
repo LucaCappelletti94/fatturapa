@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="		j															''''''''''''''''''''<?xml version="1.0" encoding="UTF-8"?>
+<ns2:FatturaElettronicaSemplificata versione="FSM10" SistemaEmittente="abc" xmlns:ns2="ht/docs/xsd/fatture/v1.0">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567890</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>00001</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+            <PECDestinatario>betagamma@pec.it</PECDestin'''''&'''''''iTrasmissione>
+            <IdTrasmittente>
+ l versioÿ"1.0" encoding="UTacaSemplificata>

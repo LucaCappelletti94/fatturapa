@@ -1,0 +1,13 @@
+<?xmh vers="1.0" encoding="UTF-8"?>
+<p:FatturaElettro<,,,Semplificata xmlns:ds="httpchema-i.agenziaentrate.gov.it/docs/xsd/f$atture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese> 
+     <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente
+>    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</For<
+.>issione>
+   >
+     ata>

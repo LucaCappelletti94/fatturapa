@@ -1,0 +1,10 @@
+<?xml( version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="ht3.org/2002/XMLSe.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>02424242423</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>00012345<?xml version="1.0" encoding="UTF-8"?>/w/www.w3.org/2002/XMLScmeiasnh-tance" xmlns:p="htd/fatture/v1.0" xmlns:ns2="h6</ProgressivoInvio>
+    <Form

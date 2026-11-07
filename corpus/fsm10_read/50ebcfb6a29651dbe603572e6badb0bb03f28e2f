@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettr/onicaSemplificata xmlns:ds="hrg/2000/09/xmldsig#" xmlns:xsi="hta>
+      <Numero>A>
+    XMLSchema-instance" xmlns:p="httvaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000Ý/CodiceDestinatario>
+  </DatiTrasmissione>
+  xsd/fatture/v1.0" vers:ds="h>1.78</Importo>trat           @           !       e.gov.it/doááálificata>

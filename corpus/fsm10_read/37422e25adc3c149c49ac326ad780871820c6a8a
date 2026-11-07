@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:<s="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/20[1/XMLSchema-instance" xmlns:p="http://ivaservizi.agion/RMCA_FAT_WRITER/Schemas/fatkura_SAP_RMCA.xsd" xmlns:pfx41="http://www.tibco.com/ns/no_namespace_chema_location/RMCA_FAT_WRenziaentrate.gov.it/docs/xsd/Fatture/v1.0" versione="FSM10">
+<FatturaEletcata xmlns:pfx1="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_FAT_WRITER/Schemas/fatkura_SAP_RMCA.xsd" xmlns:pfx41="http://www.tibco.com/ns/no_namespace_chema_location/RMCA_FAT_WRITER/Schemas/metadati.xsd" xmlns:ns3="http://telecomitalia.it/s2d/soa/esb_etl/logger" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/d/>s/xsd/fatture/v1.0" xmlns:xmlns="http://www.td" xmns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ds="http:l oin="2?><?xml oin="2.0"     <IdPaese>IT</IdPaese>
+            ==ettronicaSemplificata>

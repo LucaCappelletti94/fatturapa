@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-9"?>
+<p:Fatmlns:ds="http://www.w3.o01/XMLSchema-insre/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      </IdTrasmittente>
+    <Progresificata>

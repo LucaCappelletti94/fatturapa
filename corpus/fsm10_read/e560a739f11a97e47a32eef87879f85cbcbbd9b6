@@ -1,0 +1,15 @@
+<?<?xxml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata versisns="http://www.w3.org/2000/09/xm.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodicee>Servizio toograe come esempio - TEST</Descrizione>
+    <Importo>1.78</Importo>
+    <DatiIVA>
+      <Imposvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv¶a>0.32</Imposta>
+      <Aliquota>22.00</Aliquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

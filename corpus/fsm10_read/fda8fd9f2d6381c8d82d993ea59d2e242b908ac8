@@ -1,0 +1,39 @@
+<?xml version=*1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:pfx1="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_s/xsd/fatture/v1.0" xmlns:pfx31="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_FAT_WRITER/Schemas/aliquoteIVA.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:pfx6="http://www.fatturapa.gov.it/sdi/fatturapa/v1.0" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00123456788</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>123456</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00444448887</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>00444448888</CodiceFiscale>
+            <Denominazione>AAAAA AZIENDA PROVA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>Via Prova aaa bbb</Indirizzo>
+                <NumeroCivico>1</NumeroCivico>
+                <CAP>20123</CAP>
+                <Comune>MILANO</Comune>
+                <Provincia>MI</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>MI</Ufficio>
+                <NumeroREA>1230123</NumeroREA>
+                <CapitaleSociale>10000.00</CapitaleSociale>
+                <SocioUnico>SM</SocioUnico>
+                <StatoLiquidazione>LN                                               </StatoLiquidazione>
+            </IscrizioneREA>
+            <RegimeFiscale>RF01</RegimeFiscale>
+        </CedentePrestatore>
+    ßß  <CessionariTORINO</Comune>
+Rettificata>
+              <?xml ver<?xml version="1.0" encod>dFiscaleIV

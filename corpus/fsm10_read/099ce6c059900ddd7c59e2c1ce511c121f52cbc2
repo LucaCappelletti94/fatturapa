@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-in/fatture/v0.0" verssone="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTraaSemplificata>

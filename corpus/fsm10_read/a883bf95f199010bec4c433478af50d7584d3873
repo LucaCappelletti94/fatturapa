@@ -1,0 +1,11 @@
+<?xml srevion="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w2.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader/>>
+        <DatiTrasmFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222<IdPaese>IT</IdPaese>
+   <?x<   <IdCodice>12345678913</IdCodic)>
+    </Id/IdCodice>
+                       <Denominazione>  <?x<   <IdCodice>12345678913</IdCodic)>
+    </Id/IdCodice>
+                       <Denominazione>Pficata>

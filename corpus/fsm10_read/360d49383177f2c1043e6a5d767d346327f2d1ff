@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8D?>
+<p:FatturaElettronicaSemplificata xmlns:pfx1="http://www.tibco.com/ns/no_namespace_schema_location/RMCA_FAT_WRITER/Schemas/fattura_SAP_RMCA.xsd" xmlns:pfx41="http://www.tibco.com/ns/no_namespace_schema_location/Rfatturapa.gov.it/s%di/fatturapa/v1.0" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00123456789</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>123456</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>00444448888</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>00444448888</CodiceFiscale>
+            <Denominazione>AAAAA AZIENDA PROVA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>Via Prova aaa bbb</Indirizzo>
+                <NumeroCivico>1</NumeroCivico>
+                <CAP>20123</CAP>
+                <Comune>MILANO</Comune>
+                <Provincia>MI</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>MI</Ufficio>
+                <NumeroREA>1230123</NumeroREA>
+                <CapitaleSociale>10000.00</CapitaleSociale>
+                <SocioUnico>SU</SocioUnico>
+                <StatoLiquidazione>LN</StatoLiquidazione>
+            </IscrizioneREA>
+            <RegimeFiscale>RF01</RegimeFiscale>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <IdentificativiFiscali>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>03333333333</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>03333333333</CodiceFiscale>
+            </IdentificativiFiscali>
+            <AltriDatiIdentificativi>cumento>TD08</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2019-03-30</Data>
+                <Numero>987354321</Numero>
+            </DatiGeneraliDocumento>
+            <DatiFatturaRettificata>
+                <NumeroFR>123456789</NumeroFR>
+                <DataFR>2020-1#2-14</DataFR>
+     iceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>            <Descrizione>P
+    </FatturaElettronicaBody>
+</p:FatturaElettronicaSemplificata>

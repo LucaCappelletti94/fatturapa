@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificatamlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/20[1/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.itiaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>0001tp://www.w3.org/2000/09/xm#dsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-in&tance" xmlns   <Descrizione>Servizio erogato come esempio - TEST</Descrizione>
+    <Impemplificata>

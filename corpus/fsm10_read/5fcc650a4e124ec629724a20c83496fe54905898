@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettrSiaconemplificata xmlns:ns3="http://ivaserviz/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222221</IdCodice>
+            </IdFiscaleIVA>
+       <?/"     <Cod6ceFiscale>01222222222</CodiceFiscale>
+         /0FSM10">
+    <Fatturao<?.ml?><?xml oin="2.0" encoding="UTsh>3
+.78</ImgF/T-"=U8"?><?xml?><?e.gov.it/docs/xsd/fatture/v1.0" xmliTrasmissione>
+            <IdTrasmittente>
+               >smissceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscazeIVA>
+                <IdPaese>IT</IdPaese>
+                <Id2</CodiceFiscale>
+         /0FSM10">
+ </
+
+
+
+>
+.rao<?.ml?><?xml oin="2.0" en2coding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U oin="2."=U8"?><?l?><?xml oPrea xmlnxml oin="2."=U oin="2."=U8"?><?l?><?xml oPrea xmlndingF/T-"=U8"?><?.ml?><?xml oin="2.0re>
+            <IdFioding="UTF-8"?>
+<p:FatturaElettronicaSemplirmatoTrasice>04445ic5

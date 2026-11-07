@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaEleQttrSiaconemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118889</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+       <?/"     <CodiceFiscale>01222222222</CodiceFiscale>
+    ersione="FSM10?><?xml version="1.0" encoding="UTsce..1" ve<?xml<?<?xhversione="FSM10?><?xml version="1.0" encoding="UTsce.gov"1.co>
+                <CAP>00100</CAP>
+                <Comune>TORINO</Comune>
+   TO</Provin      <Nazione>IT</Nazione>
+         ://www.   ·     <Ident            ="1.0" encoding="UTF-8"?>
+<ns3:FatturaEleQt xmlns:ns3="http://ivaservizi.agenziaentratttronicaSemplif  <IdCodice>04445ic5

@@ -1,0 +1,11 @@
+<?xml version="1.0" e-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:n="http://www.w3.org/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+       <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>:FSM10</FormatoTrasmissione>n    <Ufficio>T
+    </DatiIVA>
+  </DatituraElettrta>

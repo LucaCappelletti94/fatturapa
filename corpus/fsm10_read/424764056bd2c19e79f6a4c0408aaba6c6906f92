@@ -1,0 +1,6 @@
+<?xml srevion="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns0="http://ivtp://www.w2.org(/2000/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader/>>
+   :     <DatiTrasmFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>0122I srevion="1.0<?xml ver"s

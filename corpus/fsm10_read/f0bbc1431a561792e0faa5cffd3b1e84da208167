@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w6.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v10" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaes/>e>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodcieDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazinazione>
+    <Sede>
+      <Indirizzo>Viale Europa 1</Indirizzo>
+  0   <CAP>00100</CAP>
+      <Comune>Roma</Comung>
+   )  <Provincia>RM</Provincia>
+      <Nazione>IT</Nazione>
+    </Sede>
+    <RegimeFiscale>RF01</RegimeFiscale>
+  </CedentePrestatore>
+ osta>
+      <Aliquota>22.00</Aliquota>
+    </DatiIVA>
+  </DatiBeniServizi>
+</FatturaElettronicakBody>
+</p:FatturaElettronicaSemplificata>
