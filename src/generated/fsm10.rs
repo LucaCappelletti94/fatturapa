@@ -25,7 +25,7 @@ pub const PREFIX_XS: NamespacePrefix = NamespacePrefix::new_const(b"xs");
 pub const PREFIX_XML: NamespacePrefix = NamespacePrefix::new_const(b"xml");
 pub const PREFIX_XSI: NamespacePrefix = NamespacePrefix::new_const(b"xsi");
 pub const PREFIX_DS: NamespacePrefix = NamespacePrefix::new_const(b"ds");
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct EntitiesType(pub Vec<String>);
 impl SerializeBytes for EntitiesType {
     fn serialize_bytes(
@@ -60,7 +60,7 @@ impl WithDeserializerFromBytes for EntitiesType {}
 pub type EntityType = String;
 pub type IdType = String;
 pub type IdrefType = String;
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct IdrefsType(pub Vec<String>);
 impl SerializeBytes for IdrefsType {
     fn serialize_bytes(
@@ -94,7 +94,7 @@ impl DeserializeBytes for IdrefsType {
 impl WithDeserializerFromBytes for IdrefsType {}
 pub type NcNameType = String;
 pub type NmtokenType = String;
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct NmtokensType(pub Vec<String>);
 impl SerializeBytes for NmtokensType {
     fn serialize_bytes(
@@ -130,7 +130,7 @@ pub type NotationType = String;
 pub type NameType = String;
 pub type QNameType = String;
 pub type AnySimpleType = String;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AnyType;
 impl WithSerializer for AnyType {
     type Serializer<'x> = quick_xml_serialize::AnyTypeSerializer<'x>;
@@ -180,11 +180,11 @@ pub type UnsignedByteType = u8;
 pub type UnsignedIntType = u32;
 pub type UnsignedLongType = u64;
 pub type UnsignedShortType = u16;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AllegatiType {
     pub content: AllegatiTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AllegatiTypeContent {
     pub nome_attachment: String60LatinType,
     pub algoritmo_compressione: Option<String10Type>,
@@ -230,11 +230,11 @@ impl WithDeserializer for AllegatiType {
 impl WithDeserializer for AllegatiTypeContent {
     type Deserializer = quick_xml_deserialize::AllegatiTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiType {
     pub content: AltriDatiIdentificativiTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiTypeContent {
     pub content_60: AltriDatiIdentificativiContent60Type,
     pub sede: IndirizzoType,
@@ -284,7 +284,7 @@ impl WithDeserializer for AltriDatiIdentificativiTypeContent {
     type Deserializer = quick_xml_deserialize::AltriDatiIdentificativiTypeContentDeserializer;
 }
 pub type Amount2DecimalType = Amount;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Art73Type {
     Si,
 }
@@ -317,7 +317,7 @@ impl DeserializeBytes for Art73Type {
     }
 }
 impl WithDeserializerFromBytes for Art73Type {}
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum BolloVirtualeType {
     Si,
 }
@@ -351,11 +351,11 @@ impl DeserializeBytes for BolloVirtualeType {
 }
 impl WithDeserializerFromBytes for BolloVirtualeType {}
 pub type CapType = String;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreType {
     pub content: CedentePrestatoreTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreTypeContent {
     pub id_fiscale_iva: IdFiscaleType,
     pub codice_fiscale: Option<CodiceFiscaleType>,
@@ -408,11 +408,11 @@ impl WithDeserializer for CedentePrestatoreType {
 impl WithDeserializer for CedentePrestatoreTypeContent {
     type Deserializer = quick_xml_deserialize::CedentePrestatoreTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CessionarioCommittenteType {
     pub content: CessionarioCommittenteTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CessionarioCommittenteTypeContent {
     pub identificativi_fiscali: IdentificativiFiscaliType,
     pub altri_dati_identificativi: Option<AltriDatiIdentificativiType>,
@@ -463,11 +463,11 @@ pub type CodiceDestinatarioType = String;
 pub type CodiceFiscaleType = String;
 pub type CodiceType = String;
 pub type DataFatturaType = Date;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiBeniServiziType {
     pub content: DatiBeniServiziTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiBeniServiziTypeContent {
     pub descrizione: String1000LatinType,
     pub importo: Amount2DecimalType,
@@ -515,11 +515,11 @@ impl WithDeserializer for DatiBeniServiziType {
 impl WithDeserializer for DatiBeniServiziTypeContent {
     type Deserializer = quick_xml_deserialize::DatiBeniServiziTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiFatturaRettificataType {
     pub content: DatiFatturaRettificataTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiFatturaRettificataTypeContent {
     pub numero_fr: String20Type,
     pub data_fr: DataFatturaType,
@@ -567,11 +567,11 @@ impl WithDeserializer for DatiFatturaRettificataType {
 impl WithDeserializer for DatiFatturaRettificataTypeContent {
     type Deserializer = quick_xml_deserialize::DatiFatturaRettificataTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiGeneraliDocumentoType {
     pub content: DatiGeneraliDocumentoTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiGeneraliDocumentoTypeContent {
     pub tipo_documento: TipoDocumentoType,
     pub divisa: DivisaType,
@@ -621,11 +621,11 @@ impl WithDeserializer for DatiGeneraliDocumentoType {
 impl WithDeserializer for DatiGeneraliDocumentoTypeContent {
     type Deserializer = quick_xml_deserialize::DatiGeneraliDocumentoTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiGeneraliType {
     pub content: DatiGeneraliTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiGeneraliTypeContent {
     pub dati_generali_documento: DatiGeneraliDocumentoType,
     pub dati_fattura_rettificata: Option<DatiFatturaRettificataType>,
@@ -670,11 +670,11 @@ impl WithDeserializer for DatiGeneraliType {
 impl WithDeserializer for DatiGeneraliTypeContent {
     type Deserializer = quick_xml_deserialize::DatiGeneraliTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiIvaType {
     pub content: DatiIvaTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiIvaTypeContent {
     pub imposta: Option<Amount2DecimalType>,
     pub aliquota: Option<RateType>,
@@ -717,11 +717,11 @@ impl WithDeserializer for DatiIvaType {
 impl WithDeserializer for DatiIvaTypeContent {
     type Deserializer = quick_xml_deserialize::DatiIvaTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiTrasmissioneType {
     pub content: DatiTrasmissioneTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DatiTrasmissioneTypeContent {
     pub id_trasmittente: IdFiscaleType,
     pub progressivo_invio: String10Type,
@@ -771,11 +771,11 @@ impl WithDeserializer for DatiTrasmissioneTypeContent {
 }
 pub type DivisaType = String;
 pub type EmailType = String;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FatturaElettronicaBodyType {
     pub content: FatturaElettronicaBodyTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FatturaElettronicaBodyTypeContent {
     pub dati_generali: DatiGeneraliType,
     pub dati_beni_servizi: Vec<DatiBeniServiziType>,
@@ -823,11 +823,11 @@ impl WithDeserializer for FatturaElettronicaBodyType {
 impl WithDeserializer for FatturaElettronicaBodyTypeContent {
     type Deserializer = quick_xml_deserialize::FatturaElettronicaBodyTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FatturaElettronicaHeaderType {
     pub content: FatturaElettronicaHeaderTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FatturaElettronicaHeaderTypeContent {
     pub dati_trasmissione: DatiTrasmissioneType,
     pub cedente_prestatore: CedentePrestatoreType,
@@ -879,13 +879,13 @@ impl WithDeserializer for FatturaElettronicaHeaderTypeContent {
     type Deserializer = quick_xml_deserialize::FatturaElettronicaHeaderTypeContentDeserializer;
 }
 pub type FatturaElettronicaSemplificata = FatturaElettronicaType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FatturaElettronicaType {
     pub versione: FormatoTrasmissioneType,
     pub sistema_emittente: Option<String10Type>,
     pub content: FatturaElettronicaTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FatturaElettronicaTypeContent {
     pub fattura_elettronica_header: FatturaElettronicaHeaderType,
     pub fattura_elettronica_body: Vec<FatturaElettronicaBodyType>,
@@ -933,7 +933,7 @@ impl WithDeserializer for FatturaElettronicaType {
 impl WithDeserializer for FatturaElettronicaTypeContent {
     type Deserializer = quick_xml_deserialize::FatturaElettronicaTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum FormatoTrasmissioneType {
     Fsm10,
 }
@@ -966,11 +966,11 @@ impl DeserializeBytes for FormatoTrasmissioneType {
     }
 }
 impl WithDeserializerFromBytes for FormatoTrasmissioneType {}
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IdFiscaleType {
     pub content: IdFiscaleTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IdFiscaleTypeContent {
     pub id_paese: NazioneType,
     pub id_codice: CodiceType,
@@ -1013,11 +1013,11 @@ impl WithDeserializer for IdFiscaleType {
 impl WithDeserializer for IdFiscaleTypeContent {
     type Deserializer = quick_xml_deserialize::IdFiscaleTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IdentificativiFiscaliType {
     pub content: IdentificativiFiscaliTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IdentificativiFiscaliTypeContent {
     pub id_fiscale_iva: Option<IdFiscaleType>,
     pub codice_fiscale: Option<CodiceFiscaleType>,
@@ -1064,11 +1064,11 @@ impl WithDeserializer for IdentificativiFiscaliType {
 impl WithDeserializer for IdentificativiFiscaliTypeContent {
     type Deserializer = quick_xml_deserialize::IdentificativiFiscaliTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IndirizzoType {
     pub content: IndirizzoTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IndirizzoTypeContent {
     pub indirizzo: String60LatinType,
     pub numero_civico: Option<NumeroCivicoType>,
@@ -1115,11 +1115,11 @@ impl WithDeserializer for IndirizzoType {
 impl WithDeserializer for IndirizzoTypeContent {
     type Deserializer = quick_xml_deserialize::IndirizzoTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IscrizioneReaType {
     pub content: IscrizioneReaTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IscrizioneReaTypeContent {
     pub ufficio: ProvinciaType,
     pub numero_rea: String20Type,
@@ -1167,7 +1167,7 @@ impl WithDeserializer for IscrizioneReaType {
 impl WithDeserializer for IscrizioneReaTypeContent {
     type Deserializer = quick_xml_deserialize::IscrizioneReaTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum NaturaType {
     N1,
     N2,
@@ -1239,11 +1239,11 @@ impl WithDeserializerFromBytes for NaturaType {}
 pub type NazioneType = String;
 pub type NumeroCivicoType = String;
 pub type ProvinciaType = String;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleType {
     pub content: RappresentanteFiscaleTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleTypeContent {
     pub id_fiscale_iva: IdFiscaleType,
     pub content_54: RappresentanteFiscaleContent54Type,
@@ -1291,7 +1291,7 @@ impl WithDeserializer for RappresentanteFiscaleTypeContent {
     type Deserializer = quick_xml_deserialize::RappresentanteFiscaleTypeContentDeserializer;
 }
 pub type RateType = Amount;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum RegimeFiscaleType {
     Rf01,
     Rf02,
@@ -1378,7 +1378,7 @@ impl DeserializeBytes for RegimeFiscaleType {
     }
 }
 impl WithDeserializerFromBytes for RegimeFiscaleType {}
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SocioUnicoType {
     Su,
     Sm,
@@ -1414,7 +1414,7 @@ impl DeserializeBytes for SocioUnicoType {
     }
 }
 impl WithDeserializerFromBytes for SocioUnicoType {}
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SoggettoEmittenteType {
     Cc,
     Tz,
@@ -1450,7 +1450,7 @@ impl DeserializeBytes for SoggettoEmittenteType {
     }
 }
 impl WithDeserializerFromBytes for SoggettoEmittenteType {}
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum StatoLiquidazioneType {
     Ls,
     Ln,
@@ -1492,7 +1492,7 @@ pub type String10Type = String;
 pub type String20Type = String;
 pub type String60LatinType = String;
 pub type String80LatinType = String;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TipoDocumentoType {
     Td07,
     Td08,
@@ -1532,7 +1532,7 @@ impl DeserializeBytes for TipoDocumentoType {
 }
 impl WithDeserializerFromBytes for TipoDocumentoType {}
 pub type CanonicalizationMethod = CanonicalizationMethodType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CanonicalizationMethodType {
     pub algorithm: AnyUriType,
 }
@@ -1558,11 +1558,11 @@ impl WithDeserializer for CanonicalizationMethodType {
 }
 pub type CryptoBinaryType = Base64String;
 pub type DsaKeyValue = DsaKeyValueType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DsaKeyValueType {
     pub content: DsaKeyValueTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DsaKeyValueTypeContent {
     pub content_36: Option<DsaKeyValueContent36Type>,
     pub g: Option<CryptoBinaryType>,
@@ -1609,7 +1609,7 @@ impl WithDeserializer for DsaKeyValueTypeContent {
     type Deserializer = quick_xml_deserialize::DsaKeyValueTypeContentDeserializer;
 }
 pub type DigestMethod = DigestMethodType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DigestMethodType {
     pub algorithm: AnyUriType,
 }
@@ -1637,12 +1637,12 @@ pub type DigestValue = DigestValueType;
 pub type DigestValueType = Base64String;
 pub type HmacOutputLengthType = i32;
 pub type KeyInfo = KeyInfoType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct KeyInfoType {
     pub id: Option<IdType>,
     pub content: Vec<KeyInfoTypeContent>,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum KeyInfoTypeContent {
     KeyName(KeyName),
     KeyValue(KeyValue),
@@ -1692,11 +1692,11 @@ impl WithDeserializer for KeyInfoTypeContent {
 }
 pub type KeyName = StringType;
 pub type KeyValue = KeyValueType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct KeyValueType {
     pub content: KeyValueTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum KeyValueTypeContent {
     DsaKeyValue(DsaKeyValue),
     RsaKeyValue(RsaKeyValue),
@@ -1740,12 +1740,12 @@ impl WithDeserializer for KeyValueTypeContent {
     type Deserializer = quick_xml_deserialize::KeyValueTypeContentDeserializer;
 }
 pub type Manifest = ManifestType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ManifestType {
     pub id: Option<IdType>,
     pub content: ManifestTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ManifestTypeContent {
     pub reference: Vec<Reference>,
 }
@@ -1789,7 +1789,7 @@ impl WithDeserializer for ManifestTypeContent {
 }
 pub type MgmtData = StringType;
 pub type Object = ObjectType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ObjectType {
     pub id: Option<IdType>,
     pub mime_type: Option<StringType>,
@@ -1814,11 +1814,11 @@ impl WithDeserializer for ObjectType {
     type Deserializer = quick_xml_deserialize::ObjectTypeDeserializer;
 }
 pub type PgpData = PgpDataType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PgpDataType {
     pub content: PgpDataTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum PgpDataTypeContent {
     Content23(PgpDataContent23Type),
     Content25(PgpDataContent25Type),
@@ -1862,11 +1862,11 @@ impl WithDeserializer for PgpDataTypeContent {
     type Deserializer = quick_xml_deserialize::PgpDataTypeContentDeserializer;
 }
 pub type RsaKeyValue = RsaKeyValueType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RsaKeyValueType {
     pub content: RsaKeyValueTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RsaKeyValueTypeContent {
     pub modulus: CryptoBinaryType,
     pub exponent: CryptoBinaryType,
@@ -1910,14 +1910,14 @@ impl WithDeserializer for RsaKeyValueTypeContent {
     type Deserializer = quick_xml_deserialize::RsaKeyValueTypeContentDeserializer;
 }
 pub type Reference = ReferenceType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ReferenceType {
     pub id: Option<IdType>,
     pub uri: Option<AnyUriType>,
     pub type_: Option<AnyUriType>,
     pub content: ReferenceTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ReferenceTypeContent {
     pub transforms: Option<Transforms>,
     pub digest_method: DigestMethod,
@@ -1962,13 +1962,13 @@ impl WithDeserializer for ReferenceTypeContent {
     type Deserializer = quick_xml_deserialize::ReferenceTypeContentDeserializer;
 }
 pub type RetrievalMethod = RetrievalMethodType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RetrievalMethodType {
     pub uri: Option<AnyUriType>,
     pub type_: Option<AnyUriType>,
     pub content: RetrievalMethodTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RetrievalMethodTypeContent {
     pub transforms: Option<Transforms>,
 }
@@ -2013,11 +2013,11 @@ impl WithDeserializer for RetrievalMethodTypeContent {
     type Deserializer = quick_xml_deserialize::RetrievalMethodTypeContentDeserializer;
 }
 pub type SpkiData = SpkiDataType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SpkiDataType {
     pub content: Vec<SpkiDataTypeContent>,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SpkiDataTypeContent {
     pub spki_sexp: Base64BinaryType,
 }
@@ -2061,12 +2061,12 @@ impl WithDeserializer for SpkiDataTypeContent {
 }
 pub type Signature = SignatureType;
 pub type SignatureMethod = SignatureMethodType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignatureMethodType {
     pub algorithm: AnyUriType,
     pub content: SignatureMethodTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignatureMethodTypeContent {
     pub hmac_output_length: Option<HmacOutputLengthType>,
 }
@@ -2111,12 +2111,12 @@ impl WithDeserializer for SignatureMethodTypeContent {
     type Deserializer = quick_xml_deserialize::SignatureMethodTypeContentDeserializer;
 }
 pub type SignatureProperties = SignaturePropertiesType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignaturePropertiesType {
     pub id: Option<IdType>,
     pub content: SignaturePropertiesTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignaturePropertiesTypeContent {
     pub signature_property: Vec<SignatureProperty>,
 }
@@ -2163,7 +2163,7 @@ impl WithDeserializer for SignaturePropertiesTypeContent {
     type Deserializer = quick_xml_deserialize::SignaturePropertiesTypeContentDeserializer;
 }
 pub type SignatureProperty = SignaturePropertyType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignaturePropertyType {
     pub target: AnyUriType,
     pub id: Option<IdType>,
@@ -2188,12 +2188,12 @@ impl WithSerializer for SignaturePropertyType {
 impl WithDeserializer for SignaturePropertyType {
     type Deserializer = quick_xml_deserialize::SignaturePropertyTypeDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignatureType {
     pub id: Option<IdType>,
     pub content: SignatureTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignatureTypeContent {
     pub signed_info: SignedInfo,
     pub signature_value: SignatureValue,
@@ -2239,7 +2239,7 @@ impl WithDeserializer for SignatureTypeContent {
     type Deserializer = quick_xml_deserialize::SignatureTypeContentDeserializer;
 }
 pub type SignatureValue = SignatureValueType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignatureValueType {
     pub id: Option<IdType>,
     pub content: Base64BinaryType,
@@ -2265,12 +2265,12 @@ impl WithDeserializer for SignatureValueType {
     type Deserializer = quick_xml_deserialize::SignatureValueTypeDeserializer;
 }
 pub type SignedInfo = SignedInfoType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignedInfoType {
     pub id: Option<IdType>,
     pub content: SignedInfoTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct SignedInfoTypeContent {
     pub canonicalization_method: CanonicalizationMethod,
     pub signature_method: SignatureMethod,
@@ -2315,12 +2315,12 @@ impl WithDeserializer for SignedInfoTypeContent {
     type Deserializer = quick_xml_deserialize::SignedInfoTypeContentDeserializer;
 }
 pub type Transform = TransformType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TransformType {
     pub algorithm: AnyUriType,
     pub content: Vec<TransformTypeContent>,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TransformTypeContent {
     XPath(StringType),
 }
@@ -2363,11 +2363,11 @@ impl WithDeserializer for TransformTypeContent {
     type Deserializer = quick_xml_deserialize::TransformTypeContentDeserializer;
 }
 pub type Transforms = TransformsType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TransformsType {
     pub content: TransformsTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TransformsTypeContent {
     pub transform: Vec<Transform>,
 }
@@ -2410,11 +2410,11 @@ impl WithDeserializer for TransformsTypeContent {
     type Deserializer = quick_xml_deserialize::TransformsTypeContentDeserializer;
 }
 pub type X509Data = X509DataType;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct X509DataType {
     pub content: Vec<X509DataTypeContent>,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct X509DataTypeContent {
     pub content_19: X509DataContent19Type,
 }
@@ -2456,11 +2456,11 @@ impl WithDeserializer for X509DataType {
 impl WithDeserializer for X509DataTypeContent {
     type Deserializer = quick_xml_deserialize::X509DataTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct X509IssuerSerialType {
     pub content: X509IssuerSerialTypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct X509IssuerSerialTypeContent {
     pub x509_issuer_name: StringType,
     pub x509_serial_number: IntegerType,
@@ -2505,11 +2505,11 @@ impl WithDeserializer for X509IssuerSerialType {
 impl WithDeserializer for X509IssuerSerialTypeContent {
     type Deserializer = quick_xml_deserialize::X509IssuerSerialTypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiContent60Type {
     pub content: AltriDatiIdentificativiContent60TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum AltriDatiIdentificativiContent60TypeContent {
     Content61(AltriDatiIdentificativiContent61Type),
     Content62(AltriDatiIdentificativiContent62Type),
@@ -2558,11 +2558,11 @@ impl WithDeserializer for AltriDatiIdentificativiContent60Type {
 impl WithDeserializer for AltriDatiIdentificativiContent60TypeContent {
     type Deserializer = quick_xml_deserialize::AltriDatiIdentificativiContent60TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreContent49Type {
     pub content: CedentePrestatoreContent49TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum CedentePrestatoreContent49TypeContent {
     Content50(CedentePrestatoreContent50Type),
     Content51(CedentePrestatoreContent51Type),
@@ -2611,11 +2611,11 @@ impl WithDeserializer for CedentePrestatoreContent49Type {
 impl WithDeserializer for CedentePrestatoreContent49TypeContent {
     type Deserializer = quick_xml_deserialize::CedentePrestatoreContent49TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleContent54Type {
     pub content: RappresentanteFiscaleContent54TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum RappresentanteFiscaleContent54TypeContent {
     Content55(RappresentanteFiscaleContent55Type),
     Content56(RappresentanteFiscaleContent56Type),
@@ -2664,11 +2664,11 @@ impl WithDeserializer for RappresentanteFiscaleContent54Type {
 impl WithDeserializer for RappresentanteFiscaleContent54TypeContent {
     type Deserializer = quick_xml_deserialize::RappresentanteFiscaleContent54TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DsaKeyValueContent36Type {
     pub content: DsaKeyValueContent36TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DsaKeyValueContent36TypeContent {
     pub p: CryptoBinaryType,
     pub q: CryptoBinaryType,
@@ -2715,11 +2715,11 @@ impl WithDeserializer for DsaKeyValueContent36Type {
 impl WithDeserializer for DsaKeyValueContent36TypeContent {
     type Deserializer = quick_xml_deserialize::DsaKeyValueContent36TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DsaKeyValueContent37Type {
     pub content: DsaKeyValueContent37TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DsaKeyValueContent37TypeContent {
     pub seed: CryptoBinaryType,
     pub pgen_counter: CryptoBinaryType,
@@ -2766,11 +2766,11 @@ impl WithDeserializer for DsaKeyValueContent37Type {
 impl WithDeserializer for DsaKeyValueContent37TypeContent {
     type Deserializer = quick_xml_deserialize::DsaKeyValueContent37TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PgpDataContent23Type {
     pub content: PgpDataContent23TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PgpDataContent23TypeContent {
     pub pgp_key_id: Base64BinaryType,
     pub pgp_key_packet: Option<Base64BinaryType>,
@@ -2815,11 +2815,11 @@ impl WithDeserializer for PgpDataContent23Type {
 impl WithDeserializer for PgpDataContent23TypeContent {
     type Deserializer = quick_xml_deserialize::PgpDataContent23TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PgpDataContent25Type {
     pub content: PgpDataContent25TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PgpDataContent25TypeContent {
     pub pgp_key_packet: Base64BinaryType,
 }
@@ -2863,11 +2863,11 @@ impl WithDeserializer for PgpDataContent25Type {
 impl WithDeserializer for PgpDataContent25TypeContent {
     type Deserializer = quick_xml_deserialize::PgpDataContent25TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct X509DataContent19Type {
     pub content: X509DataContent19TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum X509DataContent19TypeContent {
     X509IssuerSerial(X509IssuerSerialType),
     X509Ski(Base64BinaryType),
@@ -2917,11 +2917,11 @@ impl WithDeserializer for X509DataContent19Type {
 impl WithDeserializer for X509DataContent19TypeContent {
     type Deserializer = quick_xml_deserialize::X509DataContent19TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiContent61Type {
     pub content: AltriDatiIdentificativiContent61TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiContent61TypeContent {
     pub denominazione: String80LatinType,
 }
@@ -2969,11 +2969,11 @@ impl WithDeserializer for AltriDatiIdentificativiContent61Type {
 impl WithDeserializer for AltriDatiIdentificativiContent61TypeContent {
     type Deserializer = quick_xml_deserialize::AltriDatiIdentificativiContent61TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiContent62Type {
     pub content: AltriDatiIdentificativiContent62TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AltriDatiIdentificativiContent62TypeContent {
     pub nome: String60LatinType,
     pub cognome: String60LatinType,
@@ -3022,11 +3022,11 @@ impl WithDeserializer for AltriDatiIdentificativiContent62Type {
 impl WithDeserializer for AltriDatiIdentificativiContent62TypeContent {
     type Deserializer = quick_xml_deserialize::AltriDatiIdentificativiContent62TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreContent50Type {
     pub content: CedentePrestatoreContent50TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreContent50TypeContent {
     pub denominazione: String80LatinType,
 }
@@ -3074,11 +3074,11 @@ impl WithDeserializer for CedentePrestatoreContent50Type {
 impl WithDeserializer for CedentePrestatoreContent50TypeContent {
     type Deserializer = quick_xml_deserialize::CedentePrestatoreContent50TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreContent51Type {
     pub content: CedentePrestatoreContent51TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CedentePrestatoreContent51TypeContent {
     pub nome: String60LatinType,
     pub cognome: String60LatinType,
@@ -3127,11 +3127,11 @@ impl WithDeserializer for CedentePrestatoreContent51Type {
 impl WithDeserializer for CedentePrestatoreContent51TypeContent {
     type Deserializer = quick_xml_deserialize::CedentePrestatoreContent51TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleContent55Type {
     pub content: RappresentanteFiscaleContent55TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleContent55TypeContent {
     pub denominazione: String80LatinType,
 }
@@ -3179,11 +3179,11 @@ impl WithDeserializer for RappresentanteFiscaleContent55Type {
 impl WithDeserializer for RappresentanteFiscaleContent55TypeContent {
     type Deserializer = quick_xml_deserialize::RappresentanteFiscaleContent55TypeContentDeserializer;
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleContent56Type {
     pub content: RappresentanteFiscaleContent56TypeContent,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RappresentanteFiscaleContent56TypeContent {
     pub nome: String60LatinType,
     pub cognome: String60LatinType,

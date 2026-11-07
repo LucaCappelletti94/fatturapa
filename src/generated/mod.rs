@@ -4,7 +4,6 @@
 #[expect(
     clippy::collapsible_if,
     clippy::default_trait_access,
-    clippy::derive_partial_eq_without_eq,
     clippy::ignored_unit_patterns,
     clippy::large_enum_variant,
     clippy::len_zero,
@@ -42,7 +41,6 @@ pub mod fpr12;
 #[expect(
     clippy::collapsible_if,
     clippy::default_trait_access,
-    clippy::derive_partial_eq_without_eq,
     clippy::ignored_unit_patterns,
     clippy::large_enum_variant,
     clippy::len_zero,
@@ -80,7 +78,6 @@ pub mod fsm10;
 #[expect(
     clippy::collapsible_if,
     clippy::default_trait_access,
-    clippy::derive_partial_eq_without_eq,
     clippy::ignored_unit_patterns,
     clippy::large_enum_variant,
     clippy::len_zero,

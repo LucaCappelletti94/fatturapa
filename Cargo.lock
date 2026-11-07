@@ -409,9 +409,6 @@ name = "email_address"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "encoding_rs"
@@ -472,6 +469,8 @@ dependencies = [
  "rust_decimal",
  "rustls-pki-types",
  "rustls-webpki",
+ "serde",
+ "serde_json",
  "sha1",
  "sha2",
  "spki",
@@ -738,6 +737,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20633e788d3948ea7336861fdb09ec247f5dae4267e8f0743fa97de26c28624d"
 dependencies = [
  "lazy_static",
+ "serde",
 ]
 
 [[package]]
@@ -749,6 +749,7 @@ dependencies = [
  "iso_country",
  "proc-macro2",
  "quote",
+ "serde",
 ]
 
 [[package]]
@@ -1902,7 +1903,6 @@ checksum = "a0181c14ddd6c7b8b0b0132a5f1ea2f32be0d893cd3ea97b6e3b28886b8a3d1c"
 dependencies = [
  "cfg-if",
  "rustversion",
- "serde",
  "wasm-bindgen-macro",
  "wasm-bindgen-shared",
 ]

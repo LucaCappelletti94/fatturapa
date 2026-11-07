@@ -174,7 +174,7 @@ fn generate(spec_dir: &Path, schema: &str) -> Result<String> {
 
     let config = Config::default()
         .with_quick_xml()
-        .with_derive(["Debug", "Clone", "PartialEq"])
+        .with_derive(["Debug", "Clone", "PartialEq", "Eq", "Hash"])
         .with_type(
             IdentQuadruple::new("decimal", IdentType::Type).with_ns(Namespace::XS),
             CustomMeta::new("Amount").include_from("crate::amount::Amount"),

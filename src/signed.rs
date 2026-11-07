@@ -264,7 +264,7 @@ pub enum ChainError {
 ///
 /// Every `SignerInfo` of the file is verified. The exposed signer, chain and
 /// signing time are the ones of the first `SignerInfo`.
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VerifiedSignature {
     /// The encapsulated `XML` content.
     content: Vec<u8>,

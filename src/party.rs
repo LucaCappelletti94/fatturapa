@@ -47,7 +47,8 @@ where
 }
 
 /// The tax identity of a party, one of the three forms the header admits.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum TaxIdentity {
     /// The identity of an Italian party, `IdPaese` `IT`. At least one of
     /// the two identifiers is present.
@@ -195,7 +196,7 @@ impl TaxIdentity {
 }
 
 /// The seat of a party, one of the two forms the `Sede` admits.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Address {
     /// The Italian seat, with its `CAP` and `Provincia`.
     italian: Option<(Indirizzo, Cap, Comune, Provincia)>,
@@ -373,7 +374,8 @@ impl Address {
 }
 
 /// The name of a party, one of the two forms of the `Anagrafica`.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Name {
     /// The `Denominazione` of a business.
     Denomination(Denomination),
@@ -391,7 +393,8 @@ pub enum Name {
 ///
 /// Constructed through one of its roles, the `Seller`, the `Buyer`, the
 /// `Business` or the `Company`.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Party {
     /// The `Anagrafica` name.
     name: Name,
@@ -521,7 +524,8 @@ impl Party {
 
 /// The seller of a `FatturaElettronica`, an Italian VAT-registered party
 /// carrying the `RegimeFiscale` of the `CedentePrestatore`.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Seller {
     /// The party of the `CedentePrestatore`.
     party: Party,
@@ -685,7 +689,8 @@ impl From<Seller> for Party {
 }
 
 /// The buyer of a domestic `FatturaElettronica`, an Italian party.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Buyer {
     /// The party of the `CessionarioCommittente`.
     party: Party,
@@ -849,7 +854,8 @@ impl From<Buyer> for Party {
 
 /// A non-Italian business, the EU or non-EU client of the art. 7-ter
 /// invoice and the supplier of the `TD17` and `TD19` self-invoice.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Business {
     /// The party of the document.
     party: Party,
@@ -973,7 +979,8 @@ impl From<Business> for Party {
 
 /// An Italian company with its `partita IVA`, the buyer of the `TD17` and
 /// `TD19` self-invoice.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Company {
     /// The party of the `CessionarioCommittente`.
     party: Party,
@@ -1098,6 +1105,229 @@ impl Company {
 impl From<Company> for Party {
     fn from(company: Company) -> Self {
         company.party
+    }
+}
+
+/// The serialised form of an [`Address`], the two seats as tagged variants.
+#[cfg(feature = "serde")]
+#[derive(serde::Serialize, serde::Deserialize)]
+enum AddressForm {
+    /// The Italian seat, with its `CAP` and `Provincia`.
+    Italian {
+        /// The `Indirizzo`.
+        indirizzo: Indirizzo,
+        /// The `CAP`.
+        cap: Cap,
+        /// The `Comune`.
+        comune: Comune,
+        /// The `Provincia`.
+        provincia: Provincia,
+    },
+    /// The foreign seat, which writes the `CAP` `00000`.
+    Foreign {
+        /// The `Indirizzo`.
+        indirizzo: Indirizzo,
+        /// The foreign postal code, appended to the `Indirizzo`.
+        postal_code: Option<PostalCode>,
+        /// The `Comune`.
+        comune: Comune,
+        /// The country of the seat.
+        country: Country,
+    },
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Address {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let form = if let Some((indirizzo, cap, comune, provincia)) = &self.italian {
+            AddressForm::Italian {
+                indirizzo: indirizzo.clone(),
+                cap: *cap,
+                comune: comune.clone(),
+                provincia: *provincia,
+            }
+        } else if let Some((indirizzo, postal_code, comune, country)) = &self.foreign {
+            AddressForm::Foreign {
+                indirizzo: indirizzo.clone(),
+                postal_code: postal_code.clone(),
+                comune: comune.clone(),
+                country: *country,
+            }
+        } else {
+            return Err(serde::ser::Error::custom("the address carries no seat"));
+        };
+        form.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Address {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match AddressForm::deserialize(deserializer)? {
+            AddressForm::Italian {
+                indirizzo,
+                cap,
+                comune,
+                provincia,
+            } => Ok(Self::italian(indirizzo, cap, comune, provincia)),
+            AddressForm::Foreign {
+                indirizzo,
+                postal_code,
+                comune,
+                country,
+            } => Self::foreign(indirizzo, postal_code, comune, country)
+                .map_err(serde::de::Error::custom),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for TaxIdentity {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        enum Raw {
+            /// The Italian identity, at least one identifier present.
+            Italian {
+                /// The `partita IVA`, when present.
+                partita_iva: Option<PartitaIva>,
+                /// The `CodiceFiscale`, when present.
+                codice_fiscale: Option<CodiceFiscale>,
+            },
+            /// The EU business identity.
+            EuVat {
+                /// The member state.
+                country: EuCountry,
+                /// The VAT number.
+                vat: ForeignTaxId,
+            },
+            /// The non-EU identity.
+            Foreign {
+                /// The country of residence.
+                country: Country,
+                /// The fiscal identifier of residence.
+                id: ForeignTaxId,
+            },
+        }
+        match Raw::deserialize(deserializer)? {
+            Raw::Italian {
+                partita_iva,
+                codice_fiscale,
+            } => {
+                if partita_iva.is_some() || codice_fiscale.is_some() {
+                    Ok(Self::Italian {
+                        partita_iva,
+                        codice_fiscale,
+                    })
+                } else {
+                    Err(serde::de::Error::custom(
+                        "the Italian identity needs at least one identifier",
+                    ))
+                }
+            }
+            Raw::EuVat { country, vat } => Ok(Self::EuVat { country, vat }),
+            Raw::Foreign { country, id } => Ok(Self::Foreign { country, id }),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Seller {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        struct Raw {
+            /// The party of the `CedentePrestatore`.
+            party: Party,
+            /// The `RegimeFiscale`.
+            regime: RegimeFiscale,
+        }
+        let Raw { party, regime } = Raw::deserialize(deserializer)?;
+        let identity = party.identity();
+        if identity.is_italian() && identity.has_partita_iva() {
+            Ok(Self { party, regime })
+        } else {
+            Err(serde::de::Error::custom(
+                "the seller must be an Italian party with its partita IVA",
+            ))
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Buyer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        struct Raw {
+            /// The party of the `CessionarioCommittente`.
+            party: Party,
+        }
+        let Raw { party } = Raw::deserialize(deserializer)?;
+        if party.identity().is_italian() {
+            Ok(Self { party })
+        } else {
+            Err(serde::de::Error::custom(
+                "the buyer must be an Italian party",
+            ))
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Business {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        struct Raw {
+            /// The party of the document.
+            party: Party,
+        }
+        let Raw { party } = Raw::deserialize(deserializer)?;
+        if !party.identity().is_italian() && matches!(party.name(), Name::Denomination(_)) {
+            Ok(Self { party })
+        } else {
+            Err(serde::de::Error::custom(
+                "the business must be a non-Italian party with its denomination",
+            ))
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Company {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        struct Raw {
+            /// The party of the `CessionarioCommittente`.
+            party: Party,
+        }
+        let Raw { party } = Raw::deserialize(deserializer)?;
+        let identity = party.identity();
+        if identity.is_italian() && identity.has_partita_iva() {
+            Ok(Self { party })
+        } else {
+            Err(serde::de::Error::custom(
+                "the company must be an Italian party with its partita IVA",
+            ))
+        }
     }
 }
 

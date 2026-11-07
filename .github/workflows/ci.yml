@@ -25,6 +25,8 @@ jobs:
       - run: shellcheck -x -S warning .clusterfuzzlite/build.sh tests/fixtures/generate.sh
       - run: cargo run -p codegen --locked -- --check
       - run: cargo clippy --workspace --all-targets --all-features --locked
+      - run: cargo check -p fatturapa --no-default-features --locked
+      - run: cargo check -p fatturapa --features serde --locked
       - run: cargo doc --no-deps --all-features --locked
         env:
           RUSTDOCFLAGS: -D warnings

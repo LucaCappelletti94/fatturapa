@@ -12,6 +12,7 @@ Reading and writing of every `FatturaPA` invoice and SDI message, in Rust. Unoff
 - the simplified invoice, `FSM10`
 - the nine SDI messages, from the delivery receipt to the deadline notice
 - signed files: a `CAdES` `.xml.p7m` (raw `DER` or `base64`) is unwrapped to its `XML` and its signature verified, with the `trust-list` feature parsing the `AgID` trusted services list into trust anchors
+- an optional `serde` feature that reads and writes the typed identifiers and domain types as JSON, validating every value on the way in
 
 The types are generated from the official XSD schemas in `spec/`, so a document round-trips through the schema it was written for. Amounts keep their exact decimal scale and dates keep their lexical form.
 

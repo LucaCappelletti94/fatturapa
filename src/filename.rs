@@ -28,7 +28,7 @@ use std::fmt;
 use std::str::FromStr;
 
 /// Why an `SDI` file name is invalid.
-#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(Clone, Debug, thiserror::Error, PartialEq, Eq)]
 pub enum NameError {
     /// The country code is not two upper-case letters.
     #[error("the country code {0:?} is not an ISO 3166-1 alpha-2 code in upper case")]
@@ -72,7 +72,9 @@ pub enum NameError {
 
 /// The type code of an `SDI` receipt or notification, per the nomenclature
 /// of the technical specification.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub enum MessageKind {
     /// The delivery receipt, `RC`.
     Rc,
@@ -136,12 +138,36 @@ impl FromStr for MessageKind {
     }
 }
 
+impl TryFrom<&str> for MessageKind {
+    type Error = NameError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for MessageKind {
+    type Error = NameError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl From<MessageKind> for String {
+    fn from(value: MessageKind) -> Self {
+        value.to_string()
+    }
+}
+
 /// The name of an invoice file sent to the `SDI`.
 ///
 /// The signed flag picks between the `.xml` extension of the `XAdES` form
 /// and the `.xml.p7m` extension of the `CAdES` form. The name of a signed
 /// file is the name of the unsigned file with `.p7m` appended.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct InvoiceName {
     /// The country code, as in `IT`.
     country: String,
@@ -256,6 +282,28 @@ impl FromStr for InvoiceName {
     }
 }
 
+impl TryFrom<&str> for InvoiceName {
+    type Error = NameError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for InvoiceName {
+    type Error = NameError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl From<InvoiceName> for String {
+    fn from(value: InvoiceName) -> Self {
+        value.to_string()
+    }
+}
+
 /// The name of an `SDI` receipt or notification file.
 ///
 /// The invoice part holds the country code, the identifier and the file
@@ -263,7 +311,9 @@ impl FromStr for InvoiceName {
 /// signed flag of that invoice file does not appear in the name, since the
 /// extension of the received file is the part the message type and the
 /// message progressive replace.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct MessageName {
     /// The invoice file the message refers to.
     invoice: InvoiceName,
@@ -355,6 +405,28 @@ impl FromStr for MessageName {
             kind,
             progressive,
         })
+    }
+}
+
+impl TryFrom<&str> for MessageName {
+    type Error = NameError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for MessageName {
+    type Error = NameError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl From<MessageName> for String {
+    fn from(value: MessageName) -> Self {
+        value.to_string()
     }
 }
 
