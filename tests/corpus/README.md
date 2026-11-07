@@ -32,7 +32,7 @@ Each source directory carries the upstream `LICENSE` file next to the copied fil
 | `kamerozkan/` | [kamerozkan/italy-fatturapa-validator-sample](https://github.com/kamerozkan/italy-fatturapa-validator-sample) | MIT | `accepted_fpr12.xml`, `rejected_arithmetic_fpr12.xml` |
 | `marco-mastella/` | [marco-mastella/fatturapa](https://github.com/marco-mastella/fatturapa) | EUPL 1.2 | `xmlInvoices/*.xml`, `xmlInvalid/*.xml` |
 | `mcp-fatturapa/` | [MaurizioLisanti/fatturapa-mcp-server](https://github.com/MaurizioLisanti/fatturapa-mcp-server) | MIT | `test/fixtures/*.xml`, three files |
-| `merge-invoices/` | [giosil/merge-invoices](https://github.com/giosil/merge-invoices) | Apache 2.0 | `*_invoice.xml`, `*_credit_note.xml`, five files |
+| `merge-invoices/` | [giosil/merge-invoices](https://github.com/giosil/merge-invoices) | Apache 2.0 | `*_invoice.xml`, `*_credit_note.xml`, six files |
 | `odoo-fatturapa-viewer/` | [julioromano/odoo-fatturapa-viewer](https://github.com/julioromano/odoo-fatturapa-viewer) | Apache 2.0 | `test.xml`, `test-bad.xml`, `test-bad.xml.p7m` |
 | `openfatture/` | [gianlucamazza/openfatture](https://github.com/gianlucamazza/openfatture) | MIT | `tests/.../*.xml`, three files |
 | `p7m-apri/` | [azuki-beans/p7m-apri](https://github.com/azuki-beans/p7m-apri) | MIT | `*.p7m`, three files |
@@ -78,24 +78,26 @@ copied, the `fatture-elettroniche-explorer/ATTESO.json` file, the
 `tappoz/fe-xml-sample` `yaml` catalogs, `utenzepa/documento.pdf`,
 `p7m-apri/documento.pdf` and `p7m-fattura-decoder/not-base64.txt`.
 `odoo-fatturapa-viewer/test.xml.p7m` and `p7m-apri/TEST.p7m` carry the
-certificates of real persons and are excluded. `merge-invoices/02_invoice.xml`
-is valid against the `XSD` but the generated reader rejects it, a
-`dsig-xpath:XPath` filter-2 element in `ds:Transform`, so the file is
-excluded and the reader defect is reported.
+certificates of real persons and are excluded.
 
 ## Outcomes
 
-Four hundred and ninety one files. Three hundred and seventy seven read,
+Four hundred and ninety two files. Three hundred and seventy eight read,
 validate and round-trip, including the signed files unwrapped from their
 `.p7m` wrapper. One hundred and eight fail the `XSD` validation of `spec/`,
 listed below with the reason `xmllint` reports. Six signed files do not unwrap
 at all, because their `CMS` structure is damaged or absent, and that is what
 their upstream suite exercises them for.
 
-Thirty nine of the round-tripped invoices carry a `Signature` element. They
-round-trip equal, but the written bytes are not `XSD`-validated, because the
-upstream `xsd-parser` loses the `ds:` namespace of the element on
-serialisation (Bergmann89/xsd-parser#308).
+Forty of the round-tripped invoices carry a `Signature` element. Their
+`xs:any` content, the filter-2 `XPath` transform and the XAdES object, is
+preserved through the round-trip, up to the namespace declarations of that
+content, which the `xsd-parser` does not keep stable on serialisation. The
+round-trip test therefore checks equality outside the signature and compares
+the two signatures with the `xs:any` content normalised. The written bytes of
+the signed documents are not `XSD`-validated, because the `xsd-parser` writes
+the `ds:Signature` reference without its namespace
+(Bergmann89/xsd-parser#308).
 
 ### Files that fail the `XSD` validation
 
@@ -238,7 +240,7 @@ criteria of the version 2.0 list. Every other readable invoice is clean.
 | `tappoz/sample_data/IT12345678901_ddddd_SCONTO_DOC_NO_VALUE_fail_BR_00437.xml` | 00437 | a document `ScontoMaggiorazione` with `Tipo` and neither value |
 | `tappoz/sample_data/IT12345678901_ddddd_SCONTO_LINE_NO_VALUE_fail_BR_00438.xml` | 00438 | a line `ScontoMaggiorazione` with `Tipo` and neither value |
 | `tappoz/sample_data/IT12345678901_ddddd_SDI_PEC_fail_BR_00330.xml` | 00330 | the `PECDestinatario` is the SdI operational mailbox `sdi01@pec.fatturapa.it` |
-| `tappoz/sample_data/IT12345678901_ddddd_TD17_NO_IDIVA_CC_fail_BR_00475.xml` | 00475 | `TD29` without the buyer `IdFiscaleIVA` |
+| `tappoz/sample_data/IT12345678901_ddddd_TD17_NO_IDIVA_CC_fail_BR_00475.xml` | 00475 | `TD17` without the buyer `IdFiscaleIVA` |
 | `tappoz/sample_data/IT12345678901_ddddd_TD21_ZERO_ALIQUOTA_fail_BR_00474.xml` | 00400, 00474 | `TD21` with a zero-rate line missing `Natura` |
 | `validatefin/IT06363391001_00003.xml` | 00445 twice, 00421, 00422 | the generic nature on a line and a riepilogo, plus riepilogo `Imposta` and `ImponibileImporto` off |
 | `validatefin/IT06363391001_00004.xml` | 00427, 00425 | `CodiceDestinatario` length wrong and `Numero` without any digit |

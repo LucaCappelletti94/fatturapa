@@ -23,9 +23,14 @@
 //! the crate implements, while the codes the crate marks out of reach in
 //! the `validate` doc table are listed in the test with their reason.
 //!
-//! The invoices that carry a `Signature` element round-trip equal, but the
-//! written bytes are not XSD-validated, because the upstream `xsd-parser`
-//! loses the `ds:` namespace of the element on serialisation
+//! The invoices that carry a `Signature` element preserve the `xs:any`
+//! content of the signature through the round-trip, up to the namespace
+//! declarations of that content, which the `xsd-parser` does not keep
+//! stable on serialisation. The round-trip test
+//! therefore checks equality outside the signature and compares the two
+//! signatures with the `xs:any` content normalised. The written bytes of
+//! the signed documents are not XSD-validated, because the `xsd-parser`
+//! writes the `ds:Signature` reference without its namespace
 //! (Bergmann89/xsd-parser#308).
 
 #![expect(
@@ -1022,8 +1027,8 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
     ),
 ];
 
-/// Every corpus file validates as the curated lists say, round-trips equal,
-/// and runs through the `validate` checks as the findings table says.
+/// Every corpus file validates as the curated lists say, round-trips, and
+/// runs through the `validate` checks as the findings table says.
 #[test]
 fn corpus_round_trips() {
     let files = corpus_files(Path::new(CORPUS_DIR));
@@ -1244,10 +1249,13 @@ where
     set
 }
 
-/// Reads `content` as an ordinary invoice, writes it, re-reads it equal, and
+/// Reads `content` as an ordinary invoice, writes it, re-reads it, and
 /// records the `validate` findings. The written bytes are XSD-validated,
-/// unless the document carries a `Signature` element, which the upstream
-/// `xsd-parser` defect keeps unqualified on serialisation.
+/// unless the document carries a `Signature` element. Unsigned documents
+/// must round-trip exactly. Signed documents must be equal outside the
+/// signature, and the two signatures must be equal after clearing the
+/// namespace declarations of their `xs:any` content, the one part the
+/// `xsd-parser` does not keep stable on serialisation.
 fn round_trip_ordinary(
     content: &[u8],
     schema: &str,
@@ -1255,16 +1263,39 @@ fn round_trip_ordinary(
     findings: &mut Vec<(String, Vec<(String, String)>)>,
     signed_docs: &mut usize,
 ) {
-    let parsed = FatturaElettronica::from_xml_slice(content).expect("the invoice reads");
+    let mut parsed = FatturaElettronica::from_xml_slice(content).expect("the invoice reads");
     let written = parsed.to_xml_vec().expect("the invoice writes");
-    if carries_signature(content) {
+    let signed = carries_signature(content);
+    if signed {
         *signed_docs += 1;
     } else {
         support::validate(Path::new(schema), &written).expect("the written invoice validates");
     }
-    let reread =
+    let mut reread =
         FatturaElettronica::from_xml_slice(&written).expect("the written invoice re-reads");
-    assert_eq!(parsed, reread, "{relative} round-trips");
+    if signed {
+        let first = parsed
+            .content
+            .signature
+            .take()
+            .expect("the parsed invoice keeps its signature");
+        let second = reread
+            .content
+            .signature
+            .take()
+            .expect("the written invoice keeps its signature");
+        assert_eq!(
+            parsed, reread,
+            "{relative} round-trips outside the signature"
+        );
+        assert_eq!(
+            support::normalize_fpr12_signature(first),
+            support::normalize_fpr12_signature(second),
+            "{relative} signature round-trips"
+        );
+    } else {
+        assert_eq!(parsed, reread, "{relative} round-trips");
+    }
     let found = validate(&parsed)
         .into_iter()
         .map(|violation| (violation.code, violation.path))
@@ -1272,7 +1303,8 @@ fn round_trip_ordinary(
     findings.push((relative.to_string(), found));
 }
 
-/// The simplified invoice variant of `round_trip_ordinary`.
+/// The simplified invoice variant of `round_trip_ordinary`, with the same
+/// exact or signature-normalised equality on the re-read.
 fn round_trip_simplified(
     content: &[u8],
     schema: &str,
@@ -1280,18 +1312,41 @@ fn round_trip_simplified(
     findings: &mut Vec<(String, Vec<(String, String)>)>,
     signed_docs: &mut usize,
 ) {
-    let parsed = FatturaElettronicaSemplificata::from_xml_slice(content)
+    let mut parsed = FatturaElettronicaSemplificata::from_xml_slice(content)
         .expect("the simplified invoice reads");
     let written = parsed.to_xml_vec().expect("the simplified invoice writes");
-    if carries_signature(content) {
+    let signed = carries_signature(content);
+    if signed {
         *signed_docs += 1;
     } else {
         support::validate(Path::new(schema), &written)
             .expect("the written simplified invoice validates");
     }
-    let reread = FatturaElettronicaSemplificata::from_xml_slice(&written)
+    let mut reread = FatturaElettronicaSemplificata::from_xml_slice(&written)
         .expect("the written simplified invoice re-reads");
-    assert_eq!(parsed, reread, "{relative} round-trips");
+    if signed {
+        let first = parsed
+            .content
+            .signature
+            .take()
+            .expect("the parsed invoice keeps its signature");
+        let second = reread
+            .content
+            .signature
+            .take()
+            .expect("the written invoice keeps its signature");
+        assert_eq!(
+            parsed, reread,
+            "{relative} round-trips outside the signature"
+        );
+        assert_eq!(
+            support::normalize_fsm10_signature(first),
+            support::normalize_fsm10_signature(second),
+            "{relative} signature round-trips"
+        );
+    } else {
+        assert_eq!(parsed, reread, "{relative} round-trips");
+    }
     let found = validate_simplified(&parsed)
         .into_iter()
         .map(|violation| (violation.code, violation.path))
