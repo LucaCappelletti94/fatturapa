@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTFheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-01T12:00:00</DataOraRicezione>
+  <Destinatario>
+    <Codice>AAAAAA</Codice>
+    <Descrizione>Pubblica Amministrazi=one di prova</Descrizione>
+  </Destinatario>
+  <MessageId>1234<?xml version="1.0" encoding="UTF-xml8"?><?xml-stylesheet type="text/xsl" href=%RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdR>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatario56</M>essageId>
+  <No
+    <te>AtteCo

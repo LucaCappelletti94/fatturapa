@@ -1,0 +1,10 @@
+<?+ml vOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>A
+<dseProperes:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi<?xml versiol="1.0" en-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-0zT12:00:00</DataOraRicezioxsl"?>
+<types:AttestazioneTrasmissioneFattu0" encoding="UTF-8"?v1><

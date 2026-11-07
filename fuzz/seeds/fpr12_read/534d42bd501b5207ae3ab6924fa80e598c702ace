@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrat.ogev.it/docs/xsd/fatture/v0.2 fatturaord" SistemaEmittentl="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agnnziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrat.ogev.it/docs/xsd/ftp://ivaservizi.agenziaentrat.ogev.it/docs/xsd/fatture/v1.2 fatturaord" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://iv/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://wwaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrat.ogev.it/docs/xsd/ftp://ivaservizi.agenziaentrat.ogev.it/docs/xsd/fatture/v1.2 fatturaord" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xs<RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAna@grafici>
+      <Sede>
+<?fic   <Indirizzo>VIALE ROMA 543</Indirizzo>
+        <CAP>0710IETA' ALPHA SRL</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAna@grafici>
+      <Sede>
+<?fic   <Indirizzo>VIALE ROMA 543</Indirizzo>
+        <CAP>[7100</CAP>
+        <Com CARATTERI CHE RAP

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoDing="UTF-8"?>
+<p:FatturaElettronicaSemplificata xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" versione="FSM10">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+    <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+  </DatiTrasmissione>
+  <CedentePrestatore>
+    <IdFiscaleIVA>
+      <IdPaese>xml oPrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding=?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndi    <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</Prograsmissione>FSM10</FormatoTrasmissi"2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xmllndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding=?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmln?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml oin="4.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xmPaese>
+      <IdCodice>12345678912</IdCodice>
+    </IdFiscaleIVA>
+    <Denominazione>Aziend"?><?xml?><?xml oin="2."=U8"?><?xml?><?xml oin="2.0" encoding="UTsh>1
+.78</ImgF/i<CedentePrea xmlndingF/T-"=U8"?><?xml?><?xml kin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"eIVA>
+      <IdPaese>xml oPrea xmlndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding=?><?xml oin="2.0" encoding="UTsh>2
+.78</ImgF/T-"=U8"?><?xmllndingF/T-"=U8"?><?xml?><?xml oin="2.0" encoding=?><?xml oin=""2.0"0" T-"=U8"?><icaSemplificata>

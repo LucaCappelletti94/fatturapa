@@ -1,0 +1,15 @@
+<?xml version="1.0-stylesheet t<?xml version="1.0"text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="h[ttp://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="S"1rsxsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>N
+  <NomeFile>IT01234567890_11111.êml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>< D 
+estinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Desˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇcrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <Note>Esempio</No><ds:SignatureValue Id="SignatureValue1">G0FOBC+E8JKtJ5K2C+LBlvv3oarzkub7w2q5U1UQZnobWmFBbZ4WzgBNTMKUjdi2ZLkUpOSEwedf
+VLgl5SyhaKYY6TizDNbxededc/iDI6H//x+3axnLU4WwFzdr3AwqPQjPuugGX07
+gOcjBHtbr7ie2Wr//o8=</ds:SignatureValue><ds:KeyInfo Id="KeyInfoId"><ds:X509Data><ds:X509Certificate>MIDAdBgNVHQ4EFgQUn+JY07NI6xlrCUXiHoFFN66dkwDQYJKoZI
+hvcNAQEFBQADggEBALZs:SignedSignatureProperˇties><xades:Sig

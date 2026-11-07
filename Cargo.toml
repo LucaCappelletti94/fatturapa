@@ -1,0 +1,109 @@
+[package]
+name = "fatturapa"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Reading and writing of every FatturaPA invoice and SDI message, unofficial"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/LucaCappelletti94/fatturapa"
+documentation = "https://docs.rs/fatturapa"
+authors = ["Luca Cappelletti <cappelletti.luca94@gmail.com>"]
+keywords = ["fatturapa", "e-invoicing", "italy", "sdi", "xml"]
+categories = ["finance", "parser"]
+# The third-party corpus in tests/corpus stays in the repository only, under its own licences.
+include = [
+    "/src",
+    "/spec",
+    "/tests/compile_fail",
+    "/tests/filename.rs",
+    "/tests/fixtures",
+    "/tests/generator",
+    "/tests/invoices.rs",
+    "/tests/property.rs",
+    "/tests/roundtrip.proptest-regressions",
+    "/tests/roundtrip.rs",
+    "/tests/samples.rs",
+    "/tests/signed.rs",
+    "/tests/support",
+    "/tests/totals.rs",
+    "/tests/truncated.rs",
+    "/tests/trust_list.rs",
+    "/tests/trybuild.rs",
+    "/tests/validate.rs",
+    "/README.md",
+    "/LICENSE",
+]
+
+[dependencies]
+base64 = "0.23.1"
+bon = "3.10.3"
+cms = "0.2.3"
+const-oid = "0.9.6"
+der = { version = "0.7.10", features = ["derive"] }
+digest = "0.10.7"
+email_address = "0.2.9"
+iban_validate = "5.0.1"
+iso_country = "0.1.4"
+iso_currency = "0.7.1"
+jiff = "0.2.39"
+quick-xml = "0.42.0"
+rasn = "0.30"
+rasn-cms = "0.30"
+rust_decimal = "1.43.0"
+rustls-pki-types = "1.15"
+rustls-webpki = { version = "0.103.16", features = ["ring", "std"] }
+sha1 = "0.10.6"
+sha2 = { version = "0.10.8", features = ["oid"] }
+spki = "0.7.3"
+thiserror = "2.0.21"
+x509-cert = "0.2.5"
+xsd-parser-types = { version = "0.3.0", features = ["quick-xml"] }
+
+[features]
+trust-list = []
+
+[dev-dependencies]
+base64 = "0.23.1"
+cms = "0.2.3"
+const-oid = "0.9.6"
+der = { version = "0.7.10", features = ["derive"] }
+digest = "0.10.7"
+ecdsa = "0.16.9"
+p256 = "0.13.2"
+proptest = { version = "1.12.0", features = ["attr-macro"] }
+sha2 = "0.10.8"
+spki = "0.7.3"
+trybuild = "1.0.122"
+x509-cert = "0.2.5"
+
+[workspace]
+members = ["codegen"]
+
+[workspace.lints.rust]
+missing_docs = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unreachable_pub = "warn"
+unsafe_code = "forbid"
+unused_qualifications = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+expect_used = "warn"
+missing_docs_in_private_items = "warn"
+multiple_crate_versions = "allow"
+# Contradicts the unreachable_pub lint enabled above, which asks for pub(crate) where this asks for pub.
+redundant_pub_crate = "allow"
+unwrap_used = "warn"
+
+[lints]
+workspace = true
+
+[profile.mutants]
+inherits = "test"
+debug = "none"
+
+[package.metadata.docs.rs]
+all-features = true

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-  <IdCodice>04848484848</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>000123456</ProgressivoInvio>
+ onicaSemplific"http://www.w3.org/0200/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>ion="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.ag$enziaentrate.gov.it/docs/xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/0200/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione
+            <IdTrasmittent<?xml version="1.0" en

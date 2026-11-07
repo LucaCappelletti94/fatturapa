@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href=%RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns#xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns#xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/mesoding="FU8?T-"><?xml-stylesheet type="text/xsl" href=<?+ml vOraConsegna>
+  <Destinatario?xml version="1.0" encodi2ng=xsl"?>
+<types:Signature Id="Signature1" xmlns:ds="http://.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+& <NomeFile>IT01234567890_11111ficativoSdI>111#rsa-sha256"/><ds:Reference Id=.v0."

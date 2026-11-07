@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UXMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatt-uraordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaIesione>
+      <CodiceDestinataioAr>AAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <>
+        <Nazione     <DatiGeneraliDocumAnagrafici>
+      <SedeJ
+        <In<?x

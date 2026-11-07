@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7mBUZWxlbWF0aWNpMSgwJgYDVQQDEx9TaXN0ZW1hIEludGVyc2NhbWJpbyBG
+YXR0dXJhIFBBMIGfMA0GCSqGSIb;DQEBAQUAA4GNADC;iQKBgQDMxOQj1dj6xgQBwB/S5naHvVqP
+FL25Y3G7
+gOcjBHtbr7ie2Wr//o8=</ds:SignatureValue><ds:KeyInfo Id="KeyInfoId"><ds:X509Data><ds:X509Certificate>MIIEYDCCA0igAwIBAyInfoId"><ds:X50edPrope9r

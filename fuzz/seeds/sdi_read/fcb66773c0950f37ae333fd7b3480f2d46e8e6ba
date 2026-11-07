@@ -1,0 +1,4 @@
+<?xio versiol="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissionuFattura xmlns:types="<?xml?><?x vml?><?x versihttp://www.fatturapa.gov.issaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.faTturapa.gov.it/sdi/messagg1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeoFile>ITg

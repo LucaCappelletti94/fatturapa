@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronicaSemplificata xmlns:ns3="http://ivaservizi.agenziaentrate.govsd/coti./xsd/fatture/v1.0" xmlns:ns2="http://www.w3.org/0200/09/xmldsig#" versione="FSM10">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01111118888</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>***</ProgressivoInvio>
+            <FormatoTrasmissione>FSM10</FormatoTrasmissione>
+            <CodiceDestinatario>0000000</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA AAAA SPA</Denominazione>
+            <Sede>
+                <Indirizzo>VIA TEST</Indirizzo>
+                <NumeroCivico>8</NumeroCivico>
+                <CAP>00100</CAP>
+                <Comune>TORINO</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+                <IscrizioneREA>
+                <Ufficio>TO</Ufficio>
+                <NumeroREA>123456</NumeroREA>
+                <StoLiquidazione>LN</Sta<?<?xmversion="2.0" encodi<CedetoLiquidazione>
+<?/"l version="1.0" encoding="UTF-4"?>
+<nsD3:FatturaElettronicaSemplificata xmlns:ns3="http://iv<Progres<FormatoTrasmissione>FSM10</FormatoTrasmissione>
+     <?xml version="1.0" encoding="U">
+    <FatturaElettronicaHead       <IdPaese>IT</IdPaese>
+                    <IdCodice>04445555444</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>04445555444</CodiceFiscale>
+            </IdentificativiFiscali>
+            <AltriDatiIdentificativi>
+                <Denominazione>PROVA AZIENDA TEST CIAO SRL</Denominazione>
+                <Sede>
+          </AltriDatiIdentificativi>
+        </CessionaePrestatore>
+            <IdFiscaleIVA>
+                <IdPaese>IT</IdPaese>
+             nte?xml oin="2.0" encoding="UU8"?><?xml?><?xml oin="2."U8"=?><?xml?><?xml oin="2.0" e"=U5"?><?   <IdCodice>01222222222</IdCodice>
+            </IdFiscaleIVA>
+            <CodiceFiscale>01222222222</CodiceFiscale>
+            <Denominazione>PROVA AAA AZIENDA xml?><?xmlAAA oPrea

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v2.0" xmlns:ds="http://www.w3.org/2000/tp://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturap'a.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdM>
+  <NomeFile>ITпнмлкйиа890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-01T12:00:00</DataOraRicezion,>
+  <Destinatario>
+    <Codice>AAAAAA</Codice>
+    <Descrizione>Pubblica Amministrazione di prova</Descrizione>
+  </Destinatario>
+  <MessageId>123m="http://www.w3.dorg/2001/10/xml-exc-c14n#"/><ds:SignatureMe<iginale>d2c1f

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href=<?+ml vOraConsegna>
+  <Destinatario?xml version="1.0" encodi2ng="UTF-8"?><?xml-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111`</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-01T12:00:00</DataOraRicezione>
+  <D<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xestminatario>lns:xsi
+    <

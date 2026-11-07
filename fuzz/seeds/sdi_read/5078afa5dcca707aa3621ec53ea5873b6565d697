@@ -1,0 +1,9 @@
+<?xwl version="0.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7mBUZWxlbWF0aWNpMSgwJgYDVQQDEx9TaXN0ZW1hIEludGVyc2NhbWJpbyBG
+YXR0dXJhIFBBMIGfMA0GCSqGSIb3DQEBAQUAA4GNADC;iQKBgQDMxOQj1dj6xgQBwB/S5naHvVqP
+FL<?xml version="1.0" encoding= UTF-8"?><?xml-styleshee2"><XPathg0Nxdxzu+3M5i0w+UI6X89E=</ds:DigestValue></ds:Reference><ds:Reference Id="reference-keyinfo" URI<?xml version="1.0" encoding="UTF-8"A><?xml-stylesheet type="text/xsl" hre"A><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<001/04/xmlenc#sha256"/><ds:DigestValue>BaZyFTXyxM8aIJhtiemem1lEIyt4zWeNjf4PwNS0+s6Y6eC8tx25Y3G7
+gOcjBHtbr7ie2Wr//o8=</ds:SignatureValue><ds:KeyInfo Id="KeyInfoId"><ds:X5
+fOJmQNGQIbujWhds:KeyInfo><ds+8

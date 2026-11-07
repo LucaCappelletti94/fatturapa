@@ -1,0 +1,8 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc fd29cfa8ae405b4ccbd49215f18f9eb229755fbbda257321080838c734e0f5d1 # shrinks to RoundTripFatturaElettronicaSemplificataArgs = RoundTripFatturaElettronicaSemplificataArgs { seed: 5771472268490320436 }
+cc 5eb6819997c8f254a562a59fc4067aa9313f9d241ad4c5d8f65b7802d2477d88 # shrinks to RoundTripFatturaElettronicaArgs = RoundTripFatturaElettronicaArgs { seed: 739534527829501646 }

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>XF</IdPaese>
+        <IdCodice>est voluptate aute </IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>ess</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>5M5KSP</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>TK</IdPaese>
+          <IdCodice>fugiat ad amet est in</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>velit sunt minim</Denominazione>
+          <Cognome>dolore aliqua labore</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF03</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>sed Ut ut elit</Indirizzo>
+        <CAP>16619</CAP>
+        <Comune>aute mollit cillum consectetur</Comune>
+        <Nazione>KV</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <Anagrafica>
+          <Denominazione>Duis ex laborum</Denominazione>
+          <Nome>enim commodo</Nome>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>officia et</Indirizzo>
+        <CAP>02042</CAP>
+        <Comune>eiusmod id occaecat ut</Comune>
+        <Nazione>KF</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD50</TipoDocumento>
+        <Divisa>FHI</Divisa>
+        <Data>5258-71-61</Data>
+        <Numero>deserunt si</Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>40</NumeroLinea>
+        <Descrizione>tempor non</Descrizione>
+        <PrezzoUnitario>7058167.275</PrezzoUnitario>
+        <PrezzoTotale>120631.4146</PrezzoTotale>
+        <AliquotaIVA>39.93</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>76.08</AliquotaIVA>
+        <ImponibileImporto>02.66</ImponibileImporto>
+        <Imposta>93767784.35</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD97</TipoDocumento>
+        <Divisa>UCM</Divisa>
+        <Data>1002-18-07</Data>
+        <Numero>veni</Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>9418</NumeroLinea>
+        <Descrizione>sint in</Descrizione>
+        <PrezzoUnitario>7.834</PrezzoUnitario>
+        <PrezzoTotale>5.61</PrezzoTotale>
+        <AliquotaIVA>17.67</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>07</NumeroLinea>
+        <Descrizione>Lorem consectetur ea</Descrizione>
+        <PrezzoUnitario>1.3140</PrezzoUnitario>
+        <PrezzoTotale>-6464099090.390</PrezzoTotale>
+        <AliquotaIVA>19.72</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>75.75</AliquotaIVA>
+        <ImponibileImporto>064883545.30</ImponibileImporto>
+        <Imposta>-42.95</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>81.23</AliquotaIVA>
+        <ImponibileImporto>75.55</ImponibileImporto>
+        <Imposta>-90000.05</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>7.11</AliquotaIVA>
+        <ImponibileImporto>6.21</ImponibileImporto>
+        <Imposta>-8817768.61</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
+

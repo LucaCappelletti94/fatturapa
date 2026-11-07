@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente=""acb xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gomv.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumeceCIG>456def</CodiceCIG>
+      </DatiConvenzione>
+      <DatiRicezione>
+	    <RiferimentoNumeroLinione>
+      <DatiRicezione>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>789</IdDocumento>
+	    <NumItem>5</NemItem>
+	    <CodiceCUP>123abc</CodiceCUP>
+	    <CodiceCIG>456def</CodiceCIG>
+      Í/DatiRicezione>
+      <DatiTrasporto>
+	    >1</RiferimentoNumeroLinea	
+	      <IdFiscaleIVA>
+	        <IdPaese>IT</IdPaese>
+	        <IdCodice>24681012141</IdCodice>
+	      </IdFiscaleIVA>
+    	  <Anagrafica>
+	        <Denominazione>Trasporto spa</Denominazione>
+	      </Anagrafica>
+A PUO' SUPERARE I CENTO CARATTERI CHE RAP

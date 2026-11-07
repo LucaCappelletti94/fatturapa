@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xml="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRpp
+JTIwVGVsZW1hdGljaSxvJTNkQWdlbnppYSUyMGRlbGxlJTIwRW50cmF0ZSxjJTNkaXQ/Y2VydGlm
+aWNhdGVSZXZvY2F0aW9uTGlzdDAdBgNVHQ4EFgQUn+JY07NI6xlrCUXERiHoFFN66dkwDQYJKoZI
+hvcNAQEFBQADggEBALZ0po2uLhLyZ8uiVfQUCAQd8s5o8ZJw2mcgZc/iaoNbujWhAejoIteG01ciGeeII6AMnGK8KvbCA0UZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7iHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Data></ds:KeyIofo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties_1"><xades:SignedSign
