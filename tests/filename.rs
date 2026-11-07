@@ -257,6 +257,8 @@ fn message_name_rejects_bad_shapes() {
         "IT01234567890_00001_RX_001.xml",
         "IT01234567890_00001_RC_0001.xml",
         "IT01234567890_00001_RC_001",
+        "IT01234567890_001.xml",
+        "IT01234567890.xml",
     ] {
         assert!(
             name.parse::<MessageName>().is_err(),

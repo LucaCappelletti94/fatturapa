@@ -83,16 +83,14 @@ fn buyer_cf() -> Buyer {
 }
 
 fn base_line() -> Line {
-    Line::builder()
-        .description(
-            "SERVIZIO DI CONSULENZA"
-                .parse()
-                .expect("a valid description"),
-        )
-        .quantity("2.00".parse().expect("a valid decimal"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
+    let line: Line = Line::builder()
+        .description("SERVIZIO DI CONSULENZA")
+        .quantity("2.00")
+        .unit_price("100.00")
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
         .build()
+        .expect("the line builds");
+    line
 }
 
 /// A valid domestic `TD01` invoice with one 22 percent line.
@@ -103,9 +101,9 @@ fn base() -> FatturaElettronica {
         Recipient::Codice("ABC1234".parse().expect("a valid recipient code")),
         base_line(),
     )
-    .progressivo("00001".parse().expect("a valid progressive"))
+    .progressivo("00001")
     .date(date(2026, 11, 4))
-    .numero("42".parse().expect("a valid number"))
+    .numero("42")
     .build()
     .expect("the base document passes every check")
 }
@@ -368,9 +366,9 @@ fn code_00417_buyer_without_fiscal_identifiers() {
         Recipient::Codice("ABC1234".parse().expect("a valid recipient code")),
         base_line(),
     )
-    .progressivo("00001".parse().expect("a valid progressive"))
+    .progressivo("00001")
     .date(date(2026, 11, 4))
-    .numero("42".parse().expect("a valid number"))
+    .numero("42")
     .build()
     .expect("a buyer identified by tax code assembles fine");
     assert_absent(&validate(&doc), "00417");
@@ -545,6 +543,18 @@ fn code_00423_prezzo_totale_mismatch() {
 fn code_00424_rate_not_a_percentage() {
     let mut doc = base();
     line(&mut doc).aliquota_iva = amount("0.50");
+    assert_has(&validate(&doc), "00424");
+
+    let doc = base();
+    assert_absent(&validate(&doc), "00424");
+}
+
+/// 00424: a `DatiRiepilogo` rate of 0.50 is not a percentage; the base
+/// rate passes.
+#[test]
+fn code_00424_riepilogo_rate_not_a_percentage() {
+    let mut doc = base();
+    riep(&mut doc).aliquota_iva = amount("0.50");
     assert_has(&validate(&doc), "00424");
 
     let doc = base();
@@ -739,6 +749,33 @@ fn code_00445_generic_natura() {
 
     let mut doc = base();
     line(&mut doc).natura = Some(g::NaturaType::N21);
+    assert_absent(&validate(&doc), "00445");
+}
+
+/// 00445: the generic nature `N2` in a `DatiCassaPrevidenziale` is not
+/// allowed; a detailed nature passes.
+#[test]
+fn code_00445_cassa_generic_natura() {
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .dati_cassa_previdenziale
+        .push(cassa("0.00", Some(g::NaturaType::N2), false));
+    assert_has(&validate(&doc), "00445");
+
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .dati_cassa_previdenziale
+        .push(cassa("0.00", Some(g::NaturaType::N21), false));
     assert_absent(&validate(&doc), "00445");
 }
 

@@ -12,17 +12,16 @@
 #[path = "support/mod.rs"]
 mod support;
 
-use fatturapa::ids::{Natura, Provincia, RegimeFiscale};
+use fatturapa::ids::{Natura, Numero, ProgressivoInvio, Provincia, RegimeFiscale};
 use fatturapa::invoice::{
     Invoice, InvoiceCurrency, Line, Recipient, Sconto, SelfInvoice, SevenTerLine, VatTreatment,
 };
 use fatturapa::party::{Address, Business, Buyer, Company, Seller};
 use fatturapa::validate;
-use fatturapa::{Document, FatturaElettronica};
+use fatturapa::{Date, Document, FatturaElettronica};
 use iso_country::Country;
 use iso_currency::Currency;
 use proptest::prelude::*;
-use rust_decimal::Decimal;
 
 /// The text of a value in cents, with its two decimals.
 fn cents(value: u32) -> String {
@@ -133,10 +132,7 @@ fn treatment(taxed: bool, rate: &str) -> VatTreatment {
 /// when `discounted` and none otherwise.
 fn sconti(discounted: bool) -> Vec<Sconto> {
     if discounted {
-        vec![
-            Sconto::discount_percent("10.00".parse::<Decimal>().expect("a valid decimal"))
-                .expect("a valid discount"),
-        ]
+        vec![Sconto::discount_percent("10.00").expect("a valid discount")]
     } else {
         Vec::new()
     }
@@ -152,23 +148,25 @@ fn line(
     discounted: bool,
 ) -> Line {
     Line::builder()
-        .description(description.parse().expect("a valid description"))
-        .quantity(cents(quantity).parse().expect("a valid decimal"))
-        .unit_price(cents(price).parse().expect("a valid decimal"))
+        .description(description)
+        .quantity(cents(quantity))
+        .unit_price(cents(price))
         .sconti(sconti(discounted))
         .vat(treatment(taxed, rate))
         .build()
+        .expect("the line builds")
 }
 
 /// The line of the art. 7-ter invoice, without the VAT treatment the
 /// scenario writes.
 fn seven_ter_line(description: &str, price: u32, quantity: u32, discounted: bool) -> SevenTerLine {
     SevenTerLine::builder()
-        .description(description.parse().expect("a valid description"))
-        .quantity(cents(quantity).parse().expect("a valid decimal"))
-        .unit_price(cents(price).parse().expect("a valid decimal"))
+        .description(description)
+        .quantity(cents(quantity))
+        .unit_price(cents(price))
         .sconti(sconti(discounted))
         .build()
+        .expect("the line builds")
 }
 
 /// Builds the document of the scenario, checks it against `validate` and
@@ -215,9 +213,9 @@ proptest! {
         } else {
             InvoiceCurrency::Eur
         };
-        let date = "2026-11-04".parse().expect("a valid date");
-        let progressivo = progressivo.parse().expect("a valid progressivo");
-        let numero = numero.parse().expect("a valid number");
+        let date = "2026-11-04".parse::<Date>().expect("a valid date");
+        let progressivo = progressivo.parse::<ProgressivoInvio>().expect("a valid progressivo");
+        let numero = numero.parse::<Numero>().expect("a valid number");
         let descriptions = ["SERVIZIO 1", "MATERIALE 2", "FORNITURA 3"];
         match scenario {
             0 => {
@@ -262,7 +260,7 @@ proptest! {
                 .numero(numero)
                 .currency(currency);
                 let doc = if bollo {
-                    invoice.bollo().build()
+                    invoice.bollo(true).build()
                 } else {
                     invoice.build()
                 }

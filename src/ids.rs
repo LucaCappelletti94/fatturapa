@@ -60,6 +60,14 @@ macro_rules! id_newtype {
             }
         }
 
+        impl TryFrom<String> for $name {
+            type Error = IdError;
+
+            fn try_from(s: String) -> Result<Self, Self::Error> {
+                Self::from_str(&s)
+            }
+        }
+
         impl AsRef<str> for $name {
             fn as_ref(&self) -> &str {
                 &self.0
@@ -86,6 +94,14 @@ macro_rules! id_newtype {
 
             fn try_from(s: &str) -> Result<Self, Self::Error> {
                 Self::from_str(s)
+            }
+        }
+
+        impl TryFrom<String> for $name {
+            type Error = IdError;
+
+            fn try_from(s: String) -> Result<Self, Self::Error> {
+                Self::from_str(&s)
             }
         }
 
@@ -196,6 +212,27 @@ pub enum IdError {
     /// `RegimeFiscale` is not one of the codes of the XSD enumeration.
     #[error("not a valid regime fiscale code: {0}")]
     RegimeFiscale(String),
+    /// The `Amount` is not a decimal number.
+    #[error("not a valid amount, a decimal number: {0}")]
+    Amount(String),
+    /// The `Date` is not a `YYYY-MM-DD` date.
+    #[error("not a valid date, the YYYY-MM-DD form: {0}")]
+    Date(String),
+    /// The `DateTime` is not an `xs:dateTime` value.
+    #[error("not a valid date and time, the xs:dateTime form: {0}")]
+    DateTime(String),
+}
+
+impl From<core::convert::Infallible> for IdError {
+    fn from(value: core::convert::Infallible) -> Self {
+        match value {}
+    }
+}
+
+impl From<rust_decimal::Error> for IdError {
+    fn from(error: rust_decimal::Error) -> Self {
+        Self::Amount(error.to_string())
+    }
 }
 
 /// The `IdCodice` of an Italian party, the 11-digit `partita IVA` with the
@@ -340,6 +377,14 @@ impl TryFrom<&str> for Cap {
     }
 }
 
+impl TryFrom<String> for Cap {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
 /// Declares the `Provincia` enum and its `ALL`, `code`, `Display`,
 /// `FromStr` and `TryFrom` impls from a list of `name code city` rows.
 macro_rules! provincia {
@@ -392,6 +437,14 @@ macro_rules! provincia {
 
             fn try_from(s: &str) -> Result<Self, Self::Error> {
                 Self::from_str(s)
+            }
+        }
+
+        impl TryFrom<String> for Provincia {
+            type Error = IdError;
+
+            fn try_from(s: String) -> Result<Self, Self::Error> {
+                Self::from_str(&s)
             }
         }
     };
@@ -850,6 +903,22 @@ impl TryFrom<&str> for Aliquota {
     }
 }
 
+impl TryFrom<String> for Aliquota {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl TryFrom<Decimal> for Aliquota {
+    type Error = IdError;
+
+    fn try_from(value: Decimal) -> Result<Self, Self::Error> {
+        Self::try_new(value)
+    }
+}
+
 /// The `RiferimentoNormativo` of the riepilogo, one to 100 characters of
 /// the XSD `String100Latin` type.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -938,6 +1007,22 @@ impl TryFrom<&str> for ExchangeRate {
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for ExchangeRate {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl TryFrom<Decimal> for ExchangeRate {
+    type Error = IdError;
+
+    fn try_from(value: Decimal) -> Result<Self, Self::Error> {
+        Self::try_new(value)
     }
 }
 
@@ -1418,6 +1503,14 @@ impl TryFrom<&str> for EuCountry {
     }
 }
 
+impl TryFrom<String> for EuCountry {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
 /// The `Natura` of a non-taxable line, per the codes of the specification.
 /// The generic values the `SDI` retired (`N2`, `N3`, `N6`, check 00445)
 /// are not constructible.
@@ -1716,6 +1809,14 @@ impl TryFrom<&str> for RegimeFiscale {
     }
 }
 
+impl TryFrom<String> for RegimeFiscale {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
 impl FromStr for Natura {
     type Err = IdError;
 
@@ -1733,6 +1834,14 @@ impl TryFrom<&str> for Natura {
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for Natura {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
     }
 }
 
@@ -1796,13 +1905,14 @@ fn cf_check_char(first15: &str) -> u8 {
             }
         } else {
             // a digit is a letter at the same index of the table
-            let index = (u32::from(char) - u32::from('0')) as usize;
+            // and an even position adds the digit's own value
+            let value = u32::from(char) - u32::from('0');
+            debug_assert!(value <= 9, "a digit is 0 to 9");
+            let index = value as usize; // 0 to 9 fits a usize on every target
             if position.is_multiple_of(2) {
                 ODD_LETTER[index]
             } else {
-                index
-                    .try_into()
-                    .unwrap_or_else(|_| panic!("a digit index fits a u32"))
+                value
             }
         };
         sum += value;
@@ -1885,8 +1995,8 @@ mod tests {
             "CCCNNN80D07L407I",
             "RSSMRA80A01H501U",
         ] {
-            let cf =
-                CodiceFiscale::try_new(good).unwrap_or_else(|_| panic!("{good} must be accepted"));
+            let message = format!("{good} must be accepted");
+            let cf = CodiceFiscale::try_new(good).expect(&message);
             assert!(cf.is_personal());
         }
         assert!(
@@ -2147,6 +2257,104 @@ mod tests {
         ));
     }
 
+    /// The `Email` of seven to 256 characters that is not an e-mail is
+    /// reported with the `Email` error, the length check aside.
+    #[test]
+    fn email_reports_the_address_error_when_in_range() {
+        for bad in ["not an email", "a b@example.com", "no-at-sign.example"] {
+            assert!(
+                matches!(Email::try_new(bad), Err(IdError::Email(_))),
+                "{bad:?} has the right length but is not an e-mail"
+            );
+        }
+    }
+
+    /// The `Aliquota` text that is not a decimal number is reported with
+    /// the parsed text.
+    #[test]
+    fn aliquota_reports_the_parse_error_for_non_decimal_text() {
+        for bad in ["abc", "", "22,00"] {
+            let error = Aliquota::from_str(bad).expect_err("the text is rejected");
+            assert!(
+                matches!(error, IdError::Aliquota(text) if text == bad),
+                "the error carries {bad:?}"
+            );
+            assert!(
+                matches!(
+                    Aliquota::try_from(String::from(bad)),
+                    Err(IdError::Aliquota(text)) if text == bad
+                ),
+                "TryFrom<String> carries the same error"
+            );
+        }
+        assert_eq!(
+            Aliquota::try_from(String::from("22.00"))
+                .expect("a valid rate")
+                .to_string(),
+            "22.00"
+        );
+    }
+
+    /// The `Aliquota` conversion of a `Decimal` agrees with the
+    /// constructor on the valid rates and reports the original text on
+    /// the rejected ones.
+    #[test]
+    fn aliquota_from_decimal_converts_like_the_constructor() {
+        for rate in [
+            Decimal::new(22, 0),
+            Decimal::ONE_HUNDRED,
+            Decimal::new(5, 2),
+            Decimal::new(1, 1),
+        ] {
+            assert_eq!(Aliquota::try_from(rate), Aliquota::try_new(rate));
+        }
+        assert_eq!(
+            Aliquota::try_from(Decimal::new(22, 0))
+                .expect("a valid rate")
+                .to_string(),
+            "22.00"
+        );
+        for bad in [
+            Decimal::ZERO,
+            -Decimal::ONE,
+            Decimal::new(10001, 2),
+            Decimal::new(1, 3),
+        ] {
+            assert_eq!(
+                Aliquota::try_from(bad),
+                Err(IdError::Aliquota(bad.to_string())),
+                "{bad} is rejected with its original text"
+            );
+        }
+    }
+
+    /// The `ExchangeRate` conversion of a `Decimal` agrees with the
+    /// constructor on the valid rates and reports the original text on
+    /// the rejected ones.
+    #[test]
+    fn exchange_rate_from_decimal_converts_like_the_constructor() {
+        for rate in [
+            Decimal::new(10800, 4),
+            Decimal::new(96_1234, 4),
+            Decimal::new(1, 0),
+        ] {
+            assert_eq!(ExchangeRate::try_from(rate), ExchangeRate::try_new(rate));
+        }
+        assert_eq!(
+            ExchangeRate::try_from(Decimal::new(10800, 4))
+                .expect("a valid rate")
+                .to_string(),
+            "1.0800"
+        );
+        for bad in [Decimal::ZERO, -Decimal::ONE, Decimal::new(123_456, 5)] {
+            assert_eq!(
+                ExchangeRate::try_from(bad),
+                Err(IdError::ExchangeRate(bad.to_string())),
+                "{bad} is rejected with its original text"
+            );
+        }
+    }
+
     #[test]
     fn riferimento_normativo_round_trips_and_rejects() {
         let ref_ =
@@ -2328,17 +2536,74 @@ mod tests {
     }
 
     /// The `Display` output of `T` re-parses through `FromStr` to the
-    /// same value, the text accessor returns the parsed text, and
-    /// `TryFrom<&str>` agrees with `FromStr` on a valid and on an
-    /// invalid value.
+    /// same value, the text accessor and `AsRef<str>` return the parsed
+    /// text, and the `TryFrom<&str>` and `TryFrom<String>` conversions
+    /// agree with `FromStr` on a valid and on an invalid value.
     fn round_trips<T, F>(valid: &str, invalid: &str, text: F)
     where
         T: Sized
             + fmt::Debug
             + fmt::Display
             + PartialEq
+            + AsRef<str>
             + FromStr<Err = IdError>
-            + for<'a> TryFrom<&'a str, Error = IdError>,
+            + for<'a> TryFrom<&'a str, Error = IdError>
+            + TryFrom<String, Error = IdError>,
+        F: Fn(&T) -> String,
+    {
+        let value = T::from_str(valid).expect("the valid value parses");
+        assert_eq!(
+            text(&value),
+            valid,
+            "the text accessor of the parsed {valid}"
+        );
+        assert_eq!(
+            value.as_ref(),
+            valid,
+            "`AsRef<str>` reads the parsed {valid} back"
+        );
+        let rendered = value.to_string();
+        assert_eq!(rendered, valid, "the display output of the parsed {valid}");
+        assert_eq!(
+            T::from_str(&rendered).expect("the display output parses"),
+            value,
+            "the display output re-parses to the same value"
+        );
+        assert_eq!(
+            T::try_from(rendered.as_str()).expect("the display output converts"),
+            value,
+            "TryFrom agrees with FromStr on the valid value"
+        );
+        assert_eq!(
+            T::try_from(valid.to_string()).expect("the owned text converts"),
+            value,
+            "TryFrom<String> agrees with FromStr on the valid value"
+        );
+        assert_eq!(
+            T::from_str(invalid).map_err(|e| e.to_string()),
+            T::try_from(invalid.to_string()).map_err(|e| e.to_string()),
+            "TryFrom<String> reports the same error as FromStr"
+        );
+        assert_eq!(
+            T::from_str(invalid).is_err(),
+            T::try_from(invalid).is_err(),
+            "FromStr and TryFrom agree on the invalid value"
+        );
+    }
+
+    /// The `Display` output of `T` re-parses through `FromStr` to the
+    /// same value, the text accessor returns the parsed text, and the
+    /// `TryFrom<&str>` and `TryFrom<String>` conversions agree with
+    /// `FromStr` on a valid and on an invalid value.
+    fn round_trips_code<T, F>(valid: &str, invalid: &str, text: F)
+    where
+        T: Sized
+            + fmt::Debug
+            + fmt::Display
+            + PartialEq
+            + FromStr<Err = IdError>
+            + for<'a> TryFrom<&'a str, Error = IdError>
+            + TryFrom<String, Error = IdError>,
         F: Fn(&T) -> String,
     {
         let value = T::from_str(valid).expect("the valid value parses");
@@ -2355,29 +2620,34 @@ mod tests {
             "the display output re-parses to the same value"
         );
         assert_eq!(
-            T::try_from(&rendered).expect("the display output converts"),
+            T::try_from(rendered.as_str()).expect("the display output converts"),
             value,
             "TryFrom agrees with FromStr on the valid value"
         );
         assert_eq!(
-            T::from_str(invalid).is_err(),
-            T::try_from(invalid).is_err(),
-            "FromStr and TryFrom agree on the invalid value"
+            T::try_from(valid.to_string()).expect("the owned text converts"),
+            value,
+            "TryFrom<String> agrees with FromStr on the valid value"
+        );
+        assert_eq!(
+            T::from_str(invalid).map_err(|e| e.to_string()),
+            T::try_from(invalid.to_string()).map_err(|e| e.to_string()),
+            "TryFrom<String> reports the same error as FromStr"
         );
     }
 
     /// Every newtype of the module round-trips through its `Display`
     /// output, its text accessor returns the parsed text, and its
-    /// `TryFrom<&str>` conversion agrees with its `FromStr`
-    /// implementation.
+    /// `TryFrom<&str>` and `TryFrom<String>` conversions agree with
+    /// its `FromStr` implementation.
     #[test]
     fn display_output_parses_back_and_try_from_agrees_with_from_str() {
         round_trips::<PartitaIva, _>("02222222222", "01234567890", |v| v.as_str().to_string());
         round_trips::<CodiceFiscale, _>("MRALNE80E05H501C", "MRALNE80E05H501D", |v| {
             v.as_str().to_string()
         });
-        round_trips::<Cap, _>("00100", "0010", |v| v.as_str().to_string());
-        round_trips::<Provincia, _>("TO", "XX", |v| v.code().to_string());
+        round_trips_code::<Cap, _>("00100", "0010", |v| v.as_str().to_string());
+        round_trips_code::<Provincia, _>("TO", "XX", |v| v.code().to_string());
         round_trips::<CodiceDestinatario, _>("ABC1234", "AB1", |v| v.as_str().to_string());
         round_trips::<ProgressivoInvio, _>("00001", "123456", |v| v.as_str().to_string());
         round_trips::<Bic, _>("DEUTDEFF501", "DEUTDEFF5011", |v| v.as_str().to_string());
@@ -2390,8 +2660,8 @@ mod tests {
             "IT60X0542811101000000123457",
             |v| v.as_str().to_string(),
         );
-        round_trips::<Aliquota, _>("22.00", "100.01", ToString::to_string);
-        round_trips::<ExchangeRate, _>("1.0800", "-1.08", ToString::to_string);
+        round_trips_code::<Aliquota, _>("22.00", "100.01", ToString::to_string);
+        round_trips_code::<ExchangeRate, _>("1.0800", "-1.08", ToString::to_string);
         round_trips::<RiferimentoNormativo, _>("ART. 7-TER DPR 633/72", &"a".repeat(101), |v| {
             v.as_str().to_string()
         });
@@ -2411,22 +2681,20 @@ mod tests {
         round_trips::<Comune, _>("ROMA", &"a".repeat(61), |v| v.as_str().to_string());
         round_trips::<UnitaMisura, _>("PZ", "01234567890", |v| v.as_str().to_string());
         round_trips::<PostalCode, _>("10100", "s-09011", |v| v.as_str().to_string());
-        round_trips::<EuCountry, _>("GR", "EL", |v| v.code().to_string());
-        round_trips::<Natura, _>("N2.1", "N2", |v| v.code().to_string());
-        round_trips::<RegimeFiscale, _>("RF01", "RF03", |v| v.code().to_string());
+        round_trips_code::<EuCountry, _>("GR", "EL", |v| v.code().to_string());
+        round_trips_code::<Natura, _>("N2.1", "N2", |v| v.code().to_string());
+        round_trips_code::<RegimeFiscale, _>("RF01", "RF03", |v| v.code().to_string());
     }
 
     /// The decimal view of a rate keeps the parsed value at its
     /// rescaled precision.
     #[test]
     fn rate_decimal_views_keep_the_parsed_value() {
-        let rate = "22.00"
-            .parse::<Aliquota>()
-            .unwrap_or_else(|_| panic!("22.00 is a valid rate"));
+        let rate = "22.00".parse::<Aliquota>().expect("22.00 is a valid rate");
         assert_eq!(rate.as_decimal(), Decimal::new(2200, 2));
         let exchange = "1.0800"
             .parse::<ExchangeRate>()
-            .unwrap_or_else(|_| panic!("1.0800 is a valid exchange rate"));
+            .expect("1.0800 is a valid exchange rate");
         assert_eq!(exchange.as_decimal(), Decimal::new(10800, 4));
     }
 

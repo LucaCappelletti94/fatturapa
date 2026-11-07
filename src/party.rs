@@ -30,6 +30,22 @@ use crate::ids::{
 };
 use iso_country::Country;
 
+/// The conversion of an optional constructor argument, shared by the
+/// `try_*` constructors.
+///
+/// A present value is converted into `T` and its error mapped to
+/// `IdError`, an absent value stays absent.
+fn convert_opt<T, G>(value: Option<G>) -> Result<Option<T>, IdError>
+where
+    T: TryFrom<G>,
+    <T as TryFrom<G>>::Error: Into<IdError>,
+{
+    match value {
+        Some(value) => Ok(Some(T::try_from(value).map_err(Into::into)?)),
+        None => Ok(None),
+    }
+}
+
 /// The tax identity of a party, one of the three forms the header admits.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TaxIdentity {
@@ -61,15 +77,24 @@ pub enum TaxIdentity {
 
 impl TaxIdentity {
     /// Builds the Italian identity when at least one identifier is
-    /// present.
+    /// present, each converted from its value.
     ///
     /// # Errors
     ///
-    /// Returns `Err` when both identifiers are absent.
-    pub fn italian(
-        partita_iva: Option<PartitaIva>,
-        codice_fiscale: Option<CodiceFiscale>,
-    ) -> Result<Self, IdError> {
+    /// Returns `Err` with the first conversion error of the identifiers,
+    /// or when both identifiers are absent.
+    pub fn try_italian<P, C>(
+        partita_iva: Option<P>,
+        codice_fiscale: Option<C>,
+    ) -> Result<Self, IdError>
+    where
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
+    {
+        let partita_iva = convert_opt(partita_iva)?;
+        let codice_fiscale = convert_opt(codice_fiscale)?;
         if partita_iva.is_some() || codice_fiscale.is_some() {
             Ok(Self::Italian {
                 partita_iva,
@@ -86,10 +111,46 @@ impl TaxIdentity {
         Self::EuVat { country, vat }
     }
 
+    /// Builds the EU business identity, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_eu_vat<C, V>(country: C, vat: V) -> Result<Self, IdError>
+    where
+        EuCountry: TryFrom<C>,
+        <EuCountry as TryFrom<C>>::Error: Into<IdError>,
+        ForeignTaxId: TryFrom<V>,
+        <ForeignTaxId as TryFrom<V>>::Error: Into<IdError>,
+    {
+        Ok(Self::eu_vat(
+            EuCountry::try_from(country).map_err(Into::into)?,
+            ForeignTaxId::try_from(vat).map_err(Into::into)?,
+        ))
+    }
+
     /// Builds the non-EU identity.
     #[must_use]
     pub const fn foreign(country: Country, id: ForeignTaxId) -> Self {
         Self::Foreign { country, id }
+    }
+
+    /// Builds the non-EU identity, the values converted. The `country`
+    /// is the `ISO 3166-1` code the caller resolves to the `Country`
+    /// enum.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_foreign<I>(country: Country, id: I) -> Result<Self, IdError>
+    where
+        ForeignTaxId: TryFrom<I>,
+        <ForeignTaxId as TryFrom<I>>::Error: Into<IdError>,
+    {
+        Ok(Self::foreign(
+            country,
+            ForeignTaxId::try_from(id).map_err(Into::into)?,
+        ))
     }
 
     /// The `IdFiscaleIVA` pair, `IdPaese` and `IdCodice`, when the
@@ -159,6 +220,33 @@ impl Address {
         }
     }
 
+    /// The seat in Italy, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_italian<I, C, M>(
+        indirizzo: I,
+        cap: C,
+        comune: M,
+        provincia: Provincia,
+    ) -> Result<Self, IdError>
+    where
+        Indirizzo: TryFrom<I>,
+        <Indirizzo as TryFrom<I>>::Error: Into<IdError>,
+        Cap: TryFrom<C>,
+        <Cap as TryFrom<C>>::Error: Into<IdError>,
+        Comune: TryFrom<M>,
+        <Comune as TryFrom<M>>::Error: Into<IdError>,
+    {
+        Ok(Self::italian(
+            Indirizzo::try_from(indirizzo).map_err(Into::into)?,
+            Cap::try_from(cap).map_err(Into::into)?,
+            Comune::try_from(comune).map_err(Into::into)?,
+            provincia,
+        ))
+    }
+
     /// The seat abroad, which writes the `CAP` `00000`, omits the
     /// `Provincia` and puts the foreign postal code in the `Indirizzo`
     /// when present.
@@ -168,6 +256,47 @@ impl Address {
     /// Returns `Err` when the `Indirizzo` exceeds 60 characters once the
     /// postal code is appended.
     pub fn foreign(
+        indirizzo: Indirizzo,
+        postal_code: Option<PostalCode>,
+        comune: Comune,
+        country: Country,
+    ) -> Result<Self, IdError> {
+        Self::foreign_of(indirizzo, postal_code, comune, country)
+    }
+
+    /// The seat abroad, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments, or
+    /// when the `Indirizzo` exceeds 60 characters once the postal code is
+    /// appended.
+    pub fn try_foreign<I, P, C>(
+        indirizzo: I,
+        postal_code: Option<P>,
+        comune: C,
+        country: Country,
+    ) -> Result<Self, IdError>
+    where
+        Indirizzo: TryFrom<I>,
+        <Indirizzo as TryFrom<I>>::Error: Into<IdError>,
+        PostalCode: TryFrom<P>,
+        <PostalCode as TryFrom<P>>::Error: Into<IdError>,
+        Comune: TryFrom<C>,
+        <Comune as TryFrom<C>>::Error: Into<IdError>,
+    {
+        let postal_code = convert_opt(postal_code)?;
+        Self::foreign_of(
+            Indirizzo::try_from(indirizzo).map_err(Into::into)?,
+            postal_code,
+            Comune::try_from(comune).map_err(Into::into)?,
+            country,
+        )
+    }
+
+    /// The check of the `Indirizzo` once the foreign postal code is
+    /// appended.
+    fn foreign_of(
         indirizzo: Indirizzo,
         postal_code: Option<PostalCode>,
         comune: Comune,
@@ -423,6 +552,33 @@ impl Seller {
         }
     }
 
+    /// An Italian company seller, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_denomination<D, P, R>(
+        denominazione: D,
+        partita_iva: P,
+        address: Address,
+        regime: R,
+    ) -> Result<Self, IdError>
+    where
+        Denomination: TryFrom<D>,
+        <Denomination as TryFrom<D>>::Error: Into<IdError>,
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        RegimeFiscale: TryFrom<R>,
+        <RegimeFiscale as TryFrom<R>>::Error: Into<IdError>,
+    {
+        Ok(Self::denomination(
+            Denomination::try_from(denominazione).map_err(Into::into)?,
+            PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            address,
+            RegimeFiscale::try_from(regime).map_err(Into::into)?,
+        ))
+    }
+
     /// An Italian sole-trader seller, its `Nome`, `Cognome`, `partita
     /// IVA`, `CodiceFiscale`, seat and `RegimeFiscale`.
     #[must_use]
@@ -451,6 +607,40 @@ impl Seller {
     #[must_use]
     pub const fn party(&self) -> &Party {
         &self.party
+    }
+
+    /// An Italian sole-trader seller, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_sole_trader<F, L, P, C, R>(
+        first: F,
+        last: L,
+        partita_iva: P,
+        codice_fiscale: C,
+        address: Address,
+        regime: R,
+    ) -> Result<Self, IdError>
+    where
+        PersonName: TryFrom<F> + TryFrom<L>,
+        <PersonName as TryFrom<F>>::Error: Into<IdError>,
+        <PersonName as TryFrom<L>>::Error: Into<IdError>,
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
+        RegimeFiscale: TryFrom<R>,
+        <RegimeFiscale as TryFrom<R>>::Error: Into<IdError>,
+    {
+        Ok(Self::sole_trader(
+            PersonName::try_from(first).map_err(Into::into)?,
+            PersonName::try_from(last).map_err(Into::into)?,
+            PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            CodiceFiscale::try_from(codice_fiscale).map_err(Into::into)?,
+            address,
+            RegimeFiscale::try_from(regime).map_err(Into::into)?,
+        ))
     }
 
     /// The `RegimeFiscale` of the seller.
@@ -565,6 +755,85 @@ impl Buyer {
         }
     }
 
+    /// An Italian company buyer, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_denomination<D, P>(
+        denominazione: D,
+        partita_iva: P,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        Denomination: TryFrom<D>,
+        <Denomination as TryFrom<D>>::Error: Into<IdError>,
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+    {
+        Ok(Self::denomination(
+            Denomination::try_from(denominazione).map_err(Into::into)?,
+            PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            address,
+        ))
+    }
+
+    /// An Italian sole-trader buyer, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_sole_trader<F, L, P, C>(
+        first: F,
+        last: L,
+        partita_iva: P,
+        codice_fiscale: C,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        PersonName: TryFrom<F> + TryFrom<L>,
+        <PersonName as TryFrom<F>>::Error: Into<IdError>,
+        <PersonName as TryFrom<L>>::Error: Into<IdError>,
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
+    {
+        Ok(Self::sole_trader(
+            PersonName::try_from(first).map_err(Into::into)?,
+            PersonName::try_from(last).map_err(Into::into)?,
+            PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            CodiceFiscale::try_from(codice_fiscale).map_err(Into::into)?,
+            address,
+        ))
+    }
+
+    /// An Italian consumer buyer, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_consumer<F, L, C>(
+        first: F,
+        last: L,
+        codice_fiscale: C,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        PersonName: TryFrom<F> + TryFrom<L>,
+        <PersonName as TryFrom<F>>::Error: Into<IdError>,
+        <PersonName as TryFrom<L>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
+    {
+        Ok(Self::consumer(
+            PersonName::try_from(first).map_err(Into::into)?,
+            PersonName::try_from(last).map_err(Into::into)?,
+            CodiceFiscale::try_from(codice_fiscale).map_err(Into::into)?,
+            address,
+        ))
+    }
+
     /// The party of the `CessionarioCommittente`.
     #[must_use]
     pub const fn party(&self) -> &Party {
@@ -621,6 +890,58 @@ impl Business {
                 address,
             },
         }
+    }
+
+    /// An EU business, each value converted. The `country` is the member
+    /// state the caller resolves to the `EuCountry` enum.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_eu<D, V>(
+        country: EuCountry,
+        denominazione: D,
+        vat: V,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        Denomination: TryFrom<D>,
+        <Denomination as TryFrom<D>>::Error: Into<IdError>,
+        ForeignTaxId: TryFrom<V>,
+        <ForeignTaxId as TryFrom<V>>::Error: Into<IdError>,
+    {
+        Ok(Self::eu(
+            country,
+            Denomination::try_from(denominazione).map_err(Into::into)?,
+            ForeignTaxId::try_from(vat).map_err(Into::into)?,
+            address,
+        ))
+    }
+
+    /// A non-EU business, each value converted. The `country` is the
+    /// `ISO 3166-1` code the caller resolves to the `Country` enum.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_foreign<D, I>(
+        country: Country,
+        denominazione: D,
+        id: I,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        Denomination: TryFrom<D>,
+        <Denomination as TryFrom<D>>::Error: Into<IdError>,
+        ForeignTaxId: TryFrom<I>,
+        <ForeignTaxId as TryFrom<I>>::Error: Into<IdError>,
+    {
+        Ok(Self::foreign(
+            country,
+            Denomination::try_from(denominazione).map_err(Into::into)?,
+            ForeignTaxId::try_from(id).map_err(Into::into)?,
+            address,
+        ))
     }
 
     /// The party of the document.
@@ -698,6 +1019,59 @@ impl Company {
                 address,
             },
         }
+    }
+
+    /// An Italian company, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_denomination<D, P>(
+        denominazione: D,
+        partita_iva: P,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        Denomination: TryFrom<D>,
+        <Denomination as TryFrom<D>>::Error: Into<IdError>,
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+    {
+        Ok(Self::denomination(
+            Denomination::try_from(denominazione).map_err(Into::into)?,
+            PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            address,
+        ))
+    }
+
+    /// An Italian sole trader, each value converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the arguments.
+    pub fn try_sole_trader<F, L, P, C>(
+        first: F,
+        last: L,
+        partita_iva: P,
+        codice_fiscale: C,
+        address: Address,
+    ) -> Result<Self, IdError>
+    where
+        PersonName: TryFrom<F> + TryFrom<L>,
+        <PersonName as TryFrom<F>>::Error: Into<IdError>,
+        <PersonName as TryFrom<L>>::Error: Into<IdError>,
+        PartitaIva: TryFrom<P>,
+        <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
+    {
+        Ok(Self::sole_trader(
+            PersonName::try_from(first).map_err(Into::into)?,
+            PersonName::try_from(last).map_err(Into::into)?,
+            PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            CodiceFiscale::try_from(codice_fiscale).map_err(Into::into)?,
+            address,
+        ))
     }
 
     /// The party of the `CessionarioCommittente`.
@@ -921,10 +1295,26 @@ mod tests {
         );
     }
 
+    /// A foreign seat without a postal code writes the bare `Indirizzo`
+    /// and the `Comune`, with the generic foreign `CAP`.
+    #[test]
+    fn the_foreign_seat_without_a_postal_code_writes_the_bare_indirizzo() {
+        let seat = Address::foreign(
+            "FIFTH AVENUE 1".parse().expect("a valid address"),
+            None,
+            "NEW YORK".parse().expect("a valid comune"),
+            Country::US,
+        )
+        .expect("the seat is valid");
+        assert_eq!(seat.indirizzo(), "FIFTH AVENUE 1");
+        assert_eq!(seat.comune(), "NEW YORK");
+        assert_eq!(seat.cap(), "00000");
+    }
+
     #[test]
     fn the_italian_identity_needs_one_identifier() {
-        assert!(TaxIdentity::italian(None, None).is_err());
-        assert!(TaxIdentity::italian(Some(alpha_piva()), None).is_ok());
+        assert!(TaxIdentity::try_italian::<&str, &str>(None, None).is_err());
+        assert!(TaxIdentity::try_italian(Some(alpha_piva().to_string()), None::<&str>).is_ok());
     }
 
     /// A synthetic codice fiscale, never a real person.
@@ -938,12 +1328,12 @@ mod tests {
     /// the Italian consumer, the EU business and the foreign party.
     #[test]
     fn the_identity_forms_answer_the_form_queries() {
-        let company = TaxIdentity::italian(Some(alpha_piva()), Some(codice_fiscale()))
+        let company = TaxIdentity::try_italian(Some(alpha_piva()), Some(codice_fiscale()))
             .expect("an Italian company carries its identifiers");
         assert!(company.is_italian());
         assert!(company.has_partita_iva());
 
-        let consumer = TaxIdentity::italian(None, Some(codice_fiscale()))
+        let consumer = TaxIdentity::try_italian(None::<&str>, Some(codice_fiscale().to_string()))
             .expect("an Italian consumer carries its codice fiscale");
         assert!(consumer.is_italian());
         assert!(!consumer.has_partita_iva());
@@ -961,5 +1351,394 @@ mod tests {
         );
         assert!(!foreign.is_italian());
         assert!(!foreign.has_partita_iva());
+    }
+
+    /// The foreign seat of the New York client, never a real address.
+    fn ny() -> Address {
+        Address::foreign(
+            "FIFTH AVENUE 1".parse().expect("a valid address"),
+            Some("10001".parse().expect("a valid postal code")),
+            "NEW YORK".parse().expect("a valid comune"),
+            Country::US,
+        )
+        .expect("a valid foreign seat")
+    }
+
+    /// The generic `try_*` constructors of the parties build, from the
+    /// string arguments, the same party that the typed constructor
+    /// builds.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "one assertion per party, every typed field equal to the generic build"
+    )]
+    #[test]
+    fn the_try_constructors_build_the_typed_parties() {
+        assert_eq!(
+            TaxIdentity::try_italian(Some("00012345674"), Some("MRALNE80E05H501C")),
+            TaxIdentity::try_italian(Some(alpha_piva()), Some(codice_fiscale())),
+        );
+        assert_eq!(
+            TaxIdentity::try_eu_vat(EuCountry::De, "DE998877665"),
+            Ok(TaxIdentity::eu_vat(
+                EuCountry::De,
+                "DE998877665".parse().expect("a valid identifier")
+            )),
+        );
+        assert_eq!(
+            TaxIdentity::try_foreign(Country::US, "US123456789"),
+            Ok(TaxIdentity::foreign(
+                Country::US,
+                "US123456789".parse().expect("a valid identifier")
+            )),
+        );
+        assert_eq!(
+            Address::try_italian("VIA ROMA 1", "00100", "ROMA", Provincia::Rm)
+                .expect("the seat is valid"),
+            Address::italian(
+                "VIA ROMA 1".parse().expect("a valid address"),
+                "00100".parse().expect("a valid CAP"),
+                "ROMA".parse().expect("a valid comune"),
+                Provincia::Rm
+            ),
+        );
+        assert_eq!(
+            Address::try_foreign("FIFTH AVENUE 1", Some("10001"), "NEW YORK", Country::US)
+                .expect("the seat is valid"),
+            ny(),
+        );
+        assert_eq!(
+            Address::try_foreign("FIFTH AVENUE 1", None::<&str>, "NEW YORK", Country::US)
+                .expect("the seat is valid"),
+            Address::foreign(
+                "FIFTH AVENUE 1".parse().expect("a valid address"),
+                None,
+                "NEW YORK".parse().expect("a valid comune"),
+                Country::US,
+            )
+            .expect("the seat is valid"),
+        );
+        assert_eq!(
+            Seller::try_denomination("ALPHA SRL", "00012345674", rome(), "RF01")
+                .expect("the seller is valid"),
+            Seller::denomination(
+                "ALPHA SRL".parse().expect("a valid denomination"),
+                alpha_piva(),
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+        );
+        assert_eq!(
+            Seller::try_sole_trader(
+                "Mario",
+                "Rossi",
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome(),
+                "RF01",
+            )
+            .expect("the seller is valid"),
+            Seller::sole_trader(
+                "Mario".parse().expect("a valid name"),
+                "Rossi".parse().expect("a valid name"),
+                alpha_piva(),
+                codice_fiscale(),
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+        );
+        assert_eq!(
+            Buyer::try_denomination("BETA SRL", "00076543214", rome()).expect("valid"),
+            Buyer::denomination(
+                "BETA SRL".parse().expect("a valid denomination"),
+                beta_piva(),
+                rome(),
+            ),
+        );
+        assert_eq!(
+            Buyer::try_sole_trader("Mario", "Rossi", "00012345674", "MRALNE80E05H501C", rome())
+                .expect("the buyer is valid"),
+            Buyer::sole_trader(
+                "Mario".parse().expect("a valid name"),
+                "Rossi".parse().expect("a valid name"),
+                alpha_piva(),
+                codice_fiscale(),
+                rome(),
+            ),
+        );
+        assert_eq!(
+            Buyer::try_consumer("Mario", "Rossi", "MRALNE80E05H501C", rome())
+                .expect("the buyer is valid"),
+            Buyer::consumer(
+                "Mario".parse().expect("a valid name"),
+                "Rossi".parse().expect("a valid name"),
+                codice_fiscale(),
+                rome(),
+            ),
+        );
+        assert_eq!(
+            Business::try_eu(EuCountry::De, "MUSTER GMBH", "DE998877665", ny())
+                .expect("the business is valid"),
+            Business::eu(
+                EuCountry::De,
+                "MUSTER GMBH".parse().expect("a valid denomination"),
+                "DE998877665".parse().expect("a valid identifier"),
+                ny(),
+            ),
+        );
+        assert_eq!(
+            Business::try_foreign(Country::US, "ACME INC", "US123456789", ny())
+                .expect("the business is valid"),
+            Business::foreign(
+                Country::US,
+                "ACME INC".parse().expect("a valid denomination"),
+                "US123456789".parse().expect("a valid identifier"),
+                ny(),
+            ),
+        );
+        assert_eq!(
+            Company::try_denomination("BETA SRL", "00076543214", rome()).expect("valid"),
+            Company::denomination(
+                "BETA SRL".parse().expect("a valid denomination"),
+                beta_piva(),
+                rome(),
+            ),
+        );
+        assert_eq!(
+            Company::try_sole_trader("Mario", "Rossi", "00012345674", "MRALNE80E05H501C", rome())
+                .expect("the company is valid"),
+            Company::sole_trader(
+                "Mario".parse().expect("a valid name"),
+                "Rossi".parse().expect("a valid name"),
+                alpha_piva(),
+                codice_fiscale(),
+                rome(),
+            ),
+        );
+    }
+
+    /// The generic `try_*` constructors of the parties report, for every
+    /// argument position, the `IdError` of the identifier that fails.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "one assertion per argument position of every party constructor"
+    )]
+    #[test]
+    fn the_try_constructors_report_each_failing_argument() {
+        assert!(matches!(
+            TaxIdentity::try_italian(Some("00012345675"), None::<&str>),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            TaxIdentity::try_italian(None::<&str>, Some("MRALNE80E05H501X")),
+            Err(IdError::CodiceFiscale(..))
+        ));
+        assert!(matches!(
+            TaxIdentity::try_eu_vat("XX", "DE998877665"),
+            Err(IdError::EuCountry(..))
+        ));
+        assert!(matches!(
+            TaxIdentity::try_eu_vat("DE", "xx"),
+            Err(IdError::ForeignTaxId(..))
+        ));
+        assert!(matches!(
+            TaxIdentity::try_foreign(Country::US, "xx"),
+            Err(IdError::ForeignTaxId(..))
+        ));
+        assert!(matches!(
+            Address::try_italian("A".repeat(61), "00100", "ROMA", Provincia::Rm),
+            Err(IdError::Indirizzo(..))
+        ));
+        assert!(matches!(
+            Address::try_italian("VIA ROMA 1", "0010", "ROMA", Provincia::Rm),
+            Err(IdError::Cap(..))
+        ));
+        assert!(matches!(
+            Address::try_italian("VIA ROMA 1", "00100", "A".repeat(61), Provincia::Rm),
+            Err(IdError::Comune(..))
+        ));
+        assert!(matches!(
+            Address::try_foreign("A".repeat(61), None::<&str>, "NEW YORK", Country::US),
+            Err(IdError::Indirizzo(..))
+        ));
+        assert!(matches!(
+            Address::try_foreign(
+                "FIFTH AVENUE 1",
+                Some("12345678901"),
+                "NEW YORK",
+                Country::US
+            ),
+            Err(IdError::PostalCode(..))
+        ));
+        assert!(matches!(
+            Address::try_foreign("FIFTH AVENUE 1", None::<&str>, "A".repeat(61), Country::US),
+            Err(IdError::Comune(..))
+        ));
+        assert!(matches!(
+            Seller::try_denomination("A".repeat(81), "00012345674", rome(), RegimeFiscale::Rf01),
+            Err(IdError::Denomination(..))
+        ));
+        assert!(matches!(
+            Seller::try_denomination("ALPHA SRL", "00012345675", rome(), RegimeFiscale::Rf01),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Seller::try_denomination("ALPHA SRL", "00012345674", rome(), "RX99"),
+            Err(IdError::RegimeFiscale(..))
+        ));
+        assert!(matches!(
+            Seller::try_sole_trader(
+                "A".repeat(61),
+                "Rossi",
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Seller::try_sole_trader(
+                "Mario",
+                "A".repeat(61),
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Seller::try_sole_trader(
+                "Mario",
+                "Rossi",
+                "00012345675",
+                "MRALNE80E05H501C",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Seller::try_sole_trader(
+                "Mario",
+                "Rossi",
+                "00012345674",
+                "MRALNE80E05H501X",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+            Err(IdError::CodiceFiscale(..))
+        ));
+        assert!(matches!(
+            Seller::try_sole_trader(
+                "Mario",
+                "Rossi",
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome(),
+                "RX99"
+            ),
+            Err(IdError::RegimeFiscale(..))
+        ));
+        assert!(matches!(
+            Buyer::try_denomination("A".repeat(81), "00076543214", rome()),
+            Err(IdError::Denomination(..))
+        ));
+        assert!(matches!(
+            Buyer::try_denomination("BETA SRL", "00076543215", rome()),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Buyer::try_sole_trader(
+                "A".repeat(61),
+                "Rossi",
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome()
+            ),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Buyer::try_sole_trader(
+                "Mario",
+                "A".repeat(61),
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome()
+            ),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Buyer::try_sole_trader("Mario", "Rossi", "00012345675", "MRALNE80E05H501C", rome()),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Buyer::try_sole_trader("Mario", "Rossi", "00012345674", "MRALNE80E05H501X", rome()),
+            Err(IdError::CodiceFiscale(..))
+        ));
+        assert!(matches!(
+            Buyer::try_consumer("A".repeat(61), "Rossi", "MRALNE80E05H501C", rome()),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Buyer::try_consumer("Mario", "A".repeat(61), "MRALNE80E05H501C", rome()),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Buyer::try_consumer("Mario", "Rossi", "MRALNE80E05H501X", rome()),
+            Err(IdError::CodiceFiscale(..))
+        ));
+        assert!(matches!(
+            Business::try_eu(EuCountry::De, "A".repeat(81), "DE998877665", ny()),
+            Err(IdError::Denomination(..))
+        ));
+        assert!(matches!(
+            Business::try_eu(EuCountry::De, "MUSTER GMBH", "xx", ny()),
+            Err(IdError::ForeignTaxId(..))
+        ));
+        assert!(matches!(
+            Business::try_foreign(Country::US, "A".repeat(81), "US123456789", ny()),
+            Err(IdError::Denomination(..))
+        ));
+        assert!(matches!(
+            Business::try_foreign(Country::US, "ACME INC", "xx", ny()),
+            Err(IdError::ForeignTaxId(..))
+        ));
+        assert!(matches!(
+            Company::try_denomination("A".repeat(81), "00076543214", rome()),
+            Err(IdError::Denomination(..))
+        ));
+        assert!(matches!(
+            Company::try_denomination("BETA SRL", "00076543215", rome()),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Company::try_sole_trader(
+                "A".repeat(61),
+                "Rossi",
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome()
+            ),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Company::try_sole_trader(
+                "Mario",
+                "A".repeat(61),
+                "00012345674",
+                "MRALNE80E05H501C",
+                rome()
+            ),
+            Err(IdError::PersonName(..))
+        ));
+        assert!(matches!(
+            Company::try_sole_trader("Mario", "Rossi", "00012345675", "MRALNE80E05H501C", rome()),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Company::try_sole_trader("Mario", "Rossi", "00012345674", "MRALNE80E05H501X", rome()),
+            Err(IdError::CodiceFiscale(..))
+        ));
     }
 }

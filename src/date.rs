@@ -34,8 +34,50 @@ impl FromStr for Date {
     }
 }
 
+/// The `Date` of the typed construction layer, which funnels the
+/// conversion into the `FromStr` parse and reports the failure as
+/// [`crate::ids::IdError::Date`].
+impl TryFrom<&str> for Date {
+    type Error = crate::ids::IdError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        s.parse()
+            .map_err(|e: jiff::Error| crate::ids::IdError::Date(e.to_string()))
+    }
+}
+
+/// The `Date` of the typed construction layer, from an owned string.
+impl TryFrom<String> for Date {
+    type Error = crate::ids::IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::try_from(s.as_str())
+    }
+}
+
 impl xsd_parser_types::quick_xml::DeserializeBytesFromStr for Date {}
 impl xsd_parser_types::quick_xml::SerializeBytesToString for Date {}
+
+/// The `DateTime` of the typed construction layer, which funnels the
+/// conversion into the `FromStr` parse and reports the failure as
+/// [`crate::ids::IdError::DateTime`].
+impl TryFrom<&str> for DateTime {
+    type Error = crate::ids::IdError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        s.parse()
+            .map_err(|e: jiff::Error| crate::ids::IdError::DateTime(e.to_string()))
+    }
+}
+
+/// The `DateTime` of the typed construction layer, from an owned string.
+impl TryFrom<String> for DateTime {
+    type Error = crate::ids::IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::try_from(s.as_str())
+    }
+}
 
 /// A date and time in the lexical form of `xs:dateTime`.
 ///
@@ -249,6 +291,38 @@ mod tests {
         for text in cases {
             assert!(text.parse::<DateTime>().is_err(), "{text} must be rejected");
         }
+    }
+
+    /// The `Date` conversion of the typed layer reports the parse failure
+    /// as `IdError::Date` and reads the owned string through the same
+    /// parse.
+    #[test]
+    fn date_try_from_reports_the_id_error() {
+        assert!(matches!(
+            Date::try_from("2014-02-30"),
+            Err(crate::ids::IdError::Date(..))
+        ));
+        assert_eq!(
+            Date::try_from("2026-11-04".to_string()).expect("a valid date"),
+            "2026-11-04".parse::<Date>().expect("a valid date")
+        );
+    }
+
+    /// The `DateTime` conversion of the typed layer reports the parse
+    /// failure as `IdError::DateTime` and reads the owned string through
+    /// the same parse.
+    #[test]
+    fn datetime_try_from_reports_the_id_error() {
+        assert!(matches!(
+            DateTime::try_from("2014-11-20"),
+            Err(crate::ids::IdError::DateTime(..))
+        ));
+        assert_eq!(
+            DateTime::try_from("2014-11-20T10:30:00Z".to_string()).expect("a valid date-time"),
+            "2014-11-20T10:30:00Z"
+                .parse::<DateTime>()
+                .expect("a valid date-time")
+        );
     }
 
     /// Offsets outside the `Z` and `±HH:MM` lexical form are rejected, as

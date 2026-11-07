@@ -3,11 +3,18 @@
 //!
 //! The scenarios that the specification dictates are named constructors,
 //! `Invoice::domestic`, `Invoice::cross_border_services` and
-//! `SelfInvoice::td17` and `td19`, each with a `bon` builder. The scenario
-//! parties and the first line are parameters of the constructor, the
-//! `ProgressivoInvio`, the `Data` and the `Numero` are required setters,
-//! so a document missing a required field does not compile. Every
-//! `build` checks the scenario rules, computes the line totals, the
+//! `SelfInvoice::td17` and `td19`, each with a typestate builder. The
+//! scenario parties and the first line are parameters of the constructor,
+//! and the `ProgressivoInvio`, the `Data` and the `Numero` are required
+//! setters, so a document missing a required field does not compile.
+//!
+//! Every setter accepts any value convertible into the typed one through
+//! `TryFrom`, its error convertible into `IdError`, and never fails. The
+//! first conversion error is kept in the builder and returned by `build`
+//! as `BuildError::Id` before any other check, and once it is kept the
+//! later setters skip their conversion and only advance the typestate.
+//!
+//! Every `build` checks the scenario rules, computes the line totals, the
 //! riepilogo and the total amount per the rounding rules of the
 //! specification, and runs `validate::validate` before returning the
 //! document.
@@ -16,7 +23,6 @@
 //! amount the `SDI` reads in euros, the art. 13 convention of the Agenzia
 //! FAQ. The original amount, the currency and the rate appear only as
 //! management data, in the `AltriDatiGestionali` of each line.
-
 use crate::amount::Amount;
 use crate::date::Date;
 use crate::generated::fpr12::{
@@ -34,14 +40,63 @@ use crate::generated::fpr12::{
     ScontoMaggiorazioneTypeContent, TipoDocumentoType, TipoScontoMaggiorazioneType,
 };
 use crate::ids::{
-    Aliquota, Causale, CodiceDestinatario, Description, ExchangeRate, IdDocumento, Natura, Numero,
-    Pec, ProgressivoInvio, RegimeFiscale, RiferimentoNormativo, UnitaMisura,
+    Aliquota, Causale, CodiceDestinatario, Description, ExchangeRate, IdDocumento, IdError, Natura,
+    Numero, Pec, ProgressivoInvio, RegimeFiscale, RiferimentoNormativo, UnitaMisura,
 };
 use crate::party::{Business, Buyer, Company, Party, Seller};
 use crate::validate::{self, Violation};
-use bon::bon;
 use iso_currency::Currency;
 use rust_decimal::Decimal;
+use std::marker::PhantomData;
+/// The typestate markers of the builders, the type parameter of each
+/// required field, the `Unset` marker until its setter was called and the
+/// `Set` marker after.
+#[doc(hidden)]
+pub mod typestate {
+    /// The required field of a builder that has not been set yet.
+    pub struct Unset;
+
+    /// The required field of a builder that has been set.
+    pub struct Set;
+}
+
+/// The value a required setter stored, the typestate of the builder
+/// guaranteeing its presence.
+#[expect(
+    clippy::expect_used,
+    reason = "the typestate of the builder guarantees the field is set"
+)]
+const fn required<T>(slot: Option<T>) -> T {
+    slot.expect("the typestate of the builder guarantees the field is set")
+}
+
+/// The conversion of a builder setter, shared by the setters of every
+/// builder.
+///
+/// When no error is stored yet, the value is converted into `T` and the
+/// converted value is returned for the caller to store. When an error is
+/// already stored, the conversion is skipped and `None` is returned. When
+/// the conversion fails, the failure is kept as the first error of the
+/// builder and `None` is returned.
+fn convert<T, G>(error: &mut Option<BuildError>, field: &'static str, value: G) -> Option<T>
+where
+    T: TryFrom<G>,
+    <T as TryFrom<G>>::Error: Into<IdError>,
+{
+    if error.is_some() {
+        return None;
+    }
+    match T::try_from(value) {
+        Ok(value) => Some(value),
+        Err(cause) => {
+            *error = Some(BuildError::Id {
+                field,
+                error: cause.into(),
+            });
+            None
+        }
+    }
+}
 
 /// The `CodiceDestinatario` the `SDI` assigns to a non-resident buyer.
 const FOREIGN_CODICE_DESTINATARIO: &str = "XXXXXXX";
@@ -88,6 +143,16 @@ pub enum BuildError {
         /// The offending value.
         value: Decimal,
     },
+    /// The first conversion error of a builder setter, with the name of
+    /// the setter it came from, so the caller sees which input failed
+    /// without re-checking them.
+    #[error("the {field} is not valid: {error}")]
+    Id {
+        /// The name of the setter that produced the error.
+        field: &'static str,
+        /// The conversion error.
+        error: IdError,
+    },
     /// The assembled document fails one or more `SDI` checks.
     #[error("the document fails {} SDI check(s)", .0.len())]
     Violations(Vec<Violation>),
@@ -124,6 +189,36 @@ pub enum Recipient {
     Unknown,
 }
 
+impl Recipient {
+    /// The `CodiceDestinatario` channel, converted from `value`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` when the value is not a `CodiceDestinatario`.
+    pub fn try_codice<G>(codice: G) -> Result<Self, IdError>
+    where
+        CodiceDestinatario: TryFrom<G>,
+        <CodiceDestinatario as TryFrom<G>>::Error: Into<IdError>,
+    {
+        Ok(Self::Codice(
+            CodiceDestinatario::try_from(codice).map_err(Into::into)?,
+        ))
+    }
+
+    /// The `PECDestinatario` channel, converted from `value`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` when the value is not a `PEC` address.
+    pub fn try_pec<G>(pec: G) -> Result<Self, IdError>
+    where
+        Pec: TryFrom<G>,
+        <Pec as TryFrom<G>>::Error: Into<IdError>,
+    {
+        Ok(Self::Pec(Pec::try_from(pec).map_err(Into::into)?))
+    }
+}
+
 /// The `AliquotaIVA` and the `Natura` of a line, one of the two, so a
 /// taxed nature or a non-taxed rate with a percentage cannot be written.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -142,6 +237,22 @@ pub enum VatTreatment {
 }
 
 impl VatTreatment {
+    /// A taxable line, its `AliquotaIVA` converted from `value`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` when the value is not a positive percentage of at
+    /// most 100 with at most two decimals.
+    pub fn taxed<G>(aliquota: G) -> Result<Self, IdError>
+    where
+        Aliquota: TryFrom<G>,
+        <Aliquota as TryFrom<G>>::Error: Into<IdError>,
+    {
+        Ok(Self::Taxed(
+            Aliquota::try_from(aliquota).map_err(Into::into)?,
+        ))
+    }
+
     /// The `AliquotaIVA` the line and the riepilogo carry.
     pub(crate) fn rate(&self) -> Decimal {
         match self {
@@ -197,6 +308,28 @@ pub enum InvoiceCurrency {
 }
 
 impl InvoiceCurrency {
+    /// A document priced in a foreign currency, its `Divisa` resolved to
+    /// the `Currency` enum, the `rate` and its `date` converted.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` when the `rate` or the `date` is not valid.
+    pub fn try_foreign<R, D>(currency: Currency, rate: R, rate_date: D) -> Result<Self, IdError>
+    where
+        ExchangeRate: TryFrom<R>,
+        <ExchangeRate as TryFrom<R>>::Error: Into<IdError>,
+        Date: TryFrom<D>,
+        <Date as TryFrom<D>>::Error: Into<IdError>,
+    {
+        Ok(Self::Foreign {
+            currency,
+            rate: ExchangeRate::try_from(rate).map_err(Into::into)?,
+            rate_date: Date::try_from(rate_date).map_err(Into::into)?,
+        })
+    }
+}
+
+impl InvoiceCurrency {
     /// The euro value of a foreign amount, the art. 13 conversion rounded
     /// to the cent.
     pub(crate) fn eur_value(&self, value: Decimal) -> Decimal {
@@ -220,43 +353,63 @@ pub struct Sconto {
 }
 
 impl Sconto {
-    /// A discount of `value` percent, `SC` and `Percentuale`.
+    /// A discount of `value` percent, `SC` and `Percentuale`, converted
+    /// from `value`.
     ///
     /// # Errors
     ///
     /// Returns `Err` when the value is not a positive percentage of at
     /// most 100 with at most two decimals.
-    pub fn discount_percent(value: impl Into<Decimal>) -> Result<Self, crate::ids::IdError> {
+    pub fn discount_percent<G>(value: G) -> Result<Self, IdError>
+    where
+        Decimal: TryFrom<G>,
+        <Decimal as TryFrom<G>>::Error: Into<IdError>,
+    {
         Self::new(true, true, value)
     }
 
-    /// A markup of `value` percent, `MG` and `Percentuale`.
+    /// A markup of `value` percent, `MG` and `Percentuale`, converted
+    /// from `value`.
     ///
     /// # Errors
     ///
     /// Returns `Err` when the value is not a positive percentage of at
     /// most 100 with at most two decimals.
-    pub fn markup_percent(value: impl Into<Decimal>) -> Result<Self, crate::ids::IdError> {
+    pub fn markup_percent<G>(value: G) -> Result<Self, IdError>
+    where
+        Decimal: TryFrom<G>,
+        <Decimal as TryFrom<G>>::Error: Into<IdError>,
+    {
         Self::new(false, true, value)
     }
 
-    /// A discount of `value` euros, `SC` and `Importo`.
+    /// A discount of `value` euros, `SC` and `Importo`, converted from
+    /// `value`.
     ///
     /// # Errors
     ///
     /// Returns `Err` when the value is not a positive amount of the
     /// `Amount8DecimalType` bounds.
-    pub fn discount_amount(value: impl Into<Decimal>) -> Result<Self, crate::ids::IdError> {
+    pub fn discount_amount<G>(value: G) -> Result<Self, IdError>
+    where
+        Decimal: TryFrom<G>,
+        <Decimal as TryFrom<G>>::Error: Into<IdError>,
+    {
         Self::new(true, false, value)
     }
 
-    /// A markup of `value` euros, `MG` and `Importo`.
+    /// A markup of `value` euros, `MG` and `Importo`, converted from
+    /// `value`.
     ///
     /// # Errors
     ///
     /// Returns `Err` when the value is not a positive amount of the
     /// `Amount8DecimalType` bounds.
-    pub fn markup_amount(value: impl Into<Decimal>) -> Result<Self, crate::ids::IdError> {
+    pub fn markup_amount<G>(value: G) -> Result<Self, IdError>
+    where
+        Decimal: TryFrom<G>,
+        <Decimal as TryFrom<G>>::Error: Into<IdError>,
+    {
         Self::new(false, false, value)
     }
 
@@ -264,12 +417,12 @@ impl Sconto {
     /// the `RateType` of at most two decimals, the `Importo` the
     /// `Amount8DecimalType` of at most eight decimals and nine integer
     /// digits.
-    fn new(
-        discount: bool,
-        percent: bool,
-        value: impl Into<Decimal>,
-    ) -> Result<Self, crate::ids::IdError> {
-        let original = value.into();
+    fn new<G>(discount: bool, percent: bool, value: G) -> Result<Self, IdError>
+    where
+        Decimal: TryFrom<G>,
+        <Decimal as TryFrom<G>>::Error: Into<IdError>,
+    {
+        let original = Decimal::try_from(value).map_err(Into::into)?;
         let mut value = original;
         let max_scale = if percent { 2 } else { 8 };
         value.rescale(max_scale);
@@ -278,7 +431,7 @@ impl Sconto {
             || (percent && value > Decimal::ONE_HUNDRED)
             || (!percent && value >= unit_price_bound())
         {
-            return Err(crate::ids::IdError::Sconto(original.to_string()));
+            return Err(IdError::Sconto(original.to_string()));
         }
         Ok(Self {
             discount,
@@ -324,7 +477,7 @@ impl Sconto {
 /// order. The `PrezzoUnitario` is in the currency the invoice carries, and
 /// the `PrezzoTotale` is computed by the invoice from the unit price, the
 /// quantity and the `ScontoMaggiorazione` blocks, per the 00423 rule.
-#[derive(bon::Builder, Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Line {
     /// The `Descrizione`.
     description: Description,
@@ -336,13 +489,225 @@ pub struct Line {
     /// The `PrezzoUnitario`, in the currency the invoice carries.
     unit_price: Amount,
     /// The `ScontoMaggiorazione` blocks, in document order.
-    #[builder(default)]
     sconti: Vec<Sconto>,
     /// The `AliquotaIVA` or the `Natura` of the line.
     vat: VatTreatment,
 }
 
+/// The builder of a [`Line`], which checks the required fields at compile
+/// time and defers the first conversion error of the setters to `build`.
+///
+/// The `description`, the `unit_price` and the `vat` are required, and the
+/// type parameters `D`, `P` and `V` carry the marker of each one, the
+/// `Set` marker once its setter was called, so a line missing a required
+/// field does not compile and the `build` is available only when every
+/// required field is set. The optional fields, the `quantity`, the
+/// `unit_of_measure` and the `sconti`, carry plain slots with their
+/// setters available in every state.
+#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+pub struct LineBuilder<D = typestate::Unset, P = typestate::Unset, V = typestate::Unset> {
+    /// The `Descrizione`.
+    description: Option<Description>,
+    /// The `Quantita`, absent when the line is not quantity-priced and the
+    /// total reads the unit price.
+    quantity: Option<Amount>,
+    /// The `UnitaMisura`.
+    unit_of_measure: Option<UnitaMisura>,
+    /// The `PrezzoUnitario`, in the currency the invoice carries.
+    unit_price: Option<Amount>,
+    /// The `ScontoMaggiorazione` blocks, in document order.
+    sconti: Option<Vec<Sconto>>,
+    /// The `AliquotaIVA` or the `Natura` of the line.
+    vat: Option<VatTreatment>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+    /// The typestate the builder has reached.
+    _state: PhantomData<(D, P, V)>,
+}
+
+impl<D, P, V> LineBuilder<D, P, V> {
+    /// The builder moved into the typestate the setter advanced to.
+    fn advance<ND, NP, NV>(self) -> LineBuilder<ND, NP, NV> {
+        let Self {
+            description,
+            quantity,
+            unit_of_measure,
+            unit_price,
+            sconti,
+            vat,
+            error,
+            ..
+        } = self;
+        LineBuilder {
+            description,
+            quantity,
+            unit_of_measure,
+            unit_price,
+            sconti,
+            vat,
+            error,
+            _state: PhantomData,
+        }
+    }
+
+    /// The `Quantita`, converted from `value`.
+    pub fn quantity<G>(mut self, value: G) -> Self
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(quantity) = convert(&mut self.error, "quantity", value) {
+            self.quantity = Some(quantity);
+        }
+        self
+    }
+
+    /// The `Quantita`, converted from `value`, absent when `value` is
+    /// `None`.
+    pub fn maybe_quantity<G>(mut self, value: Option<G>) -> Self
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        match value {
+            Some(value) => {
+                if let Some(quantity) = convert(&mut self.error, "quantity", value) {
+                    self.quantity = Some(quantity);
+                }
+            }
+            None => self.quantity = None,
+        }
+        self
+    }
+
+    /// The `UnitaMisura`, converted from `value`.
+    pub fn unit_of_measure<G>(mut self, value: G) -> Self
+    where
+        UnitaMisura: TryFrom<G>,
+        <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
+            self.unit_of_measure = Some(unit_of_measure);
+        }
+        self
+    }
+
+    /// The `UnitaMisura`, converted from `value`, absent when `value` is
+    /// `None`.
+    pub fn maybe_unit_of_measure<G>(mut self, value: Option<G>) -> Self
+    where
+        UnitaMisura: TryFrom<G>,
+        <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
+    {
+        match value {
+            Some(value) => {
+                if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
+                    self.unit_of_measure = Some(unit_of_measure);
+                }
+            }
+            None => self.unit_of_measure = None,
+        }
+        self
+    }
+
+    /// The `ScontoMaggiorazione` blocks, in document order.
+    pub fn sconti<G>(mut self, value: G) -> Self
+    where
+        Vec<Sconto>: TryFrom<G>,
+        <Vec<Sconto> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(sconti) = convert(&mut self.error, "sconti", value) {
+            self.sconti = Some(sconti);
+        }
+        self
+    }
+}
+
+impl<P, V> LineBuilder<typestate::Unset, P, V> {
+    /// The `Descrizione`, converted from `value`.
+    pub fn description<G>(mut self, value: G) -> LineBuilder<typestate::Set, P, V>
+    where
+        Description: TryFrom<G>,
+        <Description as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(description) = convert(&mut self.error, "description", value) {
+            self.description = Some(description);
+        }
+        self.advance()
+    }
+}
+
+impl<D, V> LineBuilder<D, typestate::Unset, V> {
+    /// The `PrezzoUnitario`, in the currency the invoice carries,
+    /// converted from `value`.
+    pub fn unit_price<G>(mut self, value: G) -> LineBuilder<D, typestate::Set, V>
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(unit_price) = convert(&mut self.error, "unit_price", value) {
+            self.unit_price = Some(unit_price);
+        }
+        self.advance()
+    }
+}
+
+impl<D, P> LineBuilder<D, P, typestate::Unset> {
+    /// The `AliquotaIVA` or the `Natura` of the line.
+    pub fn vat<G>(mut self, value: G) -> LineBuilder<D, P, typestate::Set>
+    where
+        VatTreatment: TryFrom<G>,
+        <VatTreatment as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(vat) = convert(&mut self.error, "vat", value) {
+            self.vat = Some(vat);
+        }
+        self.advance()
+    }
+}
+
+impl LineBuilder<typestate::Set, typestate::Set, typestate::Set> {
+    /// Finishes building the line.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the setters.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a required field is unset, which the typestate of the
+    /// setter chain prevents.
+    pub fn build(self) -> Result<Line, BuildError> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        Ok(Line {
+            description: required(self.description),
+            quantity: self.quantity,
+            unit_of_measure: self.unit_of_measure,
+            unit_price: required(self.unit_price),
+            sconti: self.sconti.unwrap_or_default(),
+            vat: required(self.vat),
+        })
+    }
+}
+
 impl Line {
+    /// The builder of a [`Line`], which checks the required fields at
+    /// compile time.
+    pub const fn builder() -> LineBuilder {
+        LineBuilder {
+            description: None,
+            quantity: None,
+            unit_of_measure: None,
+            unit_price: None,
+            sconti: None,
+            vat: None,
+            error: None,
+            _state: PhantomData,
+        }
+    }
+
     /// The VAT treatment of the line.
     #[must_use]
     pub const fn vat(&self) -> &VatTreatment {
@@ -465,7 +830,7 @@ fn seven_ter_treatment() -> VatTreatment {
 /// carries, and the `PrezzoTotale` is computed by the invoice from the
 /// unit price, the quantity and the `ScontoMaggiorazione` blocks, per the
 /// 00423 rule.
-#[derive(bon::Builder, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct SevenTerLine {
     /// The `Descrizione`.
     description: Description,
@@ -477,11 +842,205 @@ pub struct SevenTerLine {
     /// The `PrezzoUnitario`, in the currency the invoice carries.
     unit_price: Amount,
     /// The `ScontoMaggiorazione` blocks, in document order.
-    #[builder(default)]
     sconti: Vec<Sconto>,
 }
 
+/// The builder of a [`SevenTerLine`], which checks the required fields at
+/// compile time and defers the first conversion error of the setters to
+/// `build`.
+///
+/// The `description` and the `unit_price` are required, and the type
+/// parameters `D` and `P` carry the marker of each one, the `Set` marker
+/// once its setter was called, so a line missing a required field does
+/// not compile and the `build` is available only when every required
+/// field is set. The scenario writes the `N2.1` nature and the reference
+/// on every line, so the builder carries no `vat` setter. The optional
+/// fields, the `quantity`, the `unit_of_measure` and the `sconti`, carry
+/// plain slots with their setters available in every state.
+#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+pub struct SevenTerLineBuilder<D = typestate::Unset, P = typestate::Unset> {
+    /// The `Descrizione`.
+    description: Option<Description>,
+    /// The `Quantita`, absent when the line is not quantity-priced and the
+    /// total reads the unit price.
+    quantity: Option<Amount>,
+    /// The `UnitaMisura`.
+    unit_of_measure: Option<UnitaMisura>,
+    /// The `PrezzoUnitario`, in the currency the invoice carries.
+    unit_price: Option<Amount>,
+    /// The `ScontoMaggiorazione` blocks, in document order.
+    sconti: Option<Vec<Sconto>>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+    /// The typestate the builder has reached.
+    _state: PhantomData<(D, P)>,
+}
+
+impl<D, P> SevenTerLineBuilder<D, P> {
+    /// The builder moved into the typestate the setter advanced to.
+    fn advance<ND, NP>(self) -> SevenTerLineBuilder<ND, NP> {
+        let Self {
+            description,
+            quantity,
+            unit_of_measure,
+            unit_price,
+            sconti,
+            error,
+            ..
+        } = self;
+        SevenTerLineBuilder {
+            description,
+            quantity,
+            unit_of_measure,
+            unit_price,
+            sconti,
+            error,
+            _state: PhantomData,
+        }
+    }
+
+    /// The `Quantita`, converted from `value`.
+    pub fn quantity<G>(mut self, value: G) -> Self
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(quantity) = convert(&mut self.error, "quantity", value) {
+            self.quantity = Some(quantity);
+        }
+        self
+    }
+
+    /// The `Quantita`, converted from `value`, absent when `value` is
+    /// `None`.
+    pub fn maybe_quantity<G>(mut self, value: Option<G>) -> Self
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        match value {
+            Some(value) => {
+                if let Some(quantity) = convert(&mut self.error, "quantity", value) {
+                    self.quantity = Some(quantity);
+                }
+            }
+            None => self.quantity = None,
+        }
+        self
+    }
+
+    /// The `UnitaMisura`, converted from `value`.
+    pub fn unit_of_measure<G>(mut self, value: G) -> Self
+    where
+        UnitaMisura: TryFrom<G>,
+        <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
+            self.unit_of_measure = Some(unit_of_measure);
+        }
+        self
+    }
+
+    /// The `UnitaMisura`, converted from `value`, absent when `value` is
+    /// `None`.
+    pub fn maybe_unit_of_measure<G>(mut self, value: Option<G>) -> Self
+    where
+        UnitaMisura: TryFrom<G>,
+        <UnitaMisura as TryFrom<G>>::Error: Into<IdError>,
+    {
+        match value {
+            Some(value) => {
+                if let Some(unit_of_measure) = convert(&mut self.error, "unit_of_measure", value) {
+                    self.unit_of_measure = Some(unit_of_measure);
+                }
+            }
+            None => self.unit_of_measure = None,
+        }
+        self
+    }
+
+    /// The `ScontoMaggiorazione` blocks, in document order.
+    pub fn sconti<G>(mut self, value: G) -> Self
+    where
+        Vec<Sconto>: TryFrom<G>,
+        <Vec<Sconto> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(sconti) = convert(&mut self.error, "sconti", value) {
+            self.sconti = Some(sconti);
+        }
+        self
+    }
+}
+
+impl<P> SevenTerLineBuilder<typestate::Unset, P> {
+    /// The `Descrizione`, converted from `value`.
+    pub fn description<G>(mut self, value: G) -> SevenTerLineBuilder<typestate::Set, P>
+    where
+        Description: TryFrom<G>,
+        <Description as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(description) = convert(&mut self.error, "description", value) {
+            self.description = Some(description);
+        }
+        self.advance()
+    }
+}
+
+impl<D> SevenTerLineBuilder<D, typestate::Unset> {
+    /// The `PrezzoUnitario`, in the currency the invoice carries,
+    /// converted from `value`.
+    pub fn unit_price<G>(mut self, value: G) -> SevenTerLineBuilder<D, typestate::Set>
+    where
+        Amount: TryFrom<G>,
+        <Amount as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(unit_price) = convert(&mut self.error, "unit_price", value) {
+            self.unit_price = Some(unit_price);
+        }
+        self.advance()
+    }
+}
+
+impl SevenTerLineBuilder<typestate::Set, typestate::Set> {
+    /// Finishes building the line.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the setters.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a required field is unset, which the typestate of the
+    /// setter chain prevents.
+    pub fn build(self) -> Result<SevenTerLine, BuildError> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        Ok(SevenTerLine {
+            description: required(self.description),
+            quantity: self.quantity,
+            unit_of_measure: self.unit_of_measure,
+            unit_price: required(self.unit_price),
+            sconti: self.sconti.unwrap_or_default(),
+        })
+    }
+}
+
 impl SevenTerLine {
+    /// The builder of a [`SevenTerLine`], which checks the required
+    /// fields at compile time.
+    pub const fn builder() -> SevenTerLineBuilder {
+        SevenTerLineBuilder {
+            description: None,
+            quantity: None,
+            unit_of_measure: None,
+            unit_price: None,
+            sconti: None,
+            error: None,
+            _state: PhantomData,
+        }
+    }
+
     /// The line in the `Line` form the assembly reads, with the `N2.1`
     /// nature and the `ART. 7-TER DPR 633/72` reference of the scenario.
     fn into_line(self) -> Line {
@@ -525,123 +1084,478 @@ enum Scenario {
 /// named constructor fills.
 pub struct Invoice;
 
-#[bon]
-impl Invoice {
-    /// The domestic `TD01` invoice of a resident seller. The `FPR12`
-    /// format carries the seven-character `Recipient::Codice`, the
-    /// `FPA12` the six-character code of a public administration.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` when a line amount does not fit the XSD amount
-    /// types, or with every `SDI` violation when the assembled document
-    /// fails a check.
-    #[builder(finish_fn = build)]
-    pub fn domestic(
-        /// The seller of the invoice.
-        #[builder(start_fn)]
-        seller: &Seller,
-        /// The buyer of the invoice.
-        #[builder(start_fn)]
-        buyer: &Buyer,
-        /// The recipient channel of the buyer.
-        #[builder(start_fn)]
-        recipient: Recipient,
-        /// The first line of the invoice.
-        #[builder(start_fn)]
-        line: Line,
-        /// The `ProgressivoInvio` of the transmission.
-        progressivo: ProgressivoInvio,
-        /// The `Data` of the document.
-        date: Date,
-        /// The `Numero` of the document.
-        numero: Numero,
-        /// The remaining lines, in document order.
-        #[builder(default)]
-        lines: Vec<Line>,
-        /// The `Causale` texts of the document.
-        #[builder(default)]
-        causali: Vec<Causale>,
-        /// The currency of the document.
-        #[builder(default)]
-        currency: InvoiceCurrency,
-        /// Enables the virtual stamp duty, the 2.00 euros amount when the
-        /// computed total exceeds 77.47 euros.
-        #[builder(default, with = || true)]
-        bollo: bool,
-    ) -> Result<FatturaElettronica, BuildError> {
-        build_invoice(
-            seller.cedente(),
-            seller.id_trasmittente(),
-            buyer.party(),
-            &Scenario::Domestic { recipient },
-            TipoDocumentoType::Td01,
+/// The builder of the domestic invoice, which checks the required fields
+/// at compile time and defers the first conversion error of the setters
+/// to `build`.
+///
+/// The `progressivo`, the `date` and the `numero` are required, and the
+/// type parameters `P`, `D` and `N` carry the marker of each one, the
+/// `Set` marker once its setter was called, so a document missing a
+/// required field does not compile and the `build` is available only when
+/// every required field is set. The optional fields, the `lines`, the
+/// `causali`, the `currency` and the `bollo`, carry plain slots with
+/// their setters available in every state.
+#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+pub struct InvoiceDomesticBuilder<
+    'a,
+    'b,
+    P = typestate::Unset,
+    D = typestate::Unset,
+    N = typestate::Unset,
+> {
+    /// The seller of the invoice.
+    seller: &'a Seller,
+    /// The buyer of the invoice.
+    buyer: &'b Buyer,
+    /// The recipient channel of the buyer.
+    recipient: Recipient,
+    /// The first line of the invoice.
+    line: Line,
+    /// The `ProgressivoInvio` of the transmission.
+    progressivo: Option<ProgressivoInvio>,
+    /// The `Data` of the document.
+    date: Option<Date>,
+    /// The `Numero` of the document.
+    numero: Option<Numero>,
+    /// The remaining lines, in document order.
+    lines: Option<Vec<Line>>,
+    /// The `Causale` texts of the document.
+    causali: Option<Vec<Causale>>,
+    /// The currency of the document.
+    currency: Option<InvoiceCurrency>,
+    /// Whether to write the virtual stamp duty.
+    bollo: Option<bool>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+    /// The typestate the builder has reached.
+    _state: PhantomData<(P, D, N)>,
+}
+
+impl<'a, 'b, P, D, N> InvoiceDomesticBuilder<'a, 'b, P, D, N> {
+    /// The builder moved into the typestate the setter advanced to.
+    fn advance<NP, ND, NN>(self) -> InvoiceDomesticBuilder<'a, 'b, NP, ND, NN> {
+        let Self {
+            seller,
+            buyer,
+            recipient,
+            line,
             progressivo,
             date,
             numero,
+            lines,
             causali,
-            bollo,
-            first_lines(line, lines),
             currency,
+            bollo,
+            error,
+            ..
+        } = self;
+        InvoiceDomesticBuilder {
+            seller,
+            buyer,
+            recipient,
+            line,
+            progressivo,
+            date,
+            numero,
+            lines,
+            causali,
+            currency,
+            bollo,
+            error,
+            _state: PhantomData,
+        }
+    }
+
+    /// The remaining lines, in document order.
+    pub fn lines<G>(mut self, value: G) -> Self
+    where
+        Vec<Line>: TryFrom<G>,
+        <Vec<Line> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(lines) = convert(&mut self.error, "lines", value) {
+            self.lines = Some(lines);
+        }
+        self
+    }
+
+    /// The `Causale` texts of the document.
+    pub fn causali<G>(mut self, value: G) -> Self
+    where
+        Vec<Causale>: TryFrom<G>,
+        <Vec<Causale> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(causali) = convert(&mut self.error, "causali", value) {
+            self.causali = Some(causali);
+        }
+        self
+    }
+
+    /// The currency of the document.
+    pub fn currency<G>(mut self, value: G) -> Self
+    where
+        InvoiceCurrency: TryFrom<G>,
+        <InvoiceCurrency as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(currency) = convert(&mut self.error, "currency", value) {
+            self.currency = Some(currency);
+        }
+        self
+    }
+
+    /// Enables the virtual stamp duty, the 2.00 euros amount when the
+    /// computed total exceeds 77.47 euros.
+    pub fn bollo<G>(mut self, value: G) -> Self
+    where
+        bool: TryFrom<G>,
+        <bool as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(bollo) = convert(&mut self.error, "bollo", value) {
+            self.bollo = Some(bollo);
+        }
+        self
+    }
+}
+
+impl<'a, 'b, D, N> InvoiceDomesticBuilder<'a, 'b, typestate::Unset, D, N> {
+    /// The `ProgressivoInvio` of the transmission, converted from
+    /// `value`.
+    pub fn progressivo<G>(
+        mut self,
+        value: G,
+    ) -> InvoiceDomesticBuilder<'a, 'b, typestate::Set, D, N>
+    where
+        ProgressivoInvio: TryFrom<G>,
+        <ProgressivoInvio as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(progressivo) = convert(&mut self.error, "progressivo", value) {
+            self.progressivo = Some(progressivo);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, N> InvoiceDomesticBuilder<'a, 'b, P, typestate::Unset, N> {
+    /// The `Data` of the document, converted from `value`.
+    pub fn date<G>(mut self, value: G) -> InvoiceDomesticBuilder<'a, 'b, P, typestate::Set, N>
+    where
+        Date: TryFrom<G>,
+        <Date as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(date) = convert(&mut self.error, "date", value) {
+            self.date = Some(date);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, D> InvoiceDomesticBuilder<'a, 'b, P, D, typestate::Unset> {
+    /// The `Numero` of the document, converted from `value`.
+    pub fn numero<G>(mut self, value: G) -> InvoiceDomesticBuilder<'a, 'b, P, D, typestate::Set>
+    where
+        Numero: TryFrom<G>,
+        <Numero as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(numero) = convert(&mut self.error, "numero", value) {
+            self.numero = Some(numero);
+        }
+        self.advance()
+    }
+}
+
+impl InvoiceDomesticBuilder<'_, '_, typestate::Set, typestate::Set, typestate::Set> {
+    /// Finishes building the document, which runs the `SDI` checks of
+    /// `validate::validate` before returning it.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the setters, with
+    /// the `BuildError::Amount` when a line amount does not fit the XSD
+    /// amount types, or with every `SDI` violation when the assembled
+    /// document fails a check.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a required field is unset, which the typestate of the
+    /// setter chain prevents.
+    pub fn build(self) -> Result<FatturaElettronica, BuildError> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        build_invoice(
+            self.seller.cedente(),
+            self.seller.id_trasmittente(),
+            self.buyer.party(),
+            &Scenario::Domestic {
+                recipient: self.recipient,
+            },
+            TipoDocumentoType::Td01,
+            required(self.progressivo),
+            required(self.date),
+            required(self.numero),
+            self.causali.unwrap_or_default(),
+            self.bollo.unwrap_or(false),
+            first_lines(self.line, self.lines.unwrap_or_default()),
+            self.currency.unwrap_or_default(),
             Vec::new(),
             Vec::new(),
         )
     }
+}
 
-    /// The art. 7-ter services invoice to an EU or non-EU business
-    /// client. The `FPR12` format and the `XXXXXXX` recipient code are
-    /// dictated by the scenario, every line carries the `N2.1` nature and
-    /// the `ART. 7-TER DPR 633/72` reference the scenario writes, and the
-    /// virtual stamp duty is written when the total exceeds 77.47 euros.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` when a line amount does not fit the XSD amount
-    /// types, or with every `SDI` violation when the assembled document
-    /// fails a check.
-    #[builder(finish_fn = build)]
-    pub fn cross_border_services(
-        /// The seller of the invoice.
-        #[builder(start_fn)]
-        seller: &Seller,
-        /// The EU or non-EU business client of the invoice.
-        #[builder(start_fn)]
-        buyer: &Business,
-        /// The first line of the invoice.
-        #[builder(start_fn)]
-        line: SevenTerLine,
-        /// The `ProgressivoInvio` of the transmission.
-        progressivo: ProgressivoInvio,
-        /// The `Data` of the document.
-        date: Date,
-        /// The `Numero` of the document.
-        numero: Numero,
-        /// The remaining lines, in document order.
-        #[builder(default)]
-        lines: Vec<SevenTerLine>,
-        /// The `Causale` texts of the document.
-        #[builder(default)]
-        causali: Vec<Causale>,
-        /// The currency of the document.
-        #[builder(default)]
-        currency: InvoiceCurrency,
-    ) -> Result<FatturaElettronica, BuildError> {
-        build_invoice(
-            seller.cedente(),
-            seller.id_trasmittente(),
-            buyer.party(),
-            &Scenario::CrossBorder,
-            TipoDocumentoType::Td01,
+/// The builder of the art. 7-ter invoice, which checks the required
+/// fields at compile time and defers the first conversion error of the
+/// setters to `build`.
+///
+/// The `progressivo`, the `date` and the `numero` are required, and the
+/// type parameters `P`, `D` and `N` carry the marker of each one, the
+/// `Set` marker once its setter was called, so a document missing a
+/// required field does not compile and the `build` is available only when
+/// every required field is set. The optional fields, the `lines`, the
+/// `causali` and the `currency`, carry plain slots with their setters
+/// available in every state.
+#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+pub struct InvoiceCrossBorderServicesBuilder<
+    'a,
+    'b,
+    P = typestate::Unset,
+    D = typestate::Unset,
+    N = typestate::Unset,
+> {
+    /// The seller of the invoice.
+    seller: &'a Seller,
+    /// The EU or non-EU business client of the invoice.
+    buyer: &'b Business,
+    /// The first line of the invoice.
+    line: SevenTerLine,
+    /// The `ProgressivoInvio` of the transmission.
+    progressivo: Option<ProgressivoInvio>,
+    /// The `Data` of the document.
+    date: Option<Date>,
+    /// The `Numero` of the document.
+    numero: Option<Numero>,
+    /// The remaining lines, in document order.
+    lines: Option<Vec<SevenTerLine>>,
+    /// The `Causale` texts of the document.
+    causali: Option<Vec<Causale>>,
+    /// The currency of the document.
+    currency: Option<InvoiceCurrency>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+    /// The typestate the builder has reached.
+    _state: PhantomData<(P, D, N)>,
+}
+
+impl<'a, 'b, P, D, N> InvoiceCrossBorderServicesBuilder<'a, 'b, P, D, N> {
+    /// The builder moved into the typestate the setter advanced to.
+    fn advance<NP, ND, NN>(self) -> InvoiceCrossBorderServicesBuilder<'a, 'b, NP, ND, NN> {
+        let Self {
+            seller,
+            buyer,
+            line,
             progressivo,
             date,
             numero,
+            lines,
             causali,
-            true,
-            seven_ter_lines(first_seven_ter_lines(line, lines)),
             currency,
+            error,
+            ..
+        } = self;
+        InvoiceCrossBorderServicesBuilder {
+            seller,
+            buyer,
+            line,
+            progressivo,
+            date,
+            numero,
+            lines,
+            causali,
+            currency,
+            error,
+            _state: PhantomData,
+        }
+    }
+
+    /// The remaining lines, in document order.
+    pub fn lines<G>(mut self, value: G) -> Self
+    where
+        Vec<SevenTerLine>: TryFrom<G>,
+        <Vec<SevenTerLine> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(lines) = convert(&mut self.error, "lines", value) {
+            self.lines = Some(lines);
+        }
+        self
+    }
+
+    /// The `Causale` texts of the document.
+    pub fn causali<G>(mut self, value: G) -> Self
+    where
+        Vec<Causale>: TryFrom<G>,
+        <Vec<Causale> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(causali) = convert(&mut self.error, "causali", value) {
+            self.causali = Some(causali);
+        }
+        self
+    }
+
+    /// The currency of the document.
+    pub fn currency<G>(mut self, value: G) -> Self
+    where
+        InvoiceCurrency: TryFrom<G>,
+        <InvoiceCurrency as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(currency) = convert(&mut self.error, "currency", value) {
+            self.currency = Some(currency);
+        }
+        self
+    }
+}
+
+impl<'a, 'b, D, N> InvoiceCrossBorderServicesBuilder<'a, 'b, typestate::Unset, D, N> {
+    /// The `ProgressivoInvio` of the transmission, converted from
+    /// `value`.
+    pub fn progressivo<G>(
+        mut self,
+        value: G,
+    ) -> InvoiceCrossBorderServicesBuilder<'a, 'b, typestate::Set, D, N>
+    where
+        ProgressivoInvio: TryFrom<G>,
+        <ProgressivoInvio as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(progressivo) = convert(&mut self.error, "progressivo", value) {
+            self.progressivo = Some(progressivo);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, N> InvoiceCrossBorderServicesBuilder<'a, 'b, P, typestate::Unset, N> {
+    /// The `Data` of the document, converted from `value`.
+    pub fn date<G>(
+        mut self,
+        value: G,
+    ) -> InvoiceCrossBorderServicesBuilder<'a, 'b, P, typestate::Set, N>
+    where
+        Date: TryFrom<G>,
+        <Date as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(date) = convert(&mut self.error, "date", value) {
+            self.date = Some(date);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, D> InvoiceCrossBorderServicesBuilder<'a, 'b, P, D, typestate::Unset> {
+    /// The `Numero` of the document, converted from `value`.
+    pub fn numero<G>(
+        mut self,
+        value: G,
+    ) -> InvoiceCrossBorderServicesBuilder<'a, 'b, P, D, typestate::Set>
+    where
+        Numero: TryFrom<G>,
+        <Numero as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(numero) = convert(&mut self.error, "numero", value) {
+            self.numero = Some(numero);
+        }
+        self.advance()
+    }
+}
+
+impl InvoiceCrossBorderServicesBuilder<'_, '_, typestate::Set, typestate::Set, typestate::Set> {
+    /// Finishes building the document, which runs the `SDI` checks of
+    /// `validate::validate` before returning it.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the setters, with
+    /// the `BuildError::Amount` when a line amount does not fit the XSD
+    /// amount types, or with every `SDI` violation when the assembled
+    /// document fails a check.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a required field is unset, which the typestate of the
+    /// setter chain prevents.
+    pub fn build(self) -> Result<FatturaElettronica, BuildError> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        build_invoice(
+            self.seller.cedente(),
+            self.seller.id_trasmittente(),
+            self.buyer.party(),
+            &Scenario::CrossBorder,
+            TipoDocumentoType::Td01,
+            required(self.progressivo),
+            required(self.date),
+            required(self.numero),
+            self.causali.unwrap_or_default(),
+            true,
+            seven_ter_lines(first_seven_ter_lines(
+                self.line,
+                self.lines.unwrap_or_default(),
+            )),
+            self.currency.unwrap_or_default(),
             Vec::new(),
             Vec::new(),
         )
+    }
+}
+
+impl Invoice {
+    /// The domestic `TD01` invoice of a resident seller, which checks the
+    /// required fields at compile time and defers the first conversion
+    /// error of the setters to `build`. The `FPR12` format carries the
+    /// seven-character `Recipient::Codice`, the `FPA12` the
+    /// six-character code of a public administration.
+    pub const fn domestic<'a, 'b>(
+        seller: &'a Seller,
+        buyer: &'b Buyer,
+        recipient: Recipient,
+        line: Line,
+    ) -> InvoiceDomesticBuilder<'a, 'b> {
+        InvoiceDomesticBuilder {
+            seller,
+            buyer,
+            recipient,
+            line,
+            progressivo: None,
+            date: None,
+            numero: None,
+            lines: None,
+            causali: None,
+            currency: None,
+            bollo: None,
+            error: None,
+            _state: PhantomData,
+        }
+    }
+
+    /// The art. 7-ter services invoice to an EU or non-EU business
+    /// client, which checks the required fields at compile time and
+    /// defers the first conversion error of the setters to `build`.
+    pub const fn cross_border_services<'a, 'b>(
+        seller: &'a Seller,
+        buyer: &'b Business,
+        line: SevenTerLine,
+    ) -> InvoiceCrossBorderServicesBuilder<'a, 'b> {
+        InvoiceCrossBorderServicesBuilder {
+            seller,
+            buyer,
+            line,
+            progressivo: None,
+            date: None,
+            numero: None,
+            lines: None,
+            causali: None,
+            currency: None,
+            error: None,
+            _state: PhantomData,
+        }
     }
 }
 
@@ -649,135 +1563,515 @@ impl Invoice {
 /// supplier, the `TD17` of services and the `TD19` of goods.
 pub struct SelfInvoice;
 
-#[bon]
-impl SelfInvoice {
-    /// The `TD17` self-invoice of a service bought from a non-Italian
-    /// supplier, the reverse charge of the art. 7-ter. The `FPR12` or
-    /// `FPA12` format, the `IdTrasmittente` of the Italian buyer, the
-    /// `RF01` regime the XSD demands of the foreign supplier, and the
-    /// `DatiPagamento` at the buyer's terms are dictated by the scenario.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` when a line amount does not fit the XSD amount
-    /// types, or with every `SDI` violation when the assembled document
-    /// fails a check.
-    #[builder(finish_fn = build)]
-    pub fn td17(
-        /// The non-Italian supplier of the service.
-        #[builder(start_fn)]
-        supplier: &Business,
-        /// The Italian buyer with its `partita IVA`.
-        #[builder(start_fn)]
-        buyer: &Company,
-        /// The recipient channel of the buyer.
-        #[builder(start_fn)]
-        recipient: Recipient,
-        /// The first line of the self-invoice, at the buyer's rate.
-        #[builder(start_fn)]
-        line: Line,
-        /// The `ProgressivoInvio` of the transmission.
-        progressivo: ProgressivoInvio,
-        /// The `Data` of the document.
-        date: Date,
-        /// The `Numero` of the document.
-        numero: Numero,
-        /// The remaining lines, in document order.
-        #[builder(default)]
-        lines: Vec<Line>,
-        /// The `Causale` texts of the document.
-        #[builder(default)]
-        causali: Vec<Causale>,
-        /// The currency of the document.
-        #[builder(default)]
-        currency: InvoiceCurrency,
-        /// The `DatiFattureCollegate` to the original document, its
-        /// `IdDocumento` and `Data`.
-        #[builder(with = |numero: IdDocumento, data: Date| (numero, data), name = original_invoice)]
-        original: Option<(IdDocumento, Date)>,
-    ) -> Result<FatturaElettronica, BuildError> {
-        build_invoice(
-            supplier.cedente(RegimeFiscale::Rf01),
-            buyer.id_trasmittente(),
-            buyer.party(),
-            &Scenario::Domestic { recipient },
-            TipoDocumentoType::Td17,
+/// The builder of the `TD17` self-invoice, which checks the required
+/// fields at compile time and defers the first conversion error of the
+/// setters to `build`.
+///
+/// The `progressivo`, the `date` and the `numero` are required, and the
+/// type parameters `P`, `D` and `N` carry the marker of each one, the
+/// `Set` marker once its setter was called, so a document missing a
+/// required field does not compile and the `build` is available only when
+/// every required field is set. The optional fields, the `lines`, the
+/// `causali`, the `currency` and the `original_invoice`, carry plain slots
+/// with their setters available in every state.
+#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+pub struct SelfInvoiceTd17Builder<
+    'a,
+    'b,
+    P = typestate::Unset,
+    D = typestate::Unset,
+    N = typestate::Unset,
+> {
+    /// The non-Italian supplier of the service.
+    supplier: &'a Business,
+    /// The Italian buyer with its `partita IVA`.
+    buyer: &'b Company,
+    /// The recipient channel of the buyer.
+    recipient: Recipient,
+    /// The first line of the self-invoice, at the buyer's rate.
+    line: Line,
+    /// The `ProgressivoInvio` of the transmission.
+    progressivo: Option<ProgressivoInvio>,
+    /// The `Data` of the document.
+    date: Option<Date>,
+    /// The `Numero` of the document.
+    numero: Option<Numero>,
+    /// The remaining lines, in document order.
+    lines: Option<Vec<Line>>,
+    /// The `Causale` texts of the document.
+    causali: Option<Vec<Causale>>,
+    /// The currency of the document.
+    currency: Option<InvoiceCurrency>,
+    /// The `DatiFattureCollegate` to the original document, its
+    /// `IdDocumento` and `Data`.
+    original_invoice: Option<(IdDocumento, Date)>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+    /// The typestate the builder has reached.
+    _state: PhantomData<(P, D, N)>,
+}
+
+impl<'a, 'b, P, D, N> SelfInvoiceTd17Builder<'a, 'b, P, D, N> {
+    /// The builder moved into the typestate the setter advanced to.
+    fn advance<NP, ND, NN>(self) -> SelfInvoiceTd17Builder<'a, 'b, NP, ND, NN> {
+        let Self {
+            supplier,
+            buyer,
+            recipient,
+            line,
             progressivo,
             date,
             numero,
+            lines,
             causali,
-            false,
-            first_lines(line, lines),
             currency,
+            original_invoice,
+            error,
+            ..
+        } = self;
+        SelfInvoiceTd17Builder {
+            supplier,
+            buyer,
+            recipient,
+            line,
+            progressivo,
+            date,
+            numero,
+            lines,
+            causali,
+            currency,
+            original_invoice,
+            error,
+            _state: PhantomData,
+        }
+    }
+
+    /// The remaining lines, in document order.
+    pub fn lines<G>(mut self, value: G) -> Self
+    where
+        Vec<Line>: TryFrom<G>,
+        <Vec<Line> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(lines) = convert(&mut self.error, "lines", value) {
+            self.lines = Some(lines);
+        }
+        self
+    }
+
+    /// The `Causale` texts of the document.
+    pub fn causali<G>(mut self, value: G) -> Self
+    where
+        Vec<Causale>: TryFrom<G>,
+        <Vec<Causale> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(causali) = convert(&mut self.error, "causali", value) {
+            self.causali = Some(causali);
+        }
+        self
+    }
+
+    /// The currency of the document.
+    pub fn currency<G>(mut self, value: G) -> Self
+    where
+        InvoiceCurrency: TryFrom<G>,
+        <InvoiceCurrency as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(currency) = convert(&mut self.error, "currency", value) {
+            self.currency = Some(currency);
+        }
+        self
+    }
+}
+
+impl<'a, 'b, D, N> SelfInvoiceTd17Builder<'a, 'b, typestate::Unset, D, N> {
+    /// The `ProgressivoInvio` of the transmission, converted from
+    /// `value`.
+    pub fn progressivo<G>(
+        mut self,
+        value: G,
+    ) -> SelfInvoiceTd17Builder<'a, 'b, typestate::Set, D, N>
+    where
+        ProgressivoInvio: TryFrom<G>,
+        <ProgressivoInvio as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(progressivo) = convert(&mut self.error, "progressivo", value) {
+            self.progressivo = Some(progressivo);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, N> SelfInvoiceTd17Builder<'a, 'b, P, typestate::Unset, N> {
+    /// The `Data` of the document, converted from `value`.
+    pub fn date<G>(mut self, value: G) -> SelfInvoiceTd17Builder<'a, 'b, P, typestate::Set, N>
+    where
+        Date: TryFrom<G>,
+        <Date as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(date) = convert(&mut self.error, "date", value) {
+            self.date = Some(date);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, D> SelfInvoiceTd17Builder<'a, 'b, P, D, typestate::Unset> {
+    /// The `Numero` of the document, converted from `value`.
+    pub fn numero<G>(mut self, value: G) -> SelfInvoiceTd17Builder<'a, 'b, P, D, typestate::Set>
+    where
+        Numero: TryFrom<G>,
+        <Numero as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(numero) = convert(&mut self.error, "numero", value) {
+            self.numero = Some(numero);
+        }
+        self.advance()
+    }
+}
+
+impl<P, D, N> SelfInvoiceTd17Builder<'_, '_, P, D, N> {
+    /// The `DatiFattureCollegate` to the original document, its
+    /// `IdDocumento` and `Data`, converted.
+    pub fn original_invoice<Id, Dt>(mut self, numero: Id, data: Dt) -> Self
+    where
+        IdDocumento: TryFrom<Id>,
+        <IdDocumento as TryFrom<Id>>::Error: Into<IdError>,
+        Date: TryFrom<Dt>,
+        <Date as TryFrom<Dt>>::Error: Into<IdError>,
+    {
+        if let Some(numero) = convert(&mut self.error, "original_invoice", numero)
+            && let Some(data) = convert(&mut self.error, "original_invoice", data)
+        {
+            self.original_invoice = Some((numero, data));
+        }
+        self
+    }
+}
+
+impl SelfInvoiceTd17Builder<'_, '_, typestate::Set, typestate::Set, typestate::Set> {
+    /// Finishes building the document, which runs the `SDI` checks of
+    /// `validate::validate` before returning it.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the setters, with
+    /// the `BuildError::Amount` when a line amount does not fit the XSD
+    /// amount types, or with every `SDI` violation when the assembled
+    /// document fails a check.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a required field is unset, which the typestate of the
+    /// setter chain prevents.
+    pub fn build(self) -> Result<FatturaElettronica, BuildError> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        let date = required(self.date);
+        build_invoice(
+            self.supplier.cedente(RegimeFiscale::Rf01),
+            self.buyer.id_trasmittente(),
+            self.buyer.party(),
+            &Scenario::Domestic {
+                recipient: self.recipient,
+            },
+            TipoDocumentoType::Td17,
+            required(self.progressivo),
+            date,
+            required(self.numero),
+            self.causali.unwrap_or_default(),
+            false,
+            first_lines(self.line, self.lines.unwrap_or_default()),
+            self.currency.unwrap_or_default(),
             vec![pagamento(date)],
-            original
+            self.original_invoice
                 .map(|(numero, data)| collegate(&numero, data))
                 .into_iter()
                 .collect(),
         )
     }
+}
 
-    /// The `TD19` self-invoice of goods bought from a non-Italian
-    /// supplier, the reverse charge of the art. 7-ter.
-    ///
-    /// # Errors
-    ///
-    /// Returns `Err` when a line amount does not fit the XSD amount
-    /// types, or with every `SDI` violation when the assembled document
-    /// fails a check.
-    #[builder(finish_fn = build)]
-    pub fn td19(
-        /// The non-Italian supplier of the goods.
-        #[builder(start_fn)]
-        supplier: &Business,
-        /// The Italian buyer with its `partita IVA`.
-        #[builder(start_fn)]
-        buyer: &Company,
-        /// The recipient channel of the buyer.
-        #[builder(start_fn)]
-        recipient: Recipient,
-        /// The first line of the self-invoice, at the buyer's rate.
-        #[builder(start_fn)]
-        line: Line,
-        /// The `ProgressivoInvio` of the transmission.
-        progressivo: ProgressivoInvio,
-        /// The `Data` of the document.
-        date: Date,
-        /// The `Numero` of the document.
-        numero: Numero,
-        /// The remaining lines, in document order.
-        #[builder(default)]
-        lines: Vec<Line>,
-        /// The `Causale` texts of the document.
-        #[builder(default)]
-        causali: Vec<Causale>,
-        /// The currency of the document.
-        #[builder(default)]
-        currency: InvoiceCurrency,
-        /// The `DatiFattureCollegate` to the original document, its
-        /// `IdDocumento` and `Data`.
-        #[builder(with = |numero: IdDocumento, data: Date| (numero, data), name = original_invoice)]
-        original: Option<(IdDocumento, Date)>,
-    ) -> Result<FatturaElettronica, BuildError> {
-        build_invoice(
-            supplier.cedente(RegimeFiscale::Rf01),
-            buyer.id_trasmittente(),
-            buyer.party(),
-            &Scenario::Domestic { recipient },
-            TipoDocumentoType::Td19,
+/// The builder of the `TD19` self-invoice, which checks the required
+/// fields at compile time and defers the first conversion error of the
+/// setters to `build`.
+///
+/// The `progressivo`, the `date` and the `numero` are required, and the
+/// type parameters `P`, `D` and `N` carry the marker of each one, the
+/// `Set` marker once its setter was called, so a document missing a
+/// required field does not compile and the `build` is available only when
+/// every required field is set. The optional fields, the `lines`, the
+/// `causali`, the `currency` and the `original_invoice`, carry plain slots
+/// with their setters available in every state.
+#[must_use = "the builder does nothing until you call `build()` on it to finish building"]
+pub struct SelfInvoiceTd19Builder<
+    'a,
+    'b,
+    P = typestate::Unset,
+    D = typestate::Unset,
+    N = typestate::Unset,
+> {
+    /// The non-Italian supplier of the goods.
+    supplier: &'a Business,
+    /// The Italian buyer with its `partita IVA`.
+    buyer: &'b Company,
+    /// The recipient channel of the buyer.
+    recipient: Recipient,
+    /// The first line of the self-invoice, at the buyer's rate.
+    line: Line,
+    /// The `ProgressivoInvio` of the transmission.
+    progressivo: Option<ProgressivoInvio>,
+    /// The `Data` of the document.
+    date: Option<Date>,
+    /// The `Numero` of the document.
+    numero: Option<Numero>,
+    /// The remaining lines, in document order.
+    lines: Option<Vec<Line>>,
+    /// The `Causale` texts of the document.
+    causali: Option<Vec<Causale>>,
+    /// The currency of the document.
+    currency: Option<InvoiceCurrency>,
+    /// The `DatiFattureCollegate` to the original document, its
+    /// `IdDocumento` and `Data`.
+    original_invoice: Option<(IdDocumento, Date)>,
+    /// The first conversion error of the setters, if any.
+    error: Option<BuildError>,
+    /// The typestate the builder has reached.
+    _state: PhantomData<(P, D, N)>,
+}
+
+impl<'a, 'b, P, D, N> SelfInvoiceTd19Builder<'a, 'b, P, D, N> {
+    /// The builder moved into the typestate the setter advanced to.
+    fn advance<NP, ND, NN>(self) -> SelfInvoiceTd19Builder<'a, 'b, NP, ND, NN> {
+        let Self {
+            supplier,
+            buyer,
+            recipient,
+            line,
             progressivo,
             date,
             numero,
+            lines,
             causali,
-            false,
-            first_lines(line, lines),
             currency,
+            original_invoice,
+            error,
+            ..
+        } = self;
+        SelfInvoiceTd19Builder {
+            supplier,
+            buyer,
+            recipient,
+            line,
+            progressivo,
+            date,
+            numero,
+            lines,
+            causali,
+            currency,
+            original_invoice,
+            error,
+            _state: PhantomData,
+        }
+    }
+
+    /// The remaining lines, in document order.
+    pub fn lines<G>(mut self, value: G) -> Self
+    where
+        Vec<Line>: TryFrom<G>,
+        <Vec<Line> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(lines) = convert(&mut self.error, "lines", value) {
+            self.lines = Some(lines);
+        }
+        self
+    }
+
+    /// The `Causale` texts of the document.
+    pub fn causali<G>(mut self, value: G) -> Self
+    where
+        Vec<Causale>: TryFrom<G>,
+        <Vec<Causale> as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(causali) = convert(&mut self.error, "causali", value) {
+            self.causali = Some(causali);
+        }
+        self
+    }
+
+    /// The currency of the document.
+    pub fn currency<G>(mut self, value: G) -> Self
+    where
+        InvoiceCurrency: TryFrom<G>,
+        <InvoiceCurrency as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(currency) = convert(&mut self.error, "currency", value) {
+            self.currency = Some(currency);
+        }
+        self
+    }
+}
+
+impl<'a, 'b, D, N> SelfInvoiceTd19Builder<'a, 'b, typestate::Unset, D, N> {
+    /// The `ProgressivoInvio` of the transmission, converted from
+    /// `value`.
+    pub fn progressivo<G>(
+        mut self,
+        value: G,
+    ) -> SelfInvoiceTd19Builder<'a, 'b, typestate::Set, D, N>
+    where
+        ProgressivoInvio: TryFrom<G>,
+        <ProgressivoInvio as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(progressivo) = convert(&mut self.error, "progressivo", value) {
+            self.progressivo = Some(progressivo);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, N> SelfInvoiceTd19Builder<'a, 'b, P, typestate::Unset, N> {
+    /// The `Data` of the document, converted from `value`.
+    pub fn date<G>(mut self, value: G) -> SelfInvoiceTd19Builder<'a, 'b, P, typestate::Set, N>
+    where
+        Date: TryFrom<G>,
+        <Date as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(date) = convert(&mut self.error, "date", value) {
+            self.date = Some(date);
+        }
+        self.advance()
+    }
+}
+
+impl<'a, 'b, P, D> SelfInvoiceTd19Builder<'a, 'b, P, D, typestate::Unset> {
+    /// The `Numero` of the document, converted from `value`.
+    pub fn numero<G>(mut self, value: G) -> SelfInvoiceTd19Builder<'a, 'b, P, D, typestate::Set>
+    where
+        Numero: TryFrom<G>,
+        <Numero as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(numero) = convert(&mut self.error, "numero", value) {
+            self.numero = Some(numero);
+        }
+        self.advance()
+    }
+}
+
+impl<P, D, N> SelfInvoiceTd19Builder<'_, '_, P, D, N> {
+    /// The `DatiFattureCollegate` to the original document, its
+    /// `IdDocumento` and `Data`, converted.
+    pub fn original_invoice<Id, Dt>(mut self, numero: Id, data: Dt) -> Self
+    where
+        IdDocumento: TryFrom<Id>,
+        <IdDocumento as TryFrom<Id>>::Error: Into<IdError>,
+        Date: TryFrom<Dt>,
+        <Date as TryFrom<Dt>>::Error: Into<IdError>,
+    {
+        if let Some(numero) = convert(&mut self.error, "original_invoice", numero)
+            && let Some(data) = convert(&mut self.error, "original_invoice", data)
+        {
+            self.original_invoice = Some((numero, data));
+        }
+        self
+    }
+}
+
+impl SelfInvoiceTd19Builder<'_, '_, typestate::Set, typestate::Set, typestate::Set> {
+    /// Finishes building the document, which runs the `SDI` checks of
+    /// `validate::validate` before returning it.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` with the first conversion error of the setters, with
+    /// the `BuildError::Amount` when a line amount does not fit the XSD
+    /// amount types, or with every `SDI` violation when the assembled
+    /// document fails a check.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a required field is unset, which the typestate of the
+    /// setter chain prevents.
+    pub fn build(self) -> Result<FatturaElettronica, BuildError> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        let date = required(self.date);
+        build_invoice(
+            self.supplier.cedente(RegimeFiscale::Rf01),
+            self.buyer.id_trasmittente(),
+            self.buyer.party(),
+            &Scenario::Domestic {
+                recipient: self.recipient,
+            },
+            TipoDocumentoType::Td19,
+            required(self.progressivo),
+            date,
+            required(self.numero),
+            self.causali.unwrap_or_default(),
+            false,
+            first_lines(self.line, self.lines.unwrap_or_default()),
+            self.currency.unwrap_or_default(),
             vec![pagamento(date)],
-            original
+            self.original_invoice
                 .map(|(numero, data)| collegate(&numero, data))
                 .into_iter()
                 .collect(),
         )
+    }
+}
+
+impl SelfInvoice {
+    /// The `TD17` self-invoice of a service bought from a non-Italian
+    /// supplier, which checks the required fields at compile time and
+    /// defers the first conversion error of the setters to `build`.
+    pub const fn td17<'a, 'b>(
+        supplier: &'a Business,
+        buyer: &'b Company,
+        recipient: Recipient,
+        line: Line,
+    ) -> SelfInvoiceTd17Builder<'a, 'b> {
+        SelfInvoiceTd17Builder {
+            supplier,
+            buyer,
+            recipient,
+            line,
+            progressivo: None,
+            date: None,
+            numero: None,
+            lines: None,
+            causali: None,
+            currency: None,
+            original_invoice: None,
+            error: None,
+            _state: PhantomData,
+        }
+    }
+
+    /// The `TD19` self-invoice of goods bought from a non-Italian
+    /// supplier, which checks the required fields at compile time and
+    /// defers the first conversion error of the setters to `build`.
+    pub const fn td19<'a, 'b>(
+        supplier: &'a Business,
+        buyer: &'b Company,
+        recipient: Recipient,
+        line: Line,
+    ) -> SelfInvoiceTd19Builder<'a, 'b> {
+        SelfInvoiceTd19Builder {
+            supplier,
+            buyer,
+            recipient,
+            line,
+            progressivo: None,
+            date: None,
+            numero: None,
+            lines: None,
+            causali: None,
+            currency: None,
+            original_invoice: None,
+            error: None,
+            _state: PhantomData,
+        }
     }
 }
 
@@ -1211,9 +2505,10 @@ fn norm2(mut value: Decimal) -> Decimal {
 mod tests {
     use super::*;
     use crate::Document;
-    use crate::ids::{PartitaIva, Provincia, UnitaMisura};
-    use crate::party::Address;
+    use crate::ids::{CodiceFiscale, IdError, PartitaIva, Provincia, UnitaMisura};
+    use crate::party::{Address, TaxIdentity};
     use iso_country::Country;
+    use std::sync::atomic::{AtomicUsize, Ordering};
 
     /// A synthetic check-valid `partita IVA`, never a real company.
     fn alpha_piva() -> PartitaIva {
@@ -1246,7 +2541,7 @@ mod tests {
     /// The non-taxable line with the export nature and the reference.
     fn not_taxed_line(reference: &str) -> Line {
         Line::builder()
-            .description("MERCE".parse().expect("a valid description"))
+            .description("MERCE")
             .quantity(Amount(Decimal::new(2, 2)))
             .unit_price(Amount(Decimal::new(10000, 2)))
             .vat(VatTreatment::NotTaxed {
@@ -1254,6 +2549,7 @@ mod tests {
                 riferimento_normativo: reference.parse().expect("a valid reference"),
             })
             .build()
+            .expect("the line builds")
     }
 
     fn rome() -> Address {
@@ -1319,25 +2615,23 @@ mod tests {
 
     fn seven_ter_line() -> SevenTerLine {
         SevenTerLine::builder()
-            .description(
-                "SERVIZIO DI CONSULENZA"
-                    .parse()
-                    .expect("a valid description"),
-            )
+            .description("SERVIZIO DI CONSULENZA")
             .quantity(Amount(Decimal::new(10000, 2)))
             .unit_price(Amount(Decimal::new(15000, 2)))
             .build()
+            .expect("the line builds")
     }
 
     fn taxed_line(value: i64) -> Line {
         Line::builder()
-            .description("SERVIZIO".parse().expect("a valid description"))
+            .description("SERVIZIO")
             .quantity(Amount(Decimal::new(100, 2)))
             .unit_price(Amount(Decimal::new(value, 2)))
             .vat(VatTreatment::Taxed(
                 "22.00".parse::<Aliquota>().expect("a valid rate"),
             ))
             .build()
+            .expect("the line builds")
     }
 
     fn progressivo() -> ProgressivoInvio {
@@ -1433,8 +2727,8 @@ mod tests {
             taxed_line(10000),
         )
         .progressivo(progressivo())
-        .date("2026-11-05".parse().expect("a valid date"))
-        .numero("001".parse().expect("a valid number"))
+        .date("2026-11-05")
+        .numero("001")
         .causali(vec!["AUTOFATTURA".parse().expect("a valid causale")])
         .build()
         .expect("the self-invoice builds");
@@ -1513,7 +2807,7 @@ mod tests {
         let doc = Invoice::cross_border_services(&seller(), &buyer_us(), seven_ter_line())
             .progressivo(progressivo())
             .date(date())
-            .numero("00011".parse().expect("a valid number"))
+            .numero("00011")
             .currency(currency)
             .build()
             .expect("the invoice builds");
@@ -1561,8 +2855,8 @@ mod tests {
             taxed_line(100),
         )
         .progressivo(progressivo())
-        .date("2026-11-05".parse().expect("a valid date"))
-        .numero("001".parse().expect("a valid number"))
+        .date("2026-11-05")
+        .numero("001")
         .lines(vec![taxed_line(50)])
         .build()
         .expect("the invoice builds");
@@ -1579,14 +2873,15 @@ mod tests {
     #[test]
     fn the_unit_of_measure_is_carried() {
         let line = Line::builder()
-            .description("BENE".parse().expect("a valid description"))
+            .description("BENE")
             .quantity(Amount(Decimal::new(100, 2)))
             .unit_of_measure(UnitaMisura::try_new("KG").expect("a valid unit of measure"))
             .unit_price(Amount(Decimal::new(1000, 2)))
             .vat(VatTreatment::Taxed(
                 "22.00".parse::<Aliquota>().expect("a valid rate"),
             ))
-            .build();
+            .build()
+            .expect("the line builds");
         let doc = Invoice::domestic(
             &seller(),
             &Buyer::denomination(
@@ -1704,13 +2999,14 @@ mod tests {
     #[test]
     fn the_eight_decimal_amount_fits_the_xsd_types() {
         let line = Line::builder()
-            .description("SERVIZIO".parse().expect("a valid description"))
+            .description("SERVIZIO")
             .quantity(Amount(Decimal::new(100, 2)))
             .unit_price(Amount(Decimal::new(100_000_001, 8)))
             .vat(VatTreatment::Taxed(
                 "22.00".parse::<Aliquota>().expect("a valid rate"),
             ))
-            .build();
+            .build()
+            .expect("the line builds");
         let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
             .progressivo(progressivo())
             .date(date())
@@ -1734,13 +3030,14 @@ mod tests {
     #[test]
     fn the_nine_decimal_amount_fails_the_build() {
         let line = Line::builder()
-            .description("SERVIZIO".parse().expect("a valid description"))
+            .description("SERVIZIO")
             .quantity(Amount(Decimal::new(100, 2)))
             .unit_price(Amount(Decimal::new(100_000_000_001, 9)))
             .vat(VatTreatment::Taxed(
                 "22.00".parse::<Aliquota>().expect("a valid rate"),
             ))
-            .build();
+            .build()
+            .expect("the line builds");
         let error = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
             .progressivo(progressivo())
             .date(date())
@@ -1762,13 +3059,14 @@ mod tests {
     #[test]
     fn the_sub_two_decimal_amounts_write_two_decimals() {
         let line = Line::builder()
-            .description("SERVIZIO".parse().expect("a valid description"))
+            .description("SERVIZIO")
             .quantity(Amount(Decimal::new(2, 0)))
             .unit_price(Amount(Decimal::new(55, 1)))
             .vat(VatTreatment::Taxed(
                 "22.00".parse::<Aliquota>().expect("a valid rate"),
             ))
-            .build();
+            .build()
+            .expect("the line builds");
         let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
             .progressivo(progressivo())
             .date(date())
@@ -1793,5 +3091,797 @@ mod tests {
         let xml = doc.to_xml_string().expect("the invoice serialises");
         assert!(xml.contains("<PrezzoUnitario>5.50</PrezzoUnitario>"));
         assert!(xml.contains("<Quantita>2.00</Quantita>"));
+    }
+
+    /// A source whose `TryFrom` conversions are counted, so a test can
+    /// prove that a setter skips the conversion after the first error.
+    #[derive(Clone)]
+    struct Counting {
+        /// The counter of the conversions.
+        counter: &'static AtomicUsize,
+        /// The text the source converts.
+        value: &'static str,
+    }
+
+    impl TryFrom<Counting> for Description {
+        type Error = IdError;
+
+        fn try_from(source: Counting) -> Result<Self, IdError> {
+            source.counter.fetch_add(1, Ordering::Relaxed);
+            Self::try_new(source.value)
+        }
+    }
+
+    impl TryFrom<Counting> for Amount {
+        type Error = IdError;
+
+        fn try_from(source: Counting) -> Result<Self, IdError> {
+            source.counter.fetch_add(1, Ordering::Relaxed);
+            Self::try_from(source.value)
+        }
+    }
+
+    impl TryFrom<Counting> for ProgressivoInvio {
+        type Error = IdError;
+
+        fn try_from(source: Counting) -> Result<Self, IdError> {
+            source.counter.fetch_add(1, Ordering::Relaxed);
+            Self::try_new(source.value)
+        }
+    }
+
+    impl TryFrom<Counting> for Date {
+        type Error = IdError;
+
+        fn try_from(source: Counting) -> Result<Self, IdError> {
+            source.counter.fetch_add(1, Ordering::Relaxed);
+            Self::try_from(source.value)
+        }
+    }
+
+    /// A setter whose conversion fails is reported by `build` with the
+    /// name of the setter, although the remaining required fields are
+    /// set after it.
+    #[test]
+    fn a_failing_setter_is_reported_at_build() {
+        let line = Line::builder()
+            .description("SERVIZIO")
+            .unit_price("not a decimal")
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build();
+        assert!(
+            matches!(
+                line,
+                Err(BuildError::Id {
+                    field: "unit_price",
+                    error: IdError::Amount(..)
+                })
+            ),
+            "{line:?}"
+        );
+    }
+
+    /// When two setters fail, `build` reports the first error.
+    #[test]
+    fn the_first_conversion_error_wins() {
+        let line = Line::builder()
+            .description("")
+            .unit_price("not a decimal")
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build();
+        assert!(
+            matches!(
+                line,
+                Err(BuildError::Id {
+                    field: "description",
+                    ..
+                })
+            ),
+            "{line:?}"
+        );
+    }
+
+    /// A typed value and the equivalent string build the same line.
+    #[test]
+    fn typed_and_string_values_build_the_same_line() {
+        let typed = Line::builder()
+            .description(Description::try_new("SERVIZIO").expect("a valid description"))
+            .quantity(Amount(Decimal::new(100, 2)))
+            .unit_price(Amount(Decimal::new(10_000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        let strings = Line::builder()
+            .description("SERVIZIO")
+            .quantity("1.00")
+            .unit_price("100.00")
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        assert_eq!(typed, strings);
+    }
+
+    /// A typed value and the equivalent string build the same document.
+    #[test]
+    fn typed_and_string_values_build_the_same_invoice() {
+        let typed = Invoice::domestic(&seller(), &buyer_rome(), codice(), taxed_line(10_000))
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build()
+            .expect("the invoice builds");
+        let strings = Invoice::domestic(&seller(), &buyer_rome(), codice(), taxed_line(10_000))
+            .progressivo("00001")
+            .date("2026-11-04")
+            .numero("00012")
+            .build()
+            .expect("the invoice builds");
+        assert_eq!(typed, strings);
+    }
+
+    /// Once a setter fails, the later setters skip their conversion and
+    /// only advance the typestate.
+    #[test]
+    fn a_later_setter_skips_the_conversion_after_the_first_error() {
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
+        let line = Line::builder()
+            .description(Counting {
+                counter: &COUNTER,
+                value: "",
+            })
+            .unit_price(Counting {
+                counter: &COUNTER,
+                value: "1.00",
+            })
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build();
+        assert_eq!(COUNTER.load(Ordering::Relaxed), 1);
+        assert!(
+            matches!(
+                line,
+                Err(BuildError::Id {
+                    field: "description",
+                    ..
+                })
+            ),
+            "{line:?}"
+        );
+    }
+
+    /// Once a setter of the invoice fails, the later setters skip their
+    /// conversion and only advance the typestate.
+    #[test]
+    fn the_invoice_skips_the_conversion_after_the_first_error() {
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
+        let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), taxed_line(10_000))
+            .progressivo(Counting {
+                counter: &COUNTER,
+                value: "00001X1",
+            })
+            .date(Counting {
+                counter: &COUNTER,
+                value: "2026-11-04",
+            })
+            .numero("00012")
+            .build();
+        assert_eq!(COUNTER.load(Ordering::Relaxed), 1);
+        assert!(
+            matches!(
+                doc,
+                Err(BuildError::Id {
+                    field: "progressivo",
+                    ..
+                })
+            ),
+            "{doc:?}"
+        );
+    }
+
+    /// `build` reports the conversion error before the line amount checks
+    /// and the `SDI` checks run.
+    #[test]
+    fn build_reports_the_conversion_error_before_the_other_checks() {
+        let line = Line::builder()
+            .description("SERVIZIO")
+            .unit_price("1234567890.00")
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
+            .progressivo("00001X1")
+            .date("2026-11-04")
+            .numero("00012")
+            .build();
+        assert!(
+            matches!(
+                doc,
+                Err(BuildError::Id {
+                    field: "progressivo",
+                    ..
+                })
+            ),
+            "the id error precedes the amount and the SDI checks: {doc:?}"
+        );
+    }
+
+    /// The generic constructors of the typed layer report the failing
+    /// value with its own `IdError` variant.
+    #[test]
+    fn the_generic_constructors_report_the_failing_value() {
+        assert!(matches!(
+            Seller::try_denomination("ALPHA SRL", "00012345675", rome(), RegimeFiscale::Rf01),
+            Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Business::try_eu(crate::ids::EuCountry::De, "MUSTER GMBH", "xx", rome()),
+            Err(IdError::ForeignTaxId(..))
+        ));
+        assert!(matches!(
+            Address::try_italian("VIA ROMA 1", "0010", "ROMA", Provincia::Rm),
+            Err(IdError::Cap(..))
+        ));
+        assert!(matches!(
+            Address::try_foreign("A".repeat(55), Some("12345"), "NEW YORK", Country::US),
+            Err(IdError::Address(..))
+        ));
+        assert!(TaxIdentity::try_italian::<PartitaIva, CodiceFiscale>(None, None).is_err());
+        assert!(matches!(
+            Recipient::try_codice("ABC"),
+            Err(IdError::CodiceDestinatario(..))
+        ));
+        assert!(matches!(
+            InvoiceCurrency::try_foreign(Currency::USD, "0", "2026-11-04"),
+            Err(IdError::ExchangeRate(..))
+        ));
+        assert!(matches!(
+            VatTreatment::taxed("0.00"),
+            Err(IdError::Aliquota(..))
+        ));
+        assert!(Recipient::try_pec("not an e-mail").is_err());
+    }
+
+    /// The `maybe_*` setters of the line builders store the present
+    /// value, omit the absent one and report the failing conversion at
+    /// the line build.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "one block per builder per value kind: present, absent, failing"
+    )]
+    #[test]
+    fn the_maybe_setters_carry_the_optional_values() {
+        let line = Line::builder()
+            .description("SERVIZIO")
+            .maybe_quantity(Some("2.00"))
+            .maybe_unit_of_measure(Some("KG"))
+            .unit_price(Amount(Decimal::new(10000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build()
+            .expect("the invoice builds");
+        let line = &doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_beni_servizi
+            .content
+            .dettaglio_linee[0]
+            .content;
+        assert_eq!(
+            line.quantita.as_ref().expect("the quantity is present").0,
+            Decimal::new(200, 2)
+        );
+        assert_eq!(line.unita_misura.as_deref(), Some("KG"));
+
+        let absent = Line::builder()
+            .description("SERVIZIO")
+            .maybe_quantity(None::<&str>)
+            .maybe_unit_of_measure(None::<&str>)
+            .unit_price(Amount(Decimal::new(10000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), absent)
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build()
+            .expect("the invoice builds");
+        let line = &doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_beni_servizi
+            .content
+            .dettaglio_linee[0]
+            .content;
+        assert_eq!(line.quantita, None);
+        assert_eq!(line.unita_misura, None);
+
+        let failing = Line::builder()
+            .description("SERVIZIO")
+            .maybe_quantity(Some("not a decimal"))
+            .unit_price(Amount(Decimal::new(10000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "quantity",
+                    error: IdError::Amount(..)
+                })
+            ),
+            "{failing:?}"
+        );
+        let failing = Line::builder()
+            .description("SERVIZIO")
+            .maybe_unit_of_measure(Some("TOO LONG MEASURE"))
+            .unit_price(Amount(Decimal::new(10000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "unit_of_measure",
+                    error: IdError::UnitaMisura(..)
+                })
+            ),
+            "{failing:?}"
+        );
+
+        let seven_ter = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .maybe_quantity(Some("3.00"))
+            .maybe_unit_of_measure(Some("PEZZO"))
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::cross_border_services(&seller(), &buyer_us(), seven_ter)
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build()
+            .expect("the invoice builds");
+        let line = &doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_beni_servizi
+            .content
+            .dettaglio_linee[0]
+            .content;
+        assert_eq!(
+            line.quantita.as_ref().expect("the quantity is present").0,
+            Decimal::new(300, 2)
+        );
+        assert_eq!(line.unita_misura.as_deref(), Some("PEZZO"));
+
+        let seven_ter_absent = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .maybe_quantity(None::<&str>)
+            .maybe_unit_of_measure(None::<&str>)
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::cross_border_services(&seller(), &buyer_us(), seven_ter_absent)
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build()
+            .expect("the invoice builds");
+        let line = &doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_beni_servizi
+            .content
+            .dettaglio_linee[0]
+            .content;
+        assert_eq!(line.quantita, None);
+        assert_eq!(line.unita_misura, None);
+
+        let failing = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .maybe_quantity(Some("not a decimal"))
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "quantity",
+                    error: IdError::Amount(..)
+                })
+            ),
+            "{failing:?}"
+        );
+        let failing = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .maybe_unit_of_measure(Some("TOO LONG MEASURE"))
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "unit_of_measure",
+                    error: IdError::UnitaMisura(..)
+                })
+            ),
+            "{failing:?}"
+        );
+    }
+
+    /// A failing `progressivo` is reported by the `build` of every
+    /// document builder, and the later setters skip their conversion.
+    #[test]
+    fn the_document_builders_report_the_first_setter_error() {
+        let domestic = Invoice::domestic(&seller(), &buyer_rome(), codice(), taxed_line(10000))
+            .progressivo("00001X1")
+            .date("2026-11-04")
+            .numero("00012")
+            .lines(vec![taxed_line(5000)])
+            .causali(vec!["SERVIZI".parse().expect("a valid causale")])
+            .currency(InvoiceCurrency::Eur)
+            .bollo(true)
+            .build();
+        assert!(
+            matches!(
+                domestic,
+                Err(BuildError::Id {
+                    field: "progressivo",
+                    ..
+                })
+            ),
+            "{domestic:?}"
+        );
+        let cross_border = Invoice::cross_border_services(&seller(), &buyer_us(), seven_ter_line())
+            .progressivo("00001X1")
+            .date("2026-11-04")
+            .numero("00012")
+            .lines(vec![seven_ter_line()])
+            .causali(vec!["SERVIZI".parse().expect("a valid causale")])
+            .currency(InvoiceCurrency::Eur)
+            .build();
+        assert!(
+            matches!(
+                cross_border,
+                Err(BuildError::Id {
+                    field: "progressivo",
+                    ..
+                })
+            ),
+            "{cross_border:?}"
+        );
+        let td17 = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo("00001X1")
+        .date("2026-11-04")
+        .numero("00012")
+        .lines(vec![taxed_line(5000)])
+        .causali(vec!["SERVIZI".parse().expect("a valid causale")])
+        .currency(InvoiceCurrency::Eur)
+        .original_invoice("ORIG-001", "2026-11-01")
+        .build();
+        assert!(
+            matches!(
+                td17,
+                Err(BuildError::Id {
+                    field: "progressivo",
+                    ..
+                })
+            ),
+            "{td17:?}"
+        );
+        let td19 = SelfInvoice::td19(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo("00001X1")
+        .date("2026-11-04")
+        .numero("00012")
+        .lines(vec![taxed_line(5000)])
+        .causali(vec!["SERVIZI".parse().expect("a valid causale")])
+        .currency(InvoiceCurrency::Eur)
+        .original_invoice("ORIG-001", "2026-11-01")
+        .build();
+        assert!(
+            matches!(
+                td19,
+                Err(BuildError::Id {
+                    field: "progressivo",
+                    ..
+                })
+            ),
+            "{td19:?}"
+        );
+    }
+
+    /// The `TD17` and `TD19` builders carry the remaining lines, the
+    /// `Causale` texts and the `DatiFattureCollegate` of the original
+    /// document, and report a failing `original_invoice` conversion.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "one block per builder per field: the lines, the causales, the collegate"
+    )]
+    #[test]
+    fn the_self_invoice_builders_carry_the_optional_fields() {
+        let doc = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .lines(vec![taxed_line(5000)])
+        .causali(vec!["AUTOFATTURA".parse().expect("a valid causale")])
+        .original_invoice("ORIG-001", "2026-10-01")
+        .build()
+        .expect("the self-invoice builds");
+        assert_eq!(validate::validate(&doc), Vec::new());
+        let body = &doc.content.fattura_elettronica_body[0].content;
+        assert_eq!(body.dati_beni_servizi.content.dettaglio_linee.len(), 2);
+        assert_eq!(
+            body.dati_generali
+                .content
+                .dati_generali_documento
+                .content
+                .causale,
+            vec!["AUTOFATTURA".to_string()]
+        );
+        let collegate = &body.dati_generali.content.dati_fatture_collegate;
+        assert_eq!(collegate.len(), 1);
+        assert_eq!(collegate[0].content.id_documento, "ORIG-001");
+        assert_eq!(
+            collegate[0].content.data,
+            Some("2026-10-01".parse::<Date>().expect("a valid date"))
+        );
+
+        let doc = SelfInvoice::td19(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .lines(vec![taxed_line(5000)])
+        .causali(vec!["AUTOFATTURA".parse().expect("a valid causale")])
+        .original_invoice("ORIG-001", "2026-10-01")
+        .build()
+        .expect("the self-invoice builds");
+        assert_eq!(validate::validate(&doc), Vec::new());
+        let body = &doc.content.fattura_elettronica_body[0].content;
+        assert_eq!(body.dati_beni_servizi.content.dettaglio_linee.len(), 2);
+        let collegate = &body.dati_generali.content.dati_fatture_collegate;
+        assert_eq!(collegate.len(), 1);
+        assert_eq!(collegate[0].content.id_documento, "ORIG-001");
+
+        let failing = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .original_invoice("ORIG-001", "not a date")
+        .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "original_invoice",
+                    error: IdError::Date(..)
+                })
+            ),
+            "{failing:?}"
+        );
+        let failing = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .original_invoice("012345678901234567890", "2026-10-01")
+        .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "original_invoice",
+                    error: IdError::IdDocumento(..)
+                })
+            ),
+            "{failing:?}"
+        );
+        let failing = SelfInvoice::td19(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .original_invoice("ORIG-001", "not a date")
+        .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "original_invoice",
+                    error: IdError::Date(..)
+                })
+            ),
+            "{failing:?}"
+        );
+    }
+
+    /// A line built without its `Quantita` writes the element absent,
+    /// the `PrezzoTotale` computed on the implicit quantity of one, and
+    /// the domestic builder carries the `Causale` texts.
+    #[test]
+    fn a_line_without_a_quantity_omits_the_element() {
+        let line = Line::builder()
+            .description("SERVIZIO")
+            .unit_price(Amount(Decimal::new(10000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .causali(vec!["SERVIZI".parse().expect("a valid causale")])
+            .build()
+            .expect("the invoice builds");
+        assert_eq!(validate::validate(&doc), Vec::new());
+        let body = &doc.content.fattura_elettronica_body[0].content;
+        let line = &body.dati_beni_servizi.content.dettaglio_linee[0].content;
+        assert_eq!(line.quantita, None);
+        assert_eq!(line.prezzo_totale.0, Decimal::new(10000, 2));
+        assert_eq!(
+            body.dati_generali
+                .content
+                .dati_generali_documento
+                .content
+                .causale,
+            vec!["SERVIZI".to_string()]
+        );
+    }
+
+    /// The `InvoiceCurrency` conversion reports a failing `rate_date` as
+    /// `IdError::Date`.
+    #[test]
+    fn the_foreign_currency_reports_a_bad_rate_date() {
+        assert!(matches!(
+            InvoiceCurrency::try_foreign(Currency::USD, "1.08", "not a date"),
+            Err(IdError::Date(..))
+        ));
+    }
+
+    /// The `Sconto` markup percentage checks the value the same way as
+    /// the discount percentage.
+    #[test]
+    fn the_markup_percent_checks_the_value() {
+        assert!(Sconto::markup_percent("10.00").is_ok());
+        assert!(Sconto::markup_percent(Decimal::ONE_HUNDRED).is_ok());
+        assert!(Sconto::markup_percent("0.00").is_err());
+        assert!(Sconto::markup_percent("100.01").is_err());
+        assert!(Sconto::markup_percent("12.345").is_err());
+        assert!(Sconto::markup_percent("not a decimal").is_err());
+    }
+
+    /// A `SevenTerLine` built with the plain `unit_of_measure` setter
+    /// carries the `UnitaMisura` into the document.
+    #[test]
+    fn a_seven_ter_line_carries_the_plain_unit_of_measure() {
+        let line = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .quantity("2.00")
+            .unit_of_measure("PEZZO")
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::cross_border_services(&seller(), &buyer_us(), line)
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build()
+            .expect("the invoice builds");
+        let line = &doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_beni_servizi
+            .content
+            .dettaglio_linee[0]
+            .content;
+        assert_eq!(line.unita_misura.as_deref(), Some("PEZZO"));
+        assert_eq!(
+            line.quantita.as_ref().expect("the quantity is present").0,
+            Decimal::new(200, 2)
+        );
+    }
+
+    /// A failing plain setter is reported by the line `build`, and the
+    /// later setters skip their conversion.
+    #[test]
+    fn the_plain_setters_report_the_first_failing_conversion() {
+        let failing = Line::builder()
+            .description("SERVIZIO")
+            .quantity("not a decimal")
+            .unit_of_measure("KG")
+            .sconti(Vec::<Sconto>::new())
+            .unit_price(Amount(Decimal::new(10000, 2)))
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "quantity",
+                    error: IdError::Amount(..)
+                })
+            ),
+            "{failing:?}"
+        );
+        let failing = SevenTerLine::builder()
+            .description("")
+            .quantity("2.00")
+            .unit_of_measure("KG")
+            .sconti(Vec::<Sconto>::new())
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "description",
+                    error: IdError::Description(..)
+                })
+            ),
+            "{failing:?}"
+        );
+    }
+
+    /// A source carrying its own `TryFrom` implementation flows through
+    /// the line and document builders.
+    #[test]
+    fn the_custom_try_from_sources_flow_into_the_setters() {
+        static UNIT_PRICE: AtomicUsize = AtomicUsize::new(0);
+        static DATE: AtomicUsize = AtomicUsize::new(0);
+        let line = Line::builder()
+            .description("SERVIZIO")
+            .quantity("1.00")
+            .unit_price(Counting {
+                counter: &UNIT_PRICE,
+                value: "100.00",
+            })
+            .vat(VatTreatment::taxed("22.00").expect("a valid rate"))
+            .build()
+            .expect("the line builds");
+        let doc = Invoice::domestic(&seller(), &buyer_rome(), codice(), line)
+            .progressivo("00001")
+            .date(Counting {
+                counter: &DATE,
+                value: "2026-11-04",
+            })
+            .numero("00012")
+            .build()
+            .expect("the invoice builds");
+        assert_eq!(UNIT_PRICE.load(Ordering::Relaxed), 1);
+        assert_eq!(DATE.load(Ordering::Relaxed), 1);
+        assert_eq!(validate::validate(&doc), Vec::new());
     }
 }

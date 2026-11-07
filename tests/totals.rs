@@ -20,7 +20,6 @@ use fatturapa::party::{Address, Business, Buyer, Company, Party, Seller};
 use fatturapa::{Amount, Document, FatturaElettronica};
 use iso_country::Country;
 use iso_currency::Currency;
-use rust_decimal::Decimal;
 
 fn amount(text: &str) -> Amount {
     text.parse().expect("a valid decimal")
@@ -59,11 +58,12 @@ fn code() -> Recipient {
 
 fn taxed_line(description: &str, price: &str, quantity: &str, aliquota: &str) -> Line {
     Line::builder()
-        .description(description.parse().expect("a valid description"))
-        .quantity(quantity.parse().expect("a valid decimal"))
-        .unit_price(price.parse().expect("a valid decimal"))
+        .description(description)
+        .quantity(quantity)
+        .unit_price(price)
         .vat(VatTreatment::Taxed(aliquota.parse().expect("a valid rate")))
         .build()
+        .expect("the line builds")
 }
 
 /// A domestic 22 percent invoice with several lines, a percentage discount
@@ -80,15 +80,15 @@ fn taxed_line(description: &str, price: &str, quantity: &str, aliquota: &str) ->
 #[test]
 fn domestic_invoice_totals_and_rounding() {
     let discount_line = Line::builder()
-        .description("FORNITURA CON SCONTO".parse().expect("a valid description"))
-        .quantity("3.00".parse().expect("a valid decimal"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
+        .description("FORNITURA CON SCONTO")
+        .quantity("3.00")
+        .unit_price("100.00")
         .sconti(vec![
-            Sconto::discount_percent("5.00".parse::<Decimal>().expect("a valid decimal"))
-                .expect("a valid discount"),
+            Sconto::discount_percent("5.00").expect("a valid discount"),
         ])
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
-        .build();
+        .build()
+        .expect("the line builds");
     let doc = Invoice::domestic(
         &seller(),
         &buyer(),
@@ -106,9 +106,9 @@ fn domestic_invoice_totals_and_rounding() {
         ),
         taxed_line("SALDAZIONE IVA 10", "1.11", "2.00", "10.00"),
     ])
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00013".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00013")
     .build()
     .expect("the invoice passes every check");
 
@@ -152,19 +152,19 @@ fn domestic_invoice_totals_and_rounding() {
 #[test]
 fn a_percentage_discount_adjusts_the_unit_price() {
     let line = Line::builder()
-        .description("FORNITURA CON SCONTO".parse().expect("a valid description"))
-        .quantity("3.00".parse().expect("a valid decimal"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
+        .description("FORNITURA CON SCONTO")
+        .quantity("3.00")
+        .unit_price("100.00")
         .sconti(vec![
-            Sconto::discount_percent("5.00".parse::<Decimal>().expect("a valid decimal"))
-                .expect("a valid discount"),
+            Sconto::discount_percent("5.00").expect("a valid discount"),
         ])
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
-        .build();
+        .build()
+        .expect("the line builds");
     let doc = Invoice::domestic(&seller(), &buyer(), code(), line)
-        .progressivo("00001".parse().expect("a valid progressivo"))
-        .date("2026-11-04".parse().expect("a valid date"))
-        .numero("00014".parse().expect("a valid number"))
+        .progressivo("00001")
+        .date("2026-11-04")
+        .numero("00014")
         .build()
         .expect("the invoice passes every check");
 
@@ -185,25 +185,20 @@ fn a_percentage_discount_adjusts_the_unit_price() {
 #[test]
 fn line_total_applies_several_sconto_maggiorazione_blocks() {
     let line = Line::builder()
-        .description(
-            "FORNITURA CON SCONTO E MAGGIORAZIONE"
-                .parse()
-                .expect("a valid description"),
-        )
-        .quantity("1.00".parse().expect("a valid decimal"))
-        .unit_price("100.00".parse().expect("a valid decimal"))
+        .description("FORNITURA CON SCONTO E MAGGIORAZIONE")
+        .quantity("1.00")
+        .unit_price("100.00")
         .sconti(vec![
-            Sconto::discount_percent("10.00".parse::<Decimal>().expect("a valid decimal"))
-                .expect("a valid discount"),
-            Sconto::markup_amount("10.00".parse::<Decimal>().expect("a valid decimal"))
-                .expect("a valid markup"),
+            Sconto::discount_percent("10.00").expect("a valid discount"),
+            Sconto::markup_amount("10.00").expect("a valid markup"),
         ])
         .vat(VatTreatment::Taxed("22.00".parse().expect("a valid rate")))
-        .build();
+        .build()
+        .expect("the line builds");
     let doc = Invoice::domestic(&seller(), &buyer(), code(), line)
-        .progressivo("00001".parse().expect("a valid progressivo"))
-        .date("2026-11-04".parse().expect("a valid date"))
-        .numero("00022".parse().expect("a valid number"))
+        .progressivo("00001")
+        .date("2026-11-04")
+        .numero("00022")
         .build()
         .expect("the invoice passes every check");
 
@@ -227,21 +222,22 @@ fn stamp_duty_applies_strictly_above_the_threshold() {
             &buyer(),
             code(),
             Line::builder()
-                .description("FORNITURA ESCLUSA".parse().expect("a valid description"))
-                .quantity("1.00".parse().expect("a valid decimal"))
-                .unit_price(price.parse().expect("a valid decimal"))
+                .description("FORNITURA ESCLUSA")
+                .quantity("1.00")
+                .unit_price(price)
                 .vat(VatTreatment::NotTaxed {
                     natura: Natura::N2_1,
                     riferimento_normativo: "ART. 7-TER DPR 633/72"
                         .parse::<RiferimentoNormativo>()
                         .expect("a valid reference"),
                 })
-                .build(),
+                .build()
+                .expect("the line builds"),
         )
-        .bollo()
-        .progressivo("00001".parse().expect("a valid progressivo"))
-        .date("2026-11-04".parse().expect("a valid date"))
-        .numero("00021".parse().expect("a valid number"))
+        .bollo(true)
+        .progressivo("00001")
+        .date("2026-11-04")
+        .numero("00021")
         .build()
         .expect("the invoice passes every check");
 
@@ -274,9 +270,9 @@ fn fpa12_invoice_from_a_six_character_code() {
         Recipient::Codice("AAAAAA".parse().expect("a valid code")),
         taxed_line("FORNITURA", "100.00", "1.00", "22.00"),
     )
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00019".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00019")
     .build()
     .expect("the invoice passes every check");
     assert_eq!(doc.versione, g::FormatoTrasmissioneType::Fpa12);
@@ -296,9 +292,9 @@ fn the_pec_recipient_writes_the_generic_code_and_the_pec() {
         Recipient::Pec("beta@pec.it".parse().expect("a valid pec")),
         taxed_line("FORNITURA", "100.00", "1.00", "22.00"),
     )
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00025".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00025")
     .build()
     .expect("the invoice passes every check");
 
@@ -330,9 +326,9 @@ fn riepilogo_order_follows_the_lines() {
         taxed_line("COMPONENTE 10", "20.00", "1.00", "10.00"),
         taxed_line("COMPONENTE 22 BIS", "30.00", "1.00", "22.00"),
     ])
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00020".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00020")
     .build()
     .expect("the invoice passes every check");
 
@@ -369,9 +365,9 @@ fn domestic_invoice_priced_in_usd() {
         code(),
         taxed_line("SERVIZIO IN DOLLARI", "150.00", "1.00", "22.00"),
     )
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00026".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00026")
     .currency(InvoiceCurrency::Foreign {
         currency: Currency::USD,
         rate: "1.08".parse().expect("a valid rate"),
@@ -446,9 +442,9 @@ fn sole_trader_parties_fill_the_header() {
         code(),
         taxed_line("MATERIALE UFFICIO", "10.00", "1.00", "22.00"),
     )
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00014".parse().expect("a valid number"))
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00014")
     .build()
     .expect("the invoice passes every check");
 
@@ -554,13 +550,10 @@ fn td17_self_invoice_with_a_sole_trader_buyer() {
         code(),
         taxed_line("SERVIZIO DI CONSULENZA", "100.00", "1.00", "22.00"),
     )
-    .progressivo("00001".parse().expect("a valid progressivo"))
-    .date("2026-11-04".parse().expect("a valid date"))
-    .numero("00015".parse().expect("a valid number"))
-    .original_invoice(
-        "ORIG-001".parse().expect("a valid document identifier"),
-        "2026-11-01".parse().expect("a valid date"),
-    )
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00015")
+    .original_invoice("ORIG-001", "2026-11-01")
     .build()
     .expect("the self-invoice passes every check");
 

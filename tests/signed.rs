@@ -29,6 +29,7 @@ use spki::AlgorithmIdentifierOwned;
 use std::time::UNIX_EPOCH;
 use x509_cert::Certificate;
 use x509_cert::attr::{Attribute, Attributes};
+use x509_cert::ext::pkix::SubjectKeyIdentifier as PkixSubjectKeyIdentifier;
 use x509_cert::name::Name;
 use x509_cert::serial_number::SerialNumber;
 
@@ -1792,6 +1793,549 @@ fn ess_v2_unsupported_hash_algorithm_with_sha512_hash_does_not_match() {
         verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the entry cannot match the signer");
     assert!(
         matches!(err, SignedError::SigningCertificateMismatch),
+        "{err:?}"
+    );
+}
+
+/// The `CMS SignedData` over `content` with an empty `SignerInfos` set.
+fn empty_signer_infos_cms(content: &[u8]) -> Vec<u8> {
+    let signed_data = SignedData {
+        version: CmsVersion::V1,
+        digest_algorithms: SetOfVec::try_from(Vec::<AlgorithmIdentifierOwned>::new())
+            .expect("an empty set"),
+        encap_content_info: EncapsulatedContentInfo {
+            econtent_type: db::rfc5911::ID_DATA,
+            econtent: Some(econtent_any(content)),
+        },
+        certificates: None,
+        crls: None,
+        signer_infos: SignerInfos(
+            SetOfVec::try_from(Vec::<SignerInfo>::new()).expect("an empty set"),
+        ),
+    };
+    let der = signed_data.to_der().expect("the signed data encodes");
+    ContentInfo {
+        content_type: db::rfc5911::ID_SIGNED_DATA,
+        content: Any::from_der(der.as_slice()).expect("valid DER"),
+    }
+    .to_der()
+    .expect("the content info encodes")
+}
+
+/// The `CMS` in `der` with the digest algorithm of the first signer
+/// replaced by `oid`, everything else untouched.
+fn rename_digest_oid(der: &[u8], oid: ObjectIdentifier) -> Vec<u8> {
+    let content_info = ContentInfo::from_der(der).expect("valid cms");
+    let mut signed_data =
+        SignedData::from_der(&content_info.content.to_der().expect("der")).expect("valid cms");
+    let mut signers: Vec<SignerInfo> = signed_data.signer_infos.0.into();
+    signers.first_mut().expect("a signer").digest_alg.oid = oid;
+    signed_data.signer_infos = SignerInfos(SetOfVec::try_from(signers).expect("the signers sort"));
+    let der = signed_data.to_der().expect("der");
+    ContentInfo {
+        content_type: db::rfc5911::ID_SIGNED_DATA,
+        content: Any::from_der(&der).expect("valid DER"),
+    }
+    .to_der()
+    .expect("der")
+}
+
+/// The `CMS` in `der` with the signature algorithm of the first signer
+/// replaced by the unsupported `oid`.
+fn unsupported_signature_cms(der: &[u8]) -> Vec<u8> {
+    rename_signature_oid(der, ObjectIdentifier::new_unwrap("1.2.3.4"))
+}
+
+/// A `CMS` with no `SignerInfo` fails with a clear error.
+#[test]
+fn empty_signer_infos_fail() {
+    let err = verify(&empty_signer_infos_cms(&invoice()), &[cert("ca.pem")], None)
+        .expect_err("there is no signer info");
+    assert!(matches!(err, SignedError::NotCms(_)), "{err:?}");
+}
+
+/// A `ContentInfo` whose content type is not `id-signed-data` fails with
+/// the content type in the error.
+#[test]
+fn content_info_type_other_than_signed_data_fails() {
+    let der = empty_signer_infos_cms(&invoice());
+    let content_info = ContentInfo::from_der(&der).expect("valid cms");
+    let patched = ContentInfo {
+        content_type: ObjectIdentifier::new_unwrap("1.2.3.4"),
+        content: content_info.content,
+    }
+    .to_der()
+    .expect("the content info encodes");
+    let err = verify(&patched, &[cert("ca.pem")], None).expect_err("the type is wrong");
+    assert!(
+        matches!(&err, SignedError::NotCms(text) if text.contains("1.2.3.4")),
+        "{err:?}"
+    );
+}
+
+/// A `base64` text without the `padding` characters unwraps to the
+/// invoice.
+#[test]
+fn base64_without_padding_unwraps() {
+    let der = support::fixture_bytes("invoice-rsa.p7m");
+    let unpadded = base64::engine::general_purpose::STANDARD_NO_PAD.encode(&der);
+    assert_eq!(
+        unwrap(unpadded.as_bytes()).expect("valid base64 without padding"),
+        invoice()
+    );
+}
+
+/// A `base64` text whose length does not decode under either `STANDARD`
+/// or `STANDARD_NO_PAD` fails with a clear error.
+#[test]
+fn base64_that_does_not_decode_fails() {
+    for bad in ["abc", "abcde", "ab=="] {
+        assert!(
+            matches!(unwrap(bad.as_bytes()), Err(SignedError::NotCms(_))),
+            "{bad:?} must fail"
+        );
+    }
+}
+
+/// A `SignedData` whose encapsulated content is not `id-data` fails with
+/// the content type error.
+#[test]
+fn econtent_type_other_than_id_data_fails() {
+    let der = empty_signer_infos_cms(&invoice());
+    let content_info = ContentInfo::from_der(&der).expect("valid cms");
+    let mut signed_data =
+        SignedData::from_der(&content_info.content.to_der().expect("der")).expect("valid cms");
+    signed_data.encap_content_info.econtent_type = ObjectIdentifier::new_unwrap("1.2.3.4");
+    let der = signed_data.to_der().expect("der");
+    let out = ContentInfo {
+        content_type: db::rfc5911::ID_SIGNED_DATA,
+        content: Any::from_der(der.as_slice()).expect("valid DER"),
+    }
+    .to_der()
+    .expect("der");
+    let err = verify(&out, &[cert("ca.pem")], None).expect_err("the content type is wrong");
+    assert!(
+        matches!(&err, SignedError::UnsupportedContentType(text) if text == "1.2.3.4"),
+        "{err:?}"
+    );
+}
+
+/// A `SignerInfo` that identifies the signer by `SubjectKeyIdentifier`
+/// is not supported.
+#[test]
+fn subject_key_identifier_signer_fails() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let content_info = ContentInfo::from_der(&p7m).expect("valid cms");
+    let mut signed_data =
+        SignedData::from_der(&content_info.content.to_der().expect("der")).expect("valid cms");
+    let mut signers: Vec<SignerInfo> = signed_data.signer_infos.0.into();
+    signers.first_mut().expect("a signer").sid = SignerIdentifier::SubjectKeyIdentifier(
+        PkixSubjectKeyIdentifier(OctetString::new(vec![0_u8; 20]).expect("fits")),
+    );
+    signed_data.signer_infos = SignerInfos(SetOfVec::try_from(signers).expect("the signers sort"));
+    let der = signed_data.to_der().expect("der");
+    let out = ContentInfo {
+        content_type: db::rfc5911::ID_SIGNED_DATA,
+        content: Any::from_der(der.as_slice()).expect("valid DER"),
+    }
+    .to_der()
+    .expect("der");
+    let err =
+        verify(&out, &[cert("ca.pem")], Some(t)).expect_err("the signer identifier is unsupported");
+    assert!(
+        matches!(err, SignedError::UnsupportedSignerIdentifier),
+        "{err:?}"
+    );
+}
+
+/// A `digestAlgorithm` outside `SHA-256/384/512` is rejected.
+#[test]
+fn unsupported_digest_algorithm_fails() {
+    let der = support::fixture_bytes("invoice-rsa.p7m");
+    let patched = rename_digest_oid(&der, db::rfc5912::ID_SHA_1);
+    assert_ne!(patched, der, "the digest algorithm is replaced");
+    let err =
+        verify(&patched, &[cert("ca.pem")], None).expect_err("the digest algorithm is unsupported");
+    assert!(
+        matches!(err, SignedError::UnsupportedAlgorithm(_)),
+        "{err:?}"
+    );
+}
+
+/// A signature algorithm outside the supported set is rejected.
+#[test]
+fn unsupported_signature_algorithm_fails() {
+    let der = support::fixture_bytes("invoice-rsa.p7m");
+    let patched = unsupported_signature_cms(&der);
+    assert_ne!(patched, der, "the signature algorithm is replaced");
+    let err = verify(&patched, &[cert("ca.pem")], None)
+        .expect_err("the signature algorithm is unsupported");
+    assert!(
+        matches!(err, SignedError::UnsupportedAlgorithm(_)),
+        "{err:?}"
+    );
+}
+
+/// A `signing-certificate` attribute that does not decode as an
+/// `ESSCertID` is a mismatch.
+#[test]
+fn malformed_signing_certificate_v1_fails() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let v1 =
+        SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE, &[0x05_u8, 0x00])]).expect("a value");
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        Some(v1),
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the attribute does not decode");
+    assert!(
+        matches!(err, SignedError::SigningCertificateMismatch),
+        "{err:?}"
+    );
+}
+
+/// A `signing-certificate` attribute with the hash of the signer and no
+/// `issuerSerial` verifies.
+#[test]
+fn signing_certificate_v1_without_serial_verifies() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let der = signer.to_der().expect("the certificate encodes");
+    let entry = EssSigningCertificateV1 {
+        hash: OctetString::new(Sha1::digest(&der).to_vec()).expect("the hash encodes"),
+        issuer_serial: None,
+    };
+    let entry_der = entry.to_der().expect("the entry encodes");
+    let v1 = SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE, &entry_der)])
+        .expect("a single value");
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        Some(v1),
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    verify(&p7m, &[cert("ca.pem")], Some(t)).expect("the attribute verifies");
+}
+
+/// A `signing-certificate-v2` attribute that does not decode as an
+/// `ESSCertIDv2` list is a mismatch.
+#[test]
+fn malformed_signing_certificate_v2_fails() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let v2 = SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE_V2, &[0x05_u8, 0x00])])
+        .expect("a value");
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        Some(v2),
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the attribute does not decode");
+    assert!(
+        matches!(err, SignedError::SigningCertificateMismatch),
+        "{err:?}"
+    );
+}
+
+/// The certificate in `cert` with the `keyUsage` extension's inner value tag
+/// changed from a `BIT STRING` to an `INTEGER`, so it no longer parses as a
+/// `KeyUsage`.
+fn corrupt_key_usage(cert: &Certificate) -> Certificate {
+    let key_usage: &[u8] = &[0x06, 0x03, 0x55, 0x1d, 0x0f];
+    let mut out = cert.to_der().expect("the certificate encodes");
+    let i = out
+        .windows(key_usage.len())
+        .position(|w| w == key_usage)
+        .expect("a keyUsage extension");
+    let mut j = i + key_usage.len();
+    if out[j] == 0x01 {
+        j += 3;
+    }
+    j += 2;
+    assert_eq!(out[j], 0x03, "the inner value is a BIT STRING");
+    out[j] = 0x02;
+    Certificate::from_der(&out).expect("the certificate still decodes")
+}
+
+/// The certificate in `cert` with the `SPKI` `P-256` curve `OID` tag changed
+/// to `INTEGER`, so the key no longer reads as a named curve.
+fn corrupt_spki_curve(cert: &Certificate) -> Certificate {
+    let p256: &[u8] = &[0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07];
+    let mut out = cert.to_der().expect("the certificate encodes");
+    let i = out
+        .windows(p256.len())
+        .position(|w| w == p256)
+        .expect("the P-256 curve OID");
+    out[i] = 0x02;
+    Certificate::from_der(&out).expect("the certificate still decodes")
+}
+
+/// The certificate in `cert` with the version downgraded from v3 to v2, so
+/// the end-entity parse rejects the version.
+fn downgrade_version(cert: &Certificate) -> Certificate {
+    let version: &[u8] = &[0xa0, 0x03, 0x02, 0x01, 0x02];
+    let mut out = cert.to_der().expect("the certificate encodes");
+    let i = out
+        .windows(version.len())
+        .position(|w| w == version)
+        .expect("the version field");
+    out[i + 4] = 0x01;
+    Certificate::from_der(&out).expect("the certificate still decodes")
+}
+
+/// The certificate in `cert` with its two `validity` times swapped, so the
+/// `notAfter` precedes the `notBefore`.
+fn swap_validity(cert: &Certificate) -> Certificate {
+    let prefix: &[u8] = &[0x30, 0x1e, 0x17, 0x0d];
+    let mut out = cert.to_der().expect("the certificate encodes");
+    let i = out
+        .windows(prefix.len())
+        .position(|w| w == prefix)
+        .and_then(|i| (out[i + 17] == 0x17 && out[i + 18] == 0x0d).then_some(i))
+        .expect("the validity times");
+    let first: Vec<u8> = out[i + 4..i + 17].to_vec();
+    out.copy_within(i + 19..i + 32, i + 4);
+    out[i + 19..i + 32].copy_from_slice(&first);
+    Certificate::from_der(&out).expect("the certificate still decodes")
+}
+
+/// The `CMS` in `der` with an `Other` `CertificateChoices` entry appended to
+/// the certificates set.
+fn with_other_certificate(der: &[u8]) -> Vec<u8> {
+    let content_info = ContentInfo::from_der(der).expect("valid cms");
+    let mut signed_data =
+        SignedData::from_der(&content_info.content.to_der().expect("der")).expect("valid cms");
+    let other = cms::cert::CertificateChoices::Other(cms::cert::OtherCertificateFormat {
+        other_cert_format: ObjectIdentifier::new_unwrap("1.2.3.4"),
+        other_cert: Any::from_der(&[0x05_u8, 0x00]).expect("a value"),
+    });
+    let set = signed_data
+        .certificates
+        .as_mut()
+        .expect("a certificates set");
+    let empty =
+        SetOfVec::try_from(Vec::<cms::cert::CertificateChoices>::new()).expect("an empty set");
+    let taken = std::mem::replace(&mut set.0, empty);
+    let mut certs: Vec<cms::cert::CertificateChoices> = taken.into();
+    certs.push(other);
+    set.0 = SetOfVec::try_from(certs).expect("the certificates sort");
+    let der = signed_data.to_der().expect("der");
+    ContentInfo {
+        content_type: db::rfc5911::ID_SIGNED_DATA,
+        content: Any::from_der(&der).expect("valid DER"),
+    }
+    .to_der()
+    .expect("der")
+}
+
+/// A `CMS` whose certificates set also carries an `Other` certificate format
+/// verifies, the non-`Certificate` entry being ignored by the chain.
+#[test]
+fn other_certificate_choice_is_ignored() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer.clone(), cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let patched = with_other_certificate(&p7m);
+    let verified =
+        verify(&patched, &[cert("ca.pem")], Some(t)).expect("the Other entry is ignored");
+    assert_eq!(verified.signer(), &signer);
+    assert_eq!(verified.chain().len(), 3);
+}
+
+/// A signer certificate of version 2 is rejected by the end-entity parse.
+#[test]
+fn version2_signer_fails() {
+    let invoice = invoice();
+    let signer = downgrade_version(&cert("ec-signer.pem"));
+    let t = signing_time(&cert("ec-signer.pem"));
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the version is not version 3");
+    assert!(
+        matches!(err, SignedError::UnsupportedAlgorithm(_)),
+        "{err:?}"
+    );
+}
+
+/// A signer whose `keyUsage` extension value does not parse is rejected.
+#[test]
+fn malformed_key_usage_fails() {
+    let invoice = invoice();
+    let signer = corrupt_key_usage(&cert("ku-signer.pem"));
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the keyUsage does not parse");
+    assert!(matches!(err, SignedError::KeyUsage), "{err:?}");
+}
+
+/// A signature recorded as `rsaEncryption` over a key whose `SPKI` has no
+/// named curve selects a key type the verifier cannot match to the key.
+#[test]
+fn rsa_signature_over_a_curveless_ec_key_fails() {
+    let invoice = invoice();
+    let signer = corrupt_spki_curve(&cert("ec-signer.pem"));
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let algs = Algs {
+        digest: db::rfc5912::ID_SHA_256,
+        signature: db::rfc5912::RSA_ENCRYPTION,
+        prehash: Prehash::Sha256,
+    };
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &algs,
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t))
+        .expect_err("the key type does not match the algorithm");
+    assert!(
+        matches!(err, SignedError::UnsupportedAlgorithm(_)),
+        "{err:?}"
+    );
+}
+
+/// A signer certificate that is also a `CA` is rejected as the end entity.
+#[test]
+fn ca_certificate_as_signer_fails() {
+    let invoice = invoice();
+    let signer = cert("ca-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t))
+        .expect_err("a CA certificate cannot be the signer");
+    assert!(
+        matches!(err, SignedError::Chain(ChainError::CaSigner)),
+        "{err:?}"
+    );
+}
+
+/// An intermediate that signed the signer with `SHA-1` names a signature
+/// algorithm the chain verifier does not trust.
+#[test]
+fn sha1_signed_intermediate_fails() {
+    let invoice = invoice();
+    let signer = cert("sha1-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("sha1-intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t))
+        .expect_err("the SHA-1 chain signature is unsupported");
+    assert!(
+        matches!(err, SignedError::Chain(ChainError::UnsupportedAlgorithm(_))),
+        "{err:?}"
+    );
+}
+
+/// A signer whose validity period is invalid fails with an unexpected chain
+/// error.
+#[test]
+fn invalid_cert_validity_fails() {
+    let invoice = invoice();
+    let signer = swap_validity(&cert("ec-signer.pem"));
+    let t = signing_time(&cert("ec-signer.pem"));
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the validity period is invalid");
+    assert!(
+        matches!(err, SignedError::Chain(ChainError::Other(_))),
         "{err:?}"
     );
 }

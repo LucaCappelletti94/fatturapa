@@ -16,12 +16,13 @@ Reading and writing of every `FatturaPA` invoice and SDI message, in Rust. Unoff
 The types are generated from the official XSD schemas in `spec/`, so a document round-trips through the schema it was written for. Amounts keep their exact decimal scale and dates keep their lexical form.
 
 ```rust
+# fn main() -> Result<(), Box<dyn std::error::Error>> {
 use std::fs;
 
 use fatturapa::{Document, FatturaElettronica};
 
-let xml = fs::read_to_string("spec/samples/IT01234567890_FPA01.xml").unwrap();
-let invoice = FatturaElettronica::from_xml_str(&xml).unwrap();
+let xml = fs::read_to_string("spec/samples/IT01234567890_FPA01.xml")?;
+let invoice = FatturaElettronica::from_xml_str(&xml)?;
 let numero = &invoice
     .content
     .fattura_elettronica_body[0]
@@ -32,59 +33,47 @@ let numero = &invoice
     .content
     .numero;
 println!("invoice number: {numero}");
+# Ok(())
+# }
 ```
 
 ```rust
+# fn main() -> Result<(), Box<dyn std::error::Error>> {
 use fatturapa::ids::{Provincia, RegimeFiscale};
 use fatturapa::invoice::{Invoice, InvoiceCurrency, SevenTerLine};
 use fatturapa::party::{Address, Business, Seller};
 use fatturapa::Document;
+use iso_country::Country;
+use iso_currency::Currency;
 
-let seller = Seller::denomination(
-    "ALPHA SRL".parse().unwrap(),
-    "02222222222".parse().unwrap(),
-    Address::italian(
-        "VIA ROMA 1".parse().unwrap(),
-        "00100".parse().unwrap(),
-        "ROMA".parse().unwrap(),
-        Provincia::Rm,
-    ),
+let seller = Seller::try_denomination(
+    "ALPHA SRL",
+    "02222222222",
+    Address::try_italian("VIA ROMA 1", "00100", "ROMA", Provincia::Rm)?,
     RegimeFiscale::Rf01,
-);
-let client = Business::foreign(
-    iso_country::Country::US,
-    "ACME INC".parse().unwrap(),
-    "US123456789".parse().unwrap(),
-    Address::foreign(
-        "FIFTH AVENUE 1".parse().unwrap(),
-        Some("10001".parse().unwrap()),
-        "NEW YORK".parse().unwrap(),
-        iso_country::Country::US,
-    )
-    .unwrap(),
-);
+)?;
+let client = Business::try_foreign(
+    Country::US,
+    "ACME INC",
+    "US123456789",
+    Address::try_foreign("FIFTH AVENUE 1", Some("10001"), "NEW YORK", Country::US)?,
+)?;
 let line = SevenTerLine::builder()
-    .description("SERVIZIO DI CONSULENZA".parse().unwrap())
-    .quantity("1.00".parse().unwrap())
-    .unit_price("150.00".parse().unwrap())
-    .build();
+    .description("SERVIZIO DI CONSULENZA")
+    .quantity("1.00")
+    .unit_price("150.00")
+    .build()?;
 let doc = Invoice::cross_border_services(&seller, &client, line)
-    .progressivo("00001".parse().unwrap())
-    .date("2026-11-04".parse().unwrap())
-    .numero("00012".parse().unwrap())
-    .causali(vec![
-        "CONSULENZA AI SENSI DELL'ART. 7-TER DPR 633/72".parse().unwrap(),
-    ])
-    .currency(InvoiceCurrency::Foreign {
-        currency: iso_currency::Currency::USD,
-        rate: "1.08".parse().unwrap(),
-        rate_date: "2026-11-04".parse().unwrap(),
-    })
-    .build()
-    .unwrap();
-let xml = doc.to_xml_string().unwrap();
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00012")
+    .currency(InvoiceCurrency::try_foreign(Currency::USD, "1.08", "2026-11-04")?)
+    .build()?;
+let xml = doc.to_xml_string()?;
 assert!(xml.contains("versione=\"FPR12\""));
 assert!(xml.contains("<CodiceDestinatario>XXXXXXX</CodiceDestinatario>"));
+# Ok(())
+# }
 ```
 
-The construction API is typed. The identifiers validate on construction, the scenario constructors fill what the specification dictates, and the lines of the art. 7-ter invoice carry no VAT treatment, the scenario writing the `N2.1` nature and its reference. A document priced in a foreign currency keeps the `Divisa` `EUR` and every amount in euros, the art. 13 convention, the original amount and the rate carried as management data. `build` runs the official SDI checks of `spec/Elenco-Controlli` before it returns. Signed files read through `fatturapa::signed::unwrap` and `fatturapa::signed::verify`, and the transmission file name builds through `fatturapa::InvoiceName`.
+The construction API is typed. The identifiers validate on construction, the scenario constructors fill what the specification dictates, and the lines of the art. 7-ter invoice carry no VAT treatment, the scenario writing the `N2.1` nature and its reference. Every setter accepts any value convertible into the typed one through `TryFrom`, so the strings above go straight into the API and `build` returns the first conversion error before any other check. A document priced in a foreign currency keeps the `Divisa` `EUR` and every amount in euros, the art. 13 convention, the original amount and the rate carried as management data. `build` runs the official SDI checks of `spec/Elenco-Controlli` before it returns. Signed files read through `fatturapa::signed::unwrap` and `fatturapa::signed::verify`, and the transmission file name builds through `fatturapa::InvoiceName`.

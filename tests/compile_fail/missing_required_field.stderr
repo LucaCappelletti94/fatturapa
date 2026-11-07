@@ -1,21 +1,14 @@
-error[E0277]: the member `bon::__::Unset<invoice::line_builder::members::vat>` was not set, but this method requires it to be set
+error[E0599]: no method named `build` found for struct `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>` in the current scope
  --> tests/compile_fail/missing_required_field.rs:9:10
   |
-9 |         .build();
-  |          ^^^^^ the member `bon::__::Unset<invoice::line_builder::members::vat>` was not set, but this method requires it to be set
+5 |       let _ = fatturapa::invoice::Line::builder()
+  |  _____________-
+6 | |         .description("SERVIZIO")
+7 | |         .quantity("1.00")
+8 | |         .unit_price("100.00")
+9 | |         .build();
+  | |         -^^^^^ method not found in `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>`
+  | |_________|
   |
-  = help: the trait `bon::builder_state::IsSet` is not implemented for `bon::__::Unset<invoice::line_builder::members::vat>`
-help: the trait `bon::builder_state::IsSet` is implemented for `bon::__::Set<Name>`
- --> $CARGO/bon-$VERSION/src/builder_state.rs
   |
-  | impl<Name> IsSet for Set<Name> {}
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  = note: required for `invoice::line_builder::SetUnitPrice<invoice::line_builder::SetQuantity<invoice::line_builder::SetDescription>>` to implement `invoice::line_builder::IsComplete`
-note: required by a bound in `LineBuilder::<S>::build`
- --> src/invoice.rs
-  |
-  | #[derive(bon::Builder, Clone, Debug)]
-  |          ^^^^^^^^^^^^ required by this bound in `LineBuilder::<S>::build`
-  | pub struct Line {
-  |            ---- required by a bound in this associated function
-  = note: this error originates in the derive macro `bon::Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+  = note: the method was found for `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>`

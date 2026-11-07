@@ -37,7 +37,6 @@ include = [
 
 [dependencies]
 base64 = "0.23.1"
-bon = "3.10.3"
 cms = "0.2.3"
 const-oid = "0.9.6"
 der = { version = "0.7.10", features = ["derive"] }
