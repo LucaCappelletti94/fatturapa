@@ -12,6 +12,10 @@
 //! `TD06`, `TD24`, `TD25` and `TD28` of the ordinary invoice, `TD07` of the
 //! simplified invoice and `TD27` for 00472.
 //!
+//! The check 00313 is not in the Elenco Controlli. The crate implements it
+//! per the operative specification *Allegato A*, version 1.9.1, which
+//! updated the control for the simplified invoice on 01/01/2022.
+//!
 //! Paths use the official element names, with 1-based indices for repeated
 //! elements, relative to the document root, such as
 //! `FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/Natura`.
@@ -45,6 +49,7 @@
 //! | 00306 | third party `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
 //! | 00311 | `CodiceDestinatario` not valid | out of reach, needs the IPA registry | out of reach |
 //! | 00312 | `CodiceDestinatario` not active | out of reach, IPA registry | out of reach |
+//! | 00313 | the `XXXXXXX` `CodiceDestinatario` for a buyer established in `IT` | implemented | implemented |
 //! | 00320 | seller VAT number and tax code not coherent | out of reach, tax registry | out of reach |
 //! | 00321 | seller tax code not of an IVA group member | out of reach, tax registry | out of reach |
 //! | 00322 | seller tax code missing for an IVA group | out of reach, tax registry | out of reach |
@@ -96,7 +101,10 @@ use crate::generated::fpr12::{
     ScontoMaggiorazioneType, ScontoMaggiorazioneTypeContent, TipoDocumentoType,
     TipoScontoMaggiorazioneType,
 };
-use crate::generated::fsm10::NaturaType as NaturaSemplificata;
+use crate::generated::fsm10::{
+    FatturaElettronicaBodyType as BodySemplificato,
+    FatturaElettronicaHeaderTypeContent as HeaderSemplificato, NaturaType as NaturaSemplificata,
+};
 use crate::{FatturaElettronica, FatturaElettronicaSemplificata};
 use rust_decimal::{Decimal, RoundingStrategy};
 
@@ -214,6 +222,16 @@ pub fn validate(doc: &FatturaElettronica) -> Vec<Violation> {
 pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violation> {
     let mut v = Vec::new();
     let header = &doc.content.fattura_elettronica_header.content;
+    check_simplified_header(header, &mut v);
+    for (bi, body) in doc.content.fattura_elettronica_body.iter().enumerate() {
+        check_simplified_body(bi, body, header, &mut v);
+    }
+    v
+}
+
+/// The header-level checks of the simplified invoice, 00313, 00417, 00427
+/// and 00476.
+fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) {
     let cod = &header.dati_trasmissione.content.codice_destinatario;
     if cod.len() == 6 {
         v.push(Violation::new(
@@ -234,6 +252,18 @@ pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violatio
             "the buyer has neither IdFiscaleIVA nor CodiceFiscale",
         ));
     }
+    if cod == crate::ids::CodiceDestinatario::FOREIGN
+        && buyer
+            .id_fiscale_iva
+            .as_ref()
+            .is_none_or(|iva| iva.content.id_paese == "IT")
+    {
+        v.push(Violation::new(
+            "00313",
+            "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario".to_string(),
+            "the XXXXXXX CodiceDestinatario requires a buyer IdFiscaleIVA with an IdPaese other than IT",
+        ));
+    }
     let seller = &header.cedente_prestatore.content.id_fiscale_iva;
     if seller.content.id_paese != "IT"
         && buyer
@@ -247,72 +277,85 @@ pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violatio
             "the seller and the buyer IdPaese are both different from IT",
         ));
     }
-    for (bi, body) in doc.content.fattura_elettronica_body.iter().enumerate() {
-        let bpath = format!("FatturaElettronicaBody[{}]", bi + 1);
-        let doc_data = &body
-            .content
-            .dati_generali
-            .content
-            .dati_generali_documento
-            .content;
-        if doc_data.tipo_documento == crate::generated::fsm10::TipoDocumentoType::Td07
-            && buyer
-                .id_fiscale_iva
-                .as_ref()
-                .is_some_and(|buyer| buyer == seller)
-        {
-            v.push(Violation::new(
-                "00471",
-                format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
-                "the seller and the buyer are identical for this TipoDocumento",
-            ));
-        }
-        if !doc_data.numero.bytes().any(|b| b.is_ascii_digit()) {
-            v.push(Violation::new(
-                "00425",
-                format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/Numero"),
-                "Numero contains no digit",
-            ));
-        }
-        let generali = &body.content.dati_generali.content;
-        if generali
-            .dati_fattura_rettificata
-            .as_ref()
-            .is_some_and(|rettificata| doc_data.data < rettificata.content.data_fr)
-        {
-            v.push(Violation::new(
-                "00418",
-                format!("{bpath}/DatiGenerali/DatiFatturaRettificata/DataFR"),
-                "the linked invoice is dated after the document",
-            ));
-        }
-        for (si, beni) in body.content.dati_beni_servizi.iter().enumerate() {
-            let spath = format!("{bpath}/DatiBeniServizi[{}]", si + 1);
-            let beni = &beni.content;
-            let aliquota = beni.dati_iva.content.aliquota.as_ref();
-            if aliquota.is_some_and(|a| a.0 != Decimal::ZERO && a.0 < Decimal::ONE) {
-                v.push(Violation::new(
-                    "00424",
-                    format!("{spath}/DatiIVA/Aliquota"),
-                    "Aliquota is not expressed as a percentage",
-                ));
-            }
-            if matches!(
-                beni.natura,
-                Some(NaturaSemplificata::N2 | NaturaSemplificata::N3)
-            ) {
-                v.push(Violation::new(
-                    "00445",
-                    format!("{spath}/Natura"),
-                    "the generic Natura N2 or N3 is not allowed",
-                ));
-            }
-        }
-    }
-    v
 }
 
-/// The header-level checks 00417, 00427 and 00428.
+/// The body-level checks of the simplified invoice, 00418, 00424, 00425,
+/// 00445 and 00471.
+fn check_simplified_body(
+    bi: usize,
+    body: &BodySemplificato,
+    header: &HeaderSemplificato,
+    v: &mut Vec<Violation>,
+) {
+    let buyer = &header
+        .cessionario_committente
+        .content
+        .identificativi_fiscali
+        .content;
+    let seller = &header.cedente_prestatore.content.id_fiscale_iva;
+    let bpath = format!("FatturaElettronicaBody[{}]", bi + 1);
+    let doc_data = &body
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content;
+    if doc_data.tipo_documento == crate::generated::fsm10::TipoDocumentoType::Td07
+        && buyer
+            .id_fiscale_iva
+            .as_ref()
+            .is_some_and(|buyer| buyer == seller)
+    {
+        v.push(Violation::new(
+            "00471",
+            format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
+            "the seller and the buyer are identical for this TipoDocumento",
+        ));
+    }
+    if !doc_data.numero.bytes().any(|b| b.is_ascii_digit()) {
+        v.push(Violation::new(
+            "00425",
+            format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/Numero"),
+            "Numero contains no digit",
+        ));
+    }
+    let generali = &body.content.dati_generali.content;
+    if generali
+        .dati_fattura_rettificata
+        .as_ref()
+        .is_some_and(|rettificata| doc_data.data < rettificata.content.data_fr)
+    {
+        v.push(Violation::new(
+            "00418",
+            format!("{bpath}/DatiGenerali/DatiFatturaRettificata/DataFR"),
+            "the linked invoice is dated after the document",
+        ));
+    }
+    for (si, beni) in body.content.dati_beni_servizi.iter().enumerate() {
+        let spath = format!("{bpath}/DatiBeniServizi[{}]", si + 1);
+        let beni = &beni.content;
+        let aliquota = beni.dati_iva.content.aliquota.as_ref();
+        if aliquota.is_some_and(|a| a.0 != Decimal::ZERO && a.0 < Decimal::ONE) {
+            v.push(Violation::new(
+                "00424",
+                format!("{spath}/DatiIVA/Aliquota"),
+                "Aliquota is not expressed as a percentage",
+            ));
+        }
+        if matches!(
+            beni.natura,
+            Some(NaturaSemplificata::N2 | NaturaSemplificata::N3)
+        ) {
+            v.push(Violation::new(
+                "00445",
+                format!("{spath}/Natura"),
+                "the generic Natura N2 or N3 is not allowed",
+            ));
+        }
+    }
+}
+
+/// The header-level checks 00313, 00417, 00427 and 00476.
 fn check_header(header: &FatturaElettronicaHeaderTypeContent, v: &mut Vec<Violation>) {
     let trasmissione = &header.dati_trasmissione.content;
     let cod = &trasmissione.codice_destinatario;
@@ -336,6 +379,18 @@ fn check_header(header: &FatturaElettronicaHeaderTypeContent, v: &mut Vec<Violat
             "00417",
             "FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici".to_string(),
             "the buyer has neither IdFiscaleIVA nor CodiceFiscale",
+        ));
+    }
+    if cod == crate::ids::CodiceDestinatario::FOREIGN
+        && buyer
+            .id_fiscale_iva
+            .as_ref()
+            .is_none_or(|iva| iva.content.id_paese == "IT")
+    {
+        v.push(Violation::new(
+            "00313",
+            "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario".to_string(),
+            "the XXXXXXX CodiceDestinatario requires a buyer IdFiscaleIVA with an IdPaese other than IT",
         ));
     }
     let seller = &header

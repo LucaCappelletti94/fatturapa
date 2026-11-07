@@ -209,6 +209,85 @@ fn base_document_passes() {
     assert!(validate(&base()).is_empty(), "{:?}", validate(&base()));
 }
 
+/// 00313: the `XXXXXXX` `CodiceDestinatario` of an invoice to a buyer
+/// established in `IT` triggers it; the base code and the `0000000` code
+/// of a domestic buyer pass.
+#[test]
+fn code_00313_xxxxxxx_with_an_italian_buyer() {
+    let mut doc = base();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "XXXXXXX".to_string();
+    assert_has(&validate(&doc), "00313");
+
+    let mut doc = base();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "0000000".to_string();
+    assert_absent(&validate(&doc), "00313");
+
+    let doc = base();
+    assert_absent(&validate(&doc), "00313");
+}
+
+/// 00313: the `XXXXXXX` `CodiceDestinatario` with a buyer `IdFiscaleIVA`
+/// established outside `IT` passes, the case the value exists for.
+#[test]
+fn code_00313_xxxxxxx_with_a_foreign_buyer() {
+    let mut doc = base();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "XXXXXXX".to_string();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .dati_anagrafici
+        .content
+        .id_fiscale_iva
+        .as_mut()
+        .expect("the base buyer carries its VAT number")
+        .content
+        .id_paese = "DE".to_string();
+    assert_absent(&validate(&doc), "00313");
+}
+
+/// 00313: the `XXXXXXX` `CodiceDestinatario` with a buyer that carries
+/// only its `CodiceFiscale` triggers it, the buyer `IdFiscaleIVA` being
+/// unvalued.
+#[test]
+fn code_00313_xxxxxxx_without_the_buyer_iva() {
+    let mut doc = base();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "XXXXXXX".to_string();
+    let buyer = &mut doc
+        .content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .dati_anagrafici
+        .content;
+    buyer.id_fiscale_iva = None;
+    buyer.codice_fiscale = Some("AB123456789".to_string());
+    assert_has(&validate(&doc), "00313");
+    assert_absent(&validate(&doc), "00417");
+}
+
 /// 00400: a zero-rate line without a `Natura` triggers it; the same line
 /// with a `Natura` passes.
 #[test]
@@ -1649,6 +1728,59 @@ fn base_simplified_document_passes() {
         "{:?}",
         validate_simplified(&doc)
     );
+}
+
+/// 00313: the `XXXXXXX` `CodiceDestinatario` of a simplified invoice to a
+/// buyer established in `IT` triggers it, as does the base buyer that
+/// carries only its `CodiceFiscale`; a buyer `IdFiscaleIVA` established
+/// outside `IT` passes, and so does the base code.
+#[test]
+fn code_00313_simplified() {
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "XXXXXXX".to_string();
+    assert_has(&validate_simplified(&doc), "00313");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "XXXXXXX".to_string();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .identificativi_fiscali
+        .content
+        .id_fiscale_iva = Some(sg_id("IT", "IT0987654321"));
+    assert_has(&validate_simplified(&doc), "00313");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .codice_destinatario = "XXXXXXX".to_string();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .identificativi_fiscali
+        .content
+        .id_fiscale_iva = Some(sg_id("DE", "DE0987654321"));
+    assert_absent(&validate_simplified(&doc), "00313");
+
+    let doc = doc_simplified();
+    assert_absent(&validate_simplified(&doc), "00313");
 }
 
 /// 00417: a simplified buyer with neither identifier triggers it; the base
