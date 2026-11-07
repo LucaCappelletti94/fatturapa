@@ -84,6 +84,7 @@
 //! | 00443 | line or cassa rate missing from the `DatiRiepilogo` blocks | implemented | out of reach |
 //! | 00444 | line or cassa `Natura` missing from the `DatiRiepilogo` blocks | implemented | out of reach |
 //! | 00445 | the generic nature `N2`, `N3` or `N6` | implemented | implemented, `N6` is not a simplified nature |
+//! | 00460 | total amount above the 400.00 euro limit for the simplified invoice | out of reach, the check is defined for the simplified invoice | implemented |
 //! | 00471 | seller and buyer identical for the document type | implemented | implemented, only for `TD07` |
 //! | 00472 | seller and buyer must be identical for `TD21` and `TD27` | implemented | out of reach |
 //! | 00473 | seller `IdPaese` not allowed for the document type | implemented | out of reach |
@@ -104,6 +105,7 @@ use crate::generated::fpr12::{
 use crate::generated::fsm10::{
     FatturaElettronicaBodyType as BodySemplificato,
     FatturaElettronicaHeaderTypeContent as HeaderSemplificato, NaturaType as NaturaSemplificata,
+    RegimeFiscaleType as RegimeFiscaleSemplificata,
 };
 use crate::{FatturaElettronica, FatturaElettronicaSemplificata};
 use rust_decimal::{Decimal, RoundingStrategy};
@@ -136,6 +138,10 @@ const CENT: Decimal = Decimal::from_parts(1, 0, 0, false, 2);
 
 /// The one euro tolerance of the 00422 check.
 const EURO: Decimal = Decimal::ONE;
+
+/// The 400.00 euro cap on the total amount of a simplified invoice, check
+/// 00460, the art. 21 bis DPR 633/72 limit raised by the DM MEF 10/5/2019.
+const SIMPLIFIED_INVOICE_CAP: Decimal = Decimal::from_parts(40000, 0, 0, false, 2);
 
 /// Rounds `value` to two decimals, down when the third decimal is below 5
 /// and up otherwise, the 00421 rounding of the Elenco Controlli. The result
@@ -280,7 +286,7 @@ fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) 
 }
 
 /// The body-level checks of the simplified invoice, 00418, 00424, 00425,
-/// 00445 and 00471.
+/// 00445, 00460 and 00471.
 fn check_simplified_body(
     bi: usize,
     body: &BodySemplificato,
@@ -331,6 +337,7 @@ fn check_simplified_body(
             "the linked invoice is dated after the document",
         ));
     }
+    check_simplified_cap(body, header, &bpath, v);
     for (si, beni) in body.content.dati_beni_servizi.iter().enumerate() {
         let spath = format!("{bpath}/DatiBeniServizi[{}]", si + 1);
         let beni = &beni.content;
@@ -352,6 +359,50 @@ fn check_simplified_body(
                 "the generic Natura N2 or N3 is not allowed",
             ));
         }
+    }
+}
+
+/// The 00460 check on the total amount of a simplified `FatturaElettronicaBody`.
+///
+/// The total is the sum of the body `DatiBeniServizi` `Importo`, and it must
+/// not exceed the 400.00 euros of art. 21 bis DPR 633/72, the limit raised from
+/// 100 by the DM MEF 10/5/2019 and restated by the Allegato A 1.9.1 codice
+/// 00460. It is per body, the field 2.2.2 `<Importo>` of the Rappresentazione
+/// tabellare of the simplified invoice, summed over the `DatiBeniServizi` when
+/// the element is present more than once. It is waived when the body carries a
+/// `DatiFatturaRettificata`, the correction of an already-issued invoice, or
+/// when the seller is in the forfettario regime `RF19` or the transfrontaliero
+/// franchigia IVA regime `RF20`.
+fn check_simplified_cap(
+    body: &BodySemplificato,
+    header: &HeaderSemplificato,
+    bpath: &str,
+    v: &mut Vec<Violation>,
+) {
+    let regime_exempt = matches!(
+        &header.cedente_prestatore.content.regime_fiscale,
+        RegimeFiscaleSemplificata::Rf19 | RegimeFiscaleSemplificata::Rf20
+    );
+    let totale: Decimal = body
+        .content
+        .dati_beni_servizi
+        .iter()
+        .map(|beni| beni.content.importo.0)
+        .sum();
+    if totale > SIMPLIFIED_INVOICE_CAP
+        && body
+            .content
+            .dati_generali
+            .content
+            .dati_fattura_rettificata
+            .is_none()
+        && !regime_exempt
+    {
+        v.push(Violation::new(
+            "00460",
+            format!("{bpath}/DatiBeniServizi"),
+            "the total amount exceeds the 400 euro limit for the simplified invoice",
+        ));
     }
 }
 
