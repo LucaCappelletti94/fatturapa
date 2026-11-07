@@ -13,8 +13,9 @@ use prettyplease::unparse;
 use quote::ToTokens;
 use url::Url;
 use xsd_parser::config::{Config, IdentQuadruple};
-use xsd_parser::models::IdentType;
-use xsd_parser::models::meta::CustomMeta;
+use xsd_parser::models::meta::{CustomMeta, ReferenceMeta};
+use xsd_parser::models::schema::NamespaceId;
+use xsd_parser::models::{IdentType, TypeIdent};
 use xsd_parser::pipeline::parser::Parser;
 use xsd_parser::pipeline::parser::resolver::{ResolveRequest, ResolveResult, Resolver};
 use xsd_parser::{
@@ -186,6 +187,12 @@ fn generate(spec_dir: &Path, schema: &str) -> Result<String> {
         .with_type(
             IdentQuadruple::new("dateTime", IdentType::Type).with_ns(Namespace::XS),
             CustomMeta::new("DateTime").include_from("crate::date::DateTime"),
+        )
+        // `xsd:integer` is unbounded, and the default `i32` mapping cannot
+        // hold the twelve-digit `IdentificativoSdI`.
+        .with_type(
+            IdentQuadruple::new("integer", IdentType::Type).with_ns(Namespace::XS),
+            ReferenceMeta::new(TypeIdent::I64.with_ns(NamespaceId::ANONYMOUS)),
         );
 
     let (meta_types, ident_cache) = exec_interpreter_with_ident_cache(config.interpreter, &schemas)

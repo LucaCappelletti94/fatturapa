@@ -165,7 +165,7 @@ pub type GYearType = String;
 pub type GYearMonthType = String;
 pub type HexBinaryType = HexString;
 pub type IntType = i32;
-pub type IntegerType = i32;
+pub type IntegerType = i64;
 pub type LanguageType = String;
 pub type LongType = i64;
 pub type NegativeIntegerType = isize;
@@ -381,7 +381,7 @@ impl DeserializeBytes for EsitoCommittenteType {
 }
 impl WithDeserializerFromBytes for EsitoCommittenteType {}
 pub type FormatoType = String;
-pub type IdentificativoSdIType = i32;
+pub type IdentificativoSdIType = i64;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ListaErroriType {
     pub content: ListaErroriTypeContent,
@@ -1149,7 +1149,7 @@ impl WithDeserializer for DigestMethodType {
 }
 pub type DigestValue = DigestValueType;
 pub type DigestValueType = Base64String;
-pub type HmacOutputLengthType = i32;
+pub type HmacOutputLengthType = i64;
 pub type KeyInfo = KeyInfoType;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct KeyInfoType {
