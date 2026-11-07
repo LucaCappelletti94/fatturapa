@@ -618,8 +618,14 @@ pub(crate) fn signature() -> sdi::Signature {
     }
 }
 
-pub(crate) fn identificativo(rng: &mut Rng) -> i32 {
-    i32::try_from(rng.below(100_000) + 1).expect("fits an i32")
+/// The `IdentificativoSdI` of the message, sometimes a twelve-digit value
+/// outside the `i32` range.
+pub(crate) fn identificativo(rng: &mut Rng) -> i64 {
+    if rng.bool() {
+        99_000_000_000 + i64::try_from(rng.below(1_000_000)).expect("fits an i64")
+    } else {
+        i64::try_from(rng.below(100_000) + 1).expect("fits an i64")
+    }
 }
 
 pub(crate) fn nome_file(rng: &mut Rng) -> String {
@@ -663,7 +669,7 @@ pub(crate) fn mt_from_seed(seed: u64) -> MetadatiInvioFile {
             nome_file: nome_file(&mut rng),
             codice_destinatario: codice_destinatario(&mut rng),
             formato: rng.pick(&["SDI10", "FPR12", "FPA12"]).to_string(),
-            tentativi_invio: i32::try_from(rng.below(3) + 1).expect("fits an i32"),
+            tentativi_invio: i64::try_from(rng.below(3) + 1).expect("fits an i64"),
             message_id: message_id(&mut rng),
             note: if rng.bool() {
                 Some("Esempio".to_string())

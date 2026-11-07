@@ -225,3 +225,26 @@ fn spec_files_exist() {
         assert!(path.exists(), "{path:?} is checked in");
     }
 }
+
+/// The `IdentificativoSdI` is an `xsd:integer` of twelve digits, so an
+/// identifier outside the `i32` range reads, writes, re-reads and compares
+/// equal.
+#[test]
+fn sdi_identifier_round_trips_twelve_digits() {
+    let xml = b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+        <types:NotificaEsitoCommittente \
+        xmlns:types=\"http://www.fatturapa.gov.it/sdi/messaggi/v1.0\" versione=\"1.0\">\
+        <IdentificativoSdI>990000000012</IdentificativoSdI>\
+        <Esito>EC01</Esito>\
+        </types:NotificaEsitoCommittente>";
+    let doc = NotificaEsitoCommittente::from_xml_slice(xml).expect("the message reads");
+    let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
+    let reread =
+        NotificaEsitoCommittente::from_xml_slice(&bytes).expect("the written message re-reads");
+    assert_eq!(doc, reread);
+    assert!(
+        bytes.windows(12).any(|window| window == b"990000000012"),
+        "the written message keeps the twelve-digit identifier"
+    );
+}

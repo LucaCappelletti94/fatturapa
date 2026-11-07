@@ -164,7 +164,7 @@ pub type GYearType = String;
 pub type GYearMonthType = String;
 pub type HexBinaryType = HexString;
 pub type IntType = i32;
-pub type IntegerType = i32;
+pub type IntegerType = i64;
 pub type LanguageType = String;
 pub type LongType = i64;
 pub type NegativeIntegerType = isize;
@@ -2259,7 +2259,7 @@ impl DeserializeBytes for FormatoTrasmissioneType {
     }
 }
 impl WithDeserializerFromBytes for FormatoTrasmissioneType {}
-pub type GiorniTerminePagamentoType = i32;
+pub type GiorniTerminePagamentoType = i64;
 pub type IbanType = String;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IdFiscaleType {
@@ -2614,8 +2614,8 @@ impl DeserializeBytes for NaturaType {
 impl WithDeserializerFromBytes for NaturaType {}
 pub type NazioneType = String;
 pub type NumeroCivicoType = String;
-pub type NumeroColliType = i32;
-pub type NumeroLineaType = i32;
+pub type NumeroColliType = i64;
+pub type NumeroLineaType = i64;
 pub type PesoType = Amount;
 pub type ProvinciaType = String;
 pub type QuantitaType = Amount;
@@ -2810,8 +2810,8 @@ impl DeserializeBytes for RegimeFiscaleType {
     }
 }
 impl WithDeserializerFromBytes for RegimeFiscaleType {}
-pub type RiferimentoFaseType = i32;
-pub type RiferimentoNumeroLineaType = i32;
+pub type RiferimentoFaseType = i64;
+pub type RiferimentoNumeroLineaType = i64;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum RitenutaType {
     Si,
@@ -3489,7 +3489,7 @@ impl WithDeserializer for DigestMethodType {
 }
 pub type DigestValue = DigestValueType;
 pub type DigestValueType = Base64String;
-pub type HmacOutputLengthType = i32;
+pub type HmacOutputLengthType = i64;
 pub type KeyInfo = KeyInfoType;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct KeyInfoType {

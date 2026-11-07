@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<types:NotificaEsitoCommittente xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" versione="1.0"><IdentificativoSdI>99000000001</IdentificativoSdI><Esito>EC01</Esito></types:NotificaEsitoCommittente>

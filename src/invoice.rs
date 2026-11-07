@@ -140,7 +140,7 @@ pub enum BuildError {
     #[error("line {line} {field} is not a valid amount: {value}")]
     Amount {
         /// The one-based line number.
-        line: i32,
+        line: i64,
         /// The amount field of the line.
         field: AmountField,
         /// The offending value.
@@ -841,7 +841,7 @@ impl Line {
     /// and its amounts in the currency the document reads.
     pub(crate) fn into_content(
         self,
-        numero_linea: i32,
+        numero_linea: i64,
         currency: &InvoiceCurrency,
     ) -> Result<DettaglioLineeTypeContent, BuildError> {
         let unit_price = currency.eur_value(amount_in_range(
@@ -2385,18 +2385,18 @@ fn first_lines(first: Line, rest: Vec<Line>) -> Vec<Line> {
 }
 
 /// The line number of the document, one-based.
-fn line_number(i: usize) -> i32 {
+fn line_number(i: usize) -> i64 {
     debug_assert!(
-        i < i32::MAX as usize,
-        "a document carries at most i32::MAX lines"
+        i < usize::try_from(i64::MAX).unwrap_or(usize::MAX),
+        "a document carries at most i64::MAX lines"
     );
-    i32::try_from(i).unwrap_or_else(|_| panic!("a document carries at most i32::MAX lines")) + 1
+    i64::try_from(i).unwrap_or_else(|_| panic!("a document carries at most i64::MAX lines")) + 1
 }
 
 /// Normalizes an amount the schema must read, to at least two decimals,
 /// and refuses the value outside the XSD amount types of the line. The
 /// line index is range-checked in `line_number`.
-fn amount_in_range(value: Decimal, field: AmountField, line: i32) -> Result<Decimal, BuildError> {
+fn amount_in_range(value: Decimal, field: AmountField, line: i64) -> Result<Decimal, BuildError> {
     let bound = match field {
         AmountField::UnitPrice => unit_price_bound(),
         AmountField::Quantity => quantity_bound(),

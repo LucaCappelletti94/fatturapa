@@ -43,7 +43,7 @@ Each source directory carries the upstream `LICENSE` file next to the copied fil
 | `simevo-json/` | [simevo/fattura-elettronica-json](https://github.com/simevo/fattura-elettronica-json) | BSD 3-Clause | `tests/{invalid,random,samples}/*.xml` |
 | `slamdunk/` | [Slamdunk/php-validatore-fattura-elettronica](https://github.com/Slamdunk/php-validatore-fattura-elettronica) | MIT | `tests/*.xml`, nine files |
 | `tappoz/` | [tappoz/ffe-fatture-elettroniche](https://github.com/tappoz/ffe-fatture-elettroniche) | LGPL 3.0 or later | `sample_data/*.xml`, `fe-xml-sample/personas/*.xml`, `fe-xml-sample/templates/*.xml`, two hundred forty six files |
-| `utenzepa/` | [Comune-di-Montesilvano/UtenzePA](https://github.com/Comune-di-Montesilvano/UtenzePA) | EUPL 1.2 | `*.xml`, `*.p7m`, eight files |
+| `utenzepa/` | [Comune-di-Montesilvano/UtenzePA](https://github.com/Comune-di-Montesilvano/UtenzePA) | EUPL 1.2 | `*.xml`, `*.p7m`, ten files |
 | `validatefin/` | [ValidateFin sample download](https://validatefin.com/en/resources/samples/fatturapa-fpr12-signed-p7m) | CC BY 4.0 | `IT06363391001_0000*.xml`, `IT06363391001_00002.xml.p7m`, four files |
 | `zugferd-corpus/` | [ZUGFeRD/corpus](https://github.com/ZUGFeRD/corpus) | Apache 2.0 | `eigor/valid/*.xml`, `official/valid/*.xml` |
 
@@ -78,17 +78,16 @@ copied, the `fatture-elettroniche-explorer/ATTESO.json` file, the
 `tappoz/fe-xml-sample` `yaml` catalogs, `utenzepa/documento.pdf`,
 `p7m-apri/documento.pdf` and `p7m-fattura-decoder/not-base64.txt`.
 `odoo-fatturapa-viewer/test.xml.p7m` and `p7m-apri/TEST.p7m` carry the
-certificates of real persons and are excluded. `merge-invoices/02_invoice.xml`,
-`fatture-elettroniche-explorer/casi-limite/codifica-iso-8859-1.xml` and
-`utenzepa/ec01.xml` with `utenzepa/ec02.xml` are valid against the `XSD` but
-the generated reader rejects them, a `dsig-xpath:XPath` filter-2 element in
-`ds:Transform`, non-`UTF-8` bytes and an eleven digit `IdentificativoSdI`
-outside the reader's `i32` respectively, so the four files are excluded and
-the reader defects are reported.
+certificates of real persons and are excluded. `merge-invoices/02_invoice.xml`
+and `fatture-elettroniche-explorer/casi-limite/codifica-iso-8859-1.xml` are
+valid against the `XSD` but the generated reader rejects them, a
+`dsig-xpath:XPath` filter-2 element in `ds:Transform` and non-`UTF-8` bytes
+respectively, so the two files are excluded and the reader defects are
+reported.
 
 ## Outcomes
 
-Four hundred and eighty eight files. Three hundred and seventy four read,
+Four hundred and ninety files. Three hundred and seventy six read,
 validate and round-trip, including the signed files unwrapped from their
 `.p7m` wrapper. One hundred and eight fail the `XSD` validation of `spec/`,
 listed below with the reason `xmllint` reports. Six signed files do not unwrap
