@@ -247,6 +247,31 @@ openssl x509 -req -in "$work/forged-signer.csr" \
     -CA intermediate-forged.pem -CAkey intermediate-forged.key -CAcreateserial \
     -out forged-signer.pem -days 3650 -not_before "$past" 2>/dev/null
 
+# Signers on the `ec-signer` key, so the in-process CMS signature verifies
+# and verification reaches the branch under test.
+# A leaf that is also a CA, for the end-entity usage check.
+openssl x509 -req -in "$work/ec-signer.csr" \
+    -CA intermediate.pem -CAkey intermediate.key -CAcreateserial \
+    -out ca-signer.pem -days 3650 -not_before "$past" \
+    -extfile <(printf 'basicConstraints=critical,CA:TRUE\nkeyUsage=critical,digitalSignature\n') 2>/dev/null
+# A leaf carrying a keyUsage, so the extension value can be corrupted.
+openssl x509 -req -in "$work/ec-signer.csr" \
+    -CA intermediate.pem -CAkey intermediate.key -CAcreateserial \
+    -out ku-signer.pem -days 3650 -not_before "$past" \
+    -extfile <(printf 'keyUsage=critical,digitalSignature\n') 2>/dev/null
+
+# An intermediate that signs the signer with SHA-1, untrusted by the chain verifier.
+openssl req -new -newkey rsa:3072 -nodes \
+    -keyout sha1-intermediate.key -out "$work/sha1-intermediate.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test sha1 intermediate" 2>/dev/null
+openssl x509 -req -in "$work/sha1-intermediate.csr" \
+    -CA ca.pem -CAkey ca.key -CAcreateserial -out sha1-intermediate.pem -days 3650 \
+    -not_before "$past" \
+    -extfile <(printf 'basicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\n') 2>/dev/null
+openssl x509 -req -in "$work/ec-signer.csr" \
+    -CA sha1-intermediate.pem -CAkey sha1-intermediate.key -CAcreateserial \
+    -out sha1-signer.pem -days 3650 -not_before "$past" -sha1 2>/dev/null
+
 chain() {
     cat intermediate.pem ca.pem
 }

@@ -15,9 +15,9 @@ mod support;
 use std::path::Path;
 
 use fatturapa::generated::fpr12 as g;
-use fatturapa::ids::{EuCountry, Provincia, RegimeFiscale};
+use fatturapa::ids::{EuCountry, Natura, Provincia, RegimeFiscale};
 use fatturapa::invoice::{Invoice, InvoiceCurrency, Line, Recipient, SevenTerLine, VatTreatment};
-use fatturapa::party::{Address, Business, Company, Seller};
+use fatturapa::party::{Address, Business, Buyer, Company, Seller};
 use fatturapa::validate::{Violation, validate};
 use fatturapa::{Amount, Document, FatturaElettronica};
 use iso_country::Country;
@@ -863,4 +863,133 @@ fn td17_build(
     ])
     .build()
     .expect("the self-invoice passes every check")
+}
+
+/// The domestic business client of the `Natura` and `RegimeFiscale`
+/// tests.
+fn buyer_domestic() -> Buyer {
+    Buyer::denomination(
+        "BETA SRL".parse().expect("a valid denomination"),
+        "04444444444".parse().expect("a valid partita IVA"),
+        Address::italian(
+            "VIA MILANO 2".parse().expect("a valid address"),
+            "20100".parse().expect("a valid CAP"),
+            "MILANO".parse().expect("a valid comune"),
+            Provincia::Mi,
+        ),
+    )
+}
+
+/// The domestic invoice with one line, its scenario progressivo, date
+/// and numero.
+fn domestic_invoice(line: Line) -> FatturaElettronica {
+    Invoice::domestic(
+        &seller(),
+        &buyer_domestic(),
+        Recipient::Codice("ABC1234".parse().expect("a valid code")),
+        line,
+    )
+    .progressivo("00001")
+    .date("2026-11-04")
+    .numero("00013")
+    .build()
+    .expect("the invoice passes every check")
+}
+
+/// Every current `Natura` code is written into the `Natura` elements of
+/// the document of the non-taxable line that carries it, and no other
+/// code is written.
+#[test]
+fn every_natura_writes_its_code_in_the_document() {
+    for natura in Natura::ALL {
+        let line = Line::builder()
+            .description("OPERAZIONE NON TASSABILE")
+            .quantity("1.00")
+            .unit_price("100.00")
+            .vat(VatTreatment::NotTaxed {
+                natura,
+                riferimento_normativo: "ART. 7-TER DPR 633/72".parse().expect("a valid reference"),
+            })
+            .build()
+            .expect("the line builds");
+        let written = domestic_invoice(line)
+            .to_xml_vec()
+            .expect("the invoice serialises");
+        let element = format!("<Natura>{}</Natura>", natura.code());
+        assert!(
+            written
+                .windows(element.len())
+                .any(|w| w == element.as_bytes()),
+            "the {} code is written in the document",
+            natura.code()
+        );
+        for other in Natura::ALL {
+            if other == natura {
+                continue;
+            }
+            let other_element = format!("<Natura>{}</Natura>", other.code());
+            assert!(
+                !written
+                    .windows(other_element.len())
+                    .any(|w| w == other_element.as_bytes()),
+                "the {} code is not written for {}",
+                other.code(),
+                natura.code()
+            );
+        }
+    }
+}
+
+/// Every `RegimeFiscale` code is written into the `RegimeFiscale`
+/// element of the seller that carries it, and no other code is written.
+#[test]
+fn every_regime_fiscale_writes_its_code_in_the_document() {
+    for regime in RegimeFiscale::ALL {
+        let seller = Seller::denomination(
+            "ALPHA SRL".parse().expect("a valid denomination"),
+            "02222222222".parse().expect("a valid partita IVA"),
+            Address::italian(
+                "VIA ROMA 1".parse().expect("a valid address"),
+                "00100".parse().expect("a valid CAP"),
+                "ROMA".parse().expect("a valid comune"),
+                Provincia::Rm,
+            ),
+            regime,
+        );
+        let written = Invoice::domestic(
+            &seller,
+            &buyer_domestic(),
+            Recipient::Codice("ABC1234".parse().expect("a valid code")),
+            taxed_line("SERVIZIO DI CONSULENZA", "100.00"),
+        )
+        .progressivo("00001")
+        .date("2026-11-04")
+        .numero("00013")
+        .build()
+        .expect("the invoice passes every check")
+        .to_xml_vec()
+        .expect("the invoice serialises");
+        let element = format!("<RegimeFiscale>{}</RegimeFiscale>", regime.code());
+        assert!(
+            written
+                .windows(element.len())
+                .any(|w| w == element.as_bytes()),
+            "the {} code is written in the document",
+            regime.code()
+        );
+        for other in RegimeFiscale::ALL {
+            if other == regime {
+                continue;
+            }
+            let other_element = format!("<RegimeFiscale>{}</RegimeFiscale>", other.code());
+            assert!(
+                !written
+                    .windows(other_element.len())
+                    .any(|w| w == other_element.as_bytes()),
+                "the {} code is not written for {}",
+                other.code(),
+                regime.code()
+            );
+        }
+    }
 }

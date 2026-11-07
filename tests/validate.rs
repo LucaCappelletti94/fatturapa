@@ -549,6 +549,18 @@ fn code_00424_rate_not_a_percentage() {
     assert_absent(&validate(&doc), "00424");
 }
 
+/// 00424: a `DatiRiepilogo` rate of 0.50 is not a percentage; the base
+/// rate passes.
+#[test]
+fn code_00424_riepilogo_rate_not_a_percentage() {
+    let mut doc = base();
+    riep(&mut doc).aliquota_iva = amount("0.50");
+    assert_has(&validate(&doc), "00424");
+
+    let doc = base();
+    assert_absent(&validate(&doc), "00424");
+}
+
 /// 00425: a `Numero` without any digit triggers it; the base number passes.
 #[test]
 fn code_00425_number_without_digit() {
@@ -737,6 +749,33 @@ fn code_00445_generic_natura() {
 
     let mut doc = base();
     line(&mut doc).natura = Some(g::NaturaType::N21);
+    assert_absent(&validate(&doc), "00445");
+}
+
+/// 00445: the generic nature `N2` in a `DatiCassaPrevidenziale` is not
+/// allowed; a detailed nature passes.
+#[test]
+fn code_00445_cassa_generic_natura() {
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .dati_cassa_previdenziale
+        .push(cassa("0.00", Some(g::NaturaType::N2), false));
+    assert_has(&validate(&doc), "00445");
+
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .dati_cassa_previdenziale
+        .push(cassa("0.00", Some(g::NaturaType::N21), false));
     assert_absent(&validate(&doc), "00445");
 }
 
