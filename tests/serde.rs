@@ -200,6 +200,9 @@ fn domain_types_roundtrip() {
         TaxIdentity::try_italian(Some("02222222222"), Some("MRALNE80E05H501C")).unwrap();
     assert_eq!(roundtrip(&tax_identity), tax_identity);
 
+    let eu_vat = TaxIdentity::try_eu_vat(EuCountry::De, "DE998877665").unwrap();
+    assert_eq!(roundtrip(&eu_vat), eu_vat);
+
     let address = Address::italian(
         "VIA ROMA 1".parse().unwrap(),
         "00100".parse().unwrap(),
@@ -296,6 +299,29 @@ fn domain_types_roundtrip() {
     assert_eq!(roundtrip(&sconto), sconto);
 }
 
+/// Every kind and form of a `Sconto` round-trips its JSON flags, and a
+/// value that fails the constructor validation is rejected on the way in.
+#[test]
+fn sconto_forms_round_trip_through_json() {
+    let forms = [
+        Sconto::discount_percent("10.00").unwrap(),
+        Sconto::markup_percent("12.50").unwrap(),
+        Sconto::discount_amount("5.00").unwrap(),
+        Sconto::markup_amount("7.25").unwrap(),
+    ];
+    for sconto in forms {
+        assert_eq!(roundtrip(&sconto), sconto);
+    }
+
+    // A zero `markup percentage` fails the positive bound and is rejected.
+    let err = serde_json::from_str::<Sconto>(r#"{"discount":false,"percent":true,"value":"0.00"}"#)
+        .unwrap_err();
+    assert!(
+        err.to_string().contains("discount or markup"),
+        "meaningful: {err}"
+    );
+}
+
 #[test]
 fn deserialization_rejects_invalid_values() {
     // A `partita IVA` with a wrong check digit is rejected.
@@ -332,6 +358,18 @@ fn deserialization_rejects_invalid_values() {
     )
     .unwrap_err();
     assert!(err.to_string().contains("business"), "meaningful: {err}");
+
+    // A `buyer` with a `foreign` party is rejected.
+    let err = serde_json::from_str::<Buyer>(
+        r#"{"party":{"name":{"Denomination":"ACME SPA"},
+            "identity":{"Foreign":{"country":"US","id":"US123456789"}},
+            "address":{"Foreign":{"indirizzo":"1 MAIN ST","postal_code":"10001","comune":"NEW YORK","country":"US"}}}}"#,
+    )
+    .unwrap_err();
+    assert!(
+        err.to_string().contains("Italian party"),
+        "meaningful: {err}"
+    );
 
     // A `company` whose party has no `partita IVA` is rejected.
     let err = serde_json::from_str::<Company>(

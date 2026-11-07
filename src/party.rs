@@ -197,12 +197,34 @@ impl TaxIdentity {
 
 /// The seat of a party, one of the two forms the `Sede` admits.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Address {
+pub struct Address(Seat);
+
+/// The two forms of a seat, exactly one of which a seat is.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+enum Seat {
     /// The Italian seat, with its `CAP` and `Provincia`.
-    italian: Option<(Indirizzo, Cap, Comune, Provincia)>,
+    Italian {
+        /// The `Indirizzo`.
+        indirizzo: Indirizzo,
+        /// The `CAP`.
+        cap: Cap,
+        /// The `Comune`.
+        comune: Comune,
+        /// The `Provincia`.
+        provincia: Provincia,
+    },
     /// The foreign seat, which writes the `CAP` `00000`, omits the
     /// `Provincia` and puts the foreign postal code in the `Indirizzo`.
-    foreign: Option<(Indirizzo, Option<PostalCode>, Comune, Country)>,
+    Foreign {
+        /// The `Indirizzo`.
+        indirizzo: Indirizzo,
+        /// The foreign postal code, appended to the `Indirizzo`.
+        postal_code: Option<PostalCode>,
+        /// The `Comune`.
+        comune: Comune,
+        /// The country of the seat.
+        country: Country,
+    },
 }
 
 impl Address {
@@ -215,10 +237,12 @@ impl Address {
         comune: Comune,
         provincia: Provincia,
     ) -> Self {
-        Self {
-            italian: Some((indirizzo, cap, comune, provincia)),
-            foreign: None,
-        }
+        Self(Seat::Italian {
+            indirizzo,
+            cap,
+            comune,
+            provincia,
+        })
     }
 
     /// The seat in Italy, each value converted.
@@ -308,10 +332,12 @@ impl Address {
             |postal| format!("{} {}", indirizzo.as_str(), postal.as_str()),
         );
         if written.chars().count() <= 60 {
-            Ok(Self {
-                italian: None,
-                foreign: Some((indirizzo, postal_code, comune, country)),
-            })
+            Ok(Self(Seat::Foreign {
+                indirizzo,
+                postal_code,
+                comune,
+                country,
+            }))
         } else {
             Err(IdError::Address(written))
         }
@@ -321,54 +347,51 @@ impl Address {
     /// when present.
     #[must_use]
     pub fn indirizzo(&self) -> String {
-        match &self.italian {
-            Some((indirizzo, _, _, _)) => indirizzo.as_str().to_string(),
-            None => match &self.foreign {
-                Some((indirizzo, postal_code, _, _)) => postal_code.as_ref().map_or_else(
-                    || indirizzo.as_str().to_string(),
-                    |postal| format!("{} {}", indirizzo.as_str(), postal.as_str()),
-                ),
-                None => String::new(),
-            },
+        match &self.0 {
+            Seat::Italian { indirizzo, .. } => indirizzo.as_str().to_string(),
+            Seat::Foreign {
+                indirizzo,
+                postal_code,
+                ..
+            } => postal_code.as_ref().map_or_else(
+                || indirizzo.as_str().to_string(),
+                |postal| format!("{} {}", indirizzo.as_str(), postal.as_str()),
+            ),
         }
     }
 
     /// The `CAP` to write, `00000` for a foreign seat.
     #[must_use]
     pub fn cap(&self) -> &str {
-        match &self.italian {
-            Some((_, cap, _, _)) => cap.as_str(),
-            None => Cap::FOREIGN.as_str(),
+        match &self.0 {
+            Seat::Italian { cap, .. } => cap.as_str(),
+            Seat::Foreign { .. } => Cap::FOREIGN.as_str(),
         }
     }
 
     /// The `Comune` to write.
     #[must_use]
     pub fn comune(&self) -> &str {
-        match &self.italian {
-            Some((_, _, comune, _)) => comune.as_str(),
-            None => match &self.foreign {
-                Some((_, _, comune, _)) => comune.as_str(),
-                None => "",
-            },
+        match &self.0 {
+            Seat::Italian { comune, .. } | Seat::Foreign { comune, .. } => comune.as_str(),
         }
     }
 
     /// The `Provincia` code of an Italian seat.
     #[must_use]
     pub const fn provincia_code(&self) -> Option<&str> {
-        match &self.italian {
-            Some((_, _, _, provincia)) => Some(provincia.code()),
-            None => None,
+        match &self.0 {
+            Seat::Italian { provincia, .. } => Some(provincia.code()),
+            Seat::Foreign { .. } => None,
         }
     }
 
     /// The `Nazione` to write, `ISO 3166-1` alpha-2.
     #[must_use]
     pub fn country_code(&self) -> String {
-        match &self.foreign {
-            Some((_, _, _, country)) => country.to_string(),
-            None => "IT".to_string(),
+        match &self.0 {
+            Seat::Italian { .. } => "IT".to_string(),
+            Seat::Foreign { country, .. } => country.to_string(),
         }
     }
 }
@@ -1142,22 +1165,29 @@ impl serde::Serialize for Address {
     where
         S: serde::Serializer,
     {
-        let form = if let Some((indirizzo, cap, comune, provincia)) = &self.italian {
-            AddressForm::Italian {
+        let form = match &self.0 {
+            Seat::Italian {
+                indirizzo,
+                cap,
+                comune,
+                provincia,
+            } => AddressForm::Italian {
                 indirizzo: indirizzo.clone(),
                 cap: *cap,
                 comune: comune.clone(),
                 provincia: *provincia,
-            }
-        } else if let Some((indirizzo, postal_code, comune, country)) = &self.foreign {
-            AddressForm::Foreign {
+            },
+            Seat::Foreign {
+                indirizzo,
+                postal_code,
+                comune,
+                country,
+            } => AddressForm::Foreign {
                 indirizzo: indirizzo.clone(),
                 postal_code: postal_code.clone(),
                 comune: comune.clone(),
                 country: *country,
-            }
-        } else {
-            return Err(serde::ser::Error::custom("the address carries no seat"));
+            },
         };
         form.serialize(serializer)
     }
