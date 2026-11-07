@@ -413,10 +413,11 @@ impl From<Cap> for String {
 /// `FromStr` and `TryFrom` impls from a list of `name code city` rows.
 macro_rules! provincia {
     ($($name:ident $code:literal $city:literal),* $(,)?) => {
-        /// The `Provincia` of an Italian seat, the code of the current
-        /// provinces and metropolitan cities, from the Istat census of
-        /// administrative units of 21/02/2026, with the Sardinian
-        /// sigle per DPR 4 agosto 2026 n. 183.
+        /// The `Provincia` of an Italian seat.
+        ///
+        /// The codes of the current provinces and metropolitan cities come
+        /// from the Istat census of administrative units of 21/02/2026, and
+        /// the Sardinian sigle from DPR 4 agosto 2026 n. 183.
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
