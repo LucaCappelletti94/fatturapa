@@ -136,6 +136,7 @@ readable invoice is clean.
 | File | Codes | What the file does |
 | --- | --- | --- |
 | `fatturaelettronica-php/IT01234567899_000sq.xml` | 00421 twice, 00445 twice | a riepilogo `Imposta` off by exactly one cent, and the generic nature `N2` on a line and a riepilogo |
+| `fatturaelettronica-php/semplificata/ESEMPIO NDC SEMPL.xml` | 00418 | a simplified `TD08` with a `Data` preceding the linked `DataFR` |
 | `gobl-sdi/fatturapa.gobl/invoice-b2g.xml` | 00427 | `FPA12` with a seven character `CodiceDestinatario` |
 | `gobl-sdi/gobl.fatturapa/out/invoice-b2g.xml` | 00427 | `FPA12` with a seven character `CodiceDestinatario` |
 | `gobl-sdi/gobl.fatturapa/out/invoice-simple-with-credits.xml` | 00423 | a credit line with positive amounts and a negative `PrezzoTotale` |

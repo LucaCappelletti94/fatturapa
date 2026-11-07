@@ -3654,6 +3654,45 @@ mod tests {
         );
     }
 
+    /// The `build` of a self-invoice reports the 00418 of an original
+    /// invoice dated after the document; the same date passes.
+    #[test]
+    fn the_self_invoice_reports_a_later_original_invoice_date() {
+        let failing = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date("2026-11-04")
+        .numero("00015")
+        .original_invoice("ORIG-001", "2026-11-10")
+        .build();
+        assert!(
+            matches!(
+                &failing,
+                Err(BuildError::Violations(violations))
+                    if violations.iter().any(|violation| violation.code == "00418")
+            ),
+            "{failing:?}"
+        );
+
+        let doc = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            codice(),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date("2026-11-04")
+        .numero("00015")
+        .original_invoice("ORIG-001", "2026-11-04")
+        .build()
+        .expect("the same-date original invoice passes");
+        assert_eq!(validate::validate(&doc), Vec::new());
+    }
+
     /// A line built without its `Quantita` writes the element absent,
     /// the `PrezzoTotale` computed on the implicit quantity of one, and
     /// the domestic builder carries the `Causale` texts.

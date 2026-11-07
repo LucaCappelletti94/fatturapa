@@ -359,6 +359,13 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
         ],
     ),
     (
+        "fatturaelettronica-php/semplificata/ESEMPIO NDC SEMPL.xml",
+        &[(
+            "00418",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiFatturaRettificata/DataFR",
+        )],
+    ),
+    (
         "gobl-sdi/fatturapa.gobl/invoice-b2g.xml",
         &[(
             "00427",

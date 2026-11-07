@@ -452,6 +452,52 @@ fn code_00418_credit_note_before_the_linked_invoice() {
     assert_absent(&validate(&doc), "00418");
 }
 
+/// 00418: a non-`TD04` document with a linked invoice dated after the
+/// document triggers it; the same document with an earlier linked date
+/// passes.
+#[test]
+fn code_00418_linked_invoice_after_the_document() {
+    let mut doc = base();
+    let generali = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content;
+    generali
+        .dati_fatture_collegate
+        .push(g::DatiDocumentiCorrelatiType {
+            content: g::DatiDocumentiCorrelatiTypeContent {
+                riferimento_numero_linea: Vec::new(),
+                id_documento: "41".to_string(),
+                data: Some(date(2026, 11, 10)),
+                num_item: None,
+                codice_commessa_convenzione: None,
+                codice_cup: None,
+                codice_cig: None,
+            },
+        });
+    assert_has(&validate(&doc), "00418");
+
+    let mut doc = base();
+    let generali = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content;
+    generali
+        .dati_fatture_collegate
+        .push(g::DatiDocumentiCorrelatiType {
+            content: g::DatiDocumentiCorrelatiTypeContent {
+                riferimento_numero_linea: Vec::new(),
+                id_documento: "41".to_string(),
+                data: Some(date(2026, 11, 1)),
+                num_item: None,
+                codice_commessa_convenzione: None,
+                codice_cup: None,
+                codice_cig: None,
+            },
+        });
+    assert_absent(&validate(&doc), "00418");
+}
+
 /// 00419: two distinct rates and one `DatiRiepilogo` block trigger it; one
 /// rate and one block pass.
 #[test]
@@ -1622,6 +1668,39 @@ fn code_00417_simplified() {
 
     let doc = doc_simplified();
     assert_absent(&validate_simplified(&doc), "00417");
+}
+
+/// 00418: a simplified invoice dated before its `DataFR` triggers it; a
+/// `DataFR` on the document date passes.
+#[test]
+fn code_00418_simplified() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_fattura_rettificata = Some(sg::DatiFatturaRettificataType {
+        content: sg::DatiFatturaRettificataTypeContent {
+            numero_fr: "00001A".to_string(),
+            data_fr: date(2026, 11, 10),
+            elementi_rettificati: "CARRELLO DELLA SPESA".to_string(),
+        },
+    });
+    assert_has(&validate_simplified(&doc), "00418");
+
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_fattura_rettificata = Some(sg::DatiFatturaRettificataType {
+        content: sg::DatiFatturaRettificataTypeContent {
+            numero_fr: "00001A".to_string(),
+            data_fr: date(2026, 11, 4),
+            elementi_rettificati: "CARRELLO DELLA SPESA".to_string(),
+        },
+    });
+    assert_absent(&validate_simplified(&doc), "00418");
 }
 
 /// 00424: a simplified rate below 1.00 is not a percentage; the base rate
