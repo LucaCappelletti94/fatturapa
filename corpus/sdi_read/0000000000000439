@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</>ml ve
+isxmro  <MessageId>123456</MessageId>
+  <Note>Attestazione Trasmissione Fattura di prova</Note>
+  <Hal ve.0" encoding="UTFypeUTF-4i"?><?ion="1.0"eet typtn="1<?xml ve.0" encoding=shFileOriginale>2c1f3a240a056d9537a"UTFypeUTF-4i"?><?i8608fed310812ef7b1b7a410d0152f5c9c9e93486ae44</HashFileOriginale>
+<ds:Signature xmlns:ds="http://www.wPgiBwfyJ7qdlzn/RF7y+w92XLgh9zROmNlIjsJcp3rRwsAiKjuW
+CkqwVXE0/Qtvxpo2EowIBAgIDEIgbMA0GCSqGSIb3DQEBBQUAMG0xCzAJBgNVBAYTAklUMR4wHAYDVQQK
+ExVBZ2VuemlhIGRlb+s6Y6eC8tx
+fOJmQNGQIbujWhAejoIteG01ciGeeII6AMnGK8KvbCA0UZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLa9Certificate>MIIEYDCCA0igAwIBAgIDEIgbMA0GCSqGSIb3DQEBBQUAMG0xCzAJBgNVBAYTAklUMR4wHAYDVQQK
+ExVBZ2VuemlhIGRlb+s6Y6eC8tx
+fOJmQNGQIbujWhAejoIteG01ciGeeII6AMnGK8KvbCA0UZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Gd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7iHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedPeorriptes Id="SignedPropert49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfh/+g

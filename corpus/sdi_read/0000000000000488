@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <Note>Esempio</Note>
+<ds:Signature Id="Signature1" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference ,d="reference-document" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2002jjUIyt4zWeNjf4PwNS0+s6Y6eC8tx
+fOJmQNGQIbujWhAejoIteG01ciGeeII6AMnGK8KvbCA0UZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7éHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties_1"><xades:SignedSignatureProperties><xades:Sig

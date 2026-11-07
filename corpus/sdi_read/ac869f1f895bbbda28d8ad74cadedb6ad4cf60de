@@ -1,0 +1,6 @@
+aOraRicezione>2013-06-06T12:00:&00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Descrizione>
+  < <DataOraRicezione>2:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿSignedProperties Id="SignedProperties_1"><xades:SignedSignatureProperties><xades:Sig

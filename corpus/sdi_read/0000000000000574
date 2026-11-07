@@ -1,0 +1,9 @@
+<?xml7version="1.0" encoding="UT<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutF-8"?><?xmencoding=aConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messagggeId>
+  <Note>Esempio</Note>
+<ds:Signature Id="Signature1" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"t>/><ds:SignatureMethod AlgorithUgRW50cmF0ZTEbMBkG
+A1UECxMSU2Vydml6aSBUZWxlbWF0aWNpMSgwJgYDVQQDEx9TaXN0ZW1hIEludGVyc2NhbWJpbyBG
+YXR0dXJhIFBBMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMxOQj1dj6xgQBwB/S5naHvVqP
+FL25Y3GnAulrcaeO8ZFFK5fWKPgiBwfyJ7qdlzn/RF7y+w92XLgh9zROmNlIjsJcp3rRwsAiKjuW
+CkqwVXE0/Qtvxpo2Eovk1SV4+rf+7WKSHtabjmWXbM2FVccyN2AOvfR4WAd"Ucopr4hHkoEIiwIDAQAB
+o4IBhDCCAYAwDgYDVR0PAQH/BAQDAgZAMIGZB"SignedProperties_1"><xades:SignedSignatureProperties><xades:Sig

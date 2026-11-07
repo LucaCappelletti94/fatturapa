@@ -1,0 +1,5 @@
+<?+m<?+ml version="1.0"//www.w3.orgn="http://www.fatturapa.gov.it/sdi/messaggi/v1."RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="vutaConsegna xmlns:types=i/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT0"123http://www.fatturapa.gov.i9<?xml version="1.0" encoding="U <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT0"123http://www.fatturapa.gov.i9<?xml version="1.0" encoding="UTF0_-8"?><?xml45672-890_1-

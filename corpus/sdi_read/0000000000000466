@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatari/>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <Note>Esempio</Note>
+<ds:Signature Id="Signature1" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><demlhIGRlbGxlIEVudHJhdGUxGzAZBgNVBAsTElNlcnZpemkgVGVsZW1hdGljaTEhMB8G
+A1UEAxMYQ0EgQWdlbnppYSBkZWxsZSBFbnRyYXRlMB4XDTExMDcwNDEzMTkyNFoXDTE0MDcwNDEz
+MTkyM1owdDELMAkGA1UEBhMCSVQxHjAcBgNVBAoTFUFnZW56aWEgZGVsbGUgRW50cmF0ZTEbMBkG
+A1UECxMSU2Vydml6aSBUZWxlbWF0aWNpMSgwJgYDVQQDEx9TaXN0ZW1hIEludGVyc2NhbWJpbyBG
+YXR0dXJhIFBBMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMxOQj1dj6xgQBwB/S5naHvVqP
+FL25Y3GnAulrcaeO8ZFFK5fWKPgiBwfyJ7qdlzn/RF7y+w92XLgh9zROmNlIjsJcp3rRwsAiKjuW
+CkqwVXE0/Qtvxpo2Eovk1SV4+rf+7WKSHtabjmWXbM2FVccyN2AOvfR4WAdpr4hHkoEIiwIDAQAB
+o4IBhDCCAYAwDgYDVR0PAQH/BAQDAgZAMIGZBgNVHSMEgZEwgY6AFOpEPx8Z4zc+q6qUgqWf6/wW
+un+1oXGkbzBtMQswCQYDVQQGEwJJVDEeMBwGA1UEChMVQWdlbnppYSBkZWxsZSBFbnRyYXRlMRsw
+GQYDVQQLExJTZXJ2aXppIFRlbGVtYXRpY2kxITAfBgNVBAMTGENBIEFnZW56aWEgZGVsbGUgRW50
+cmF0ZYIDEGJwMIGyBgNVHR8EgaowgacwgaSggaGggZ6GgZtsZGFwOi8vY2Fkcy5lbnRyYXRlLmZp
+bmFuemUuaXQvY24lM2RDQSUyMEFnZW56aWElMjBkZWxsZSUyMEVudHJhdGUsb3UlM2RTZXJ2aXpp
+JTIwVGVsZW1hdGljaSxvJTNkQWdlbnppYSUyMGRlbGxlJTIwRW50cmF0ZSxjJTNkaXQ/Y2VydGlm
+aWNhdGVSZXZvY2F0aW9uTGlzdDAdBgNVHQ4EFgQUn+JY07NI6xlrCUXERiHoFFN66dkwDQYJKoZI
+hvDasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyCr9M4=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties_1"><xades:SignedSignatureProperties><xades:Sig

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href=%RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegn >
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <Note>Esempio</Note>
+<ds<?xml version="1.0" encoding="FU8?T-"><?xml-stylesheet type="text/xsl" href=<?+ml vOraConsegna>
+  <Destinatario?xml version="1.0" encodi2ng=xsl"?>
+<types:Signature Id="Signature1" xmlns:ds="http://.1.6-06T12:00:00Z</DataOraRicezioprova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <No2v.it/sdi/messaggi/v1.0" xml

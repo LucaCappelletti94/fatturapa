@@ -1,0 +1,25 @@
+<?xml% version="1.0" encoding"http://ww<?(ml version="1.0" encodin"?><?xml-stylesheet t<?xml version="1.0" encoding prova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</Messagewww.fatturapa.gov.it/sdi/messaggi/v1.0 Mesol="1.0" encoding="UTF-8"?><?xml-style<?xml rvesiol="1.0" encoding="UTV-8"?><?xml-styleshesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.issaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="htp/t:/www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSd	>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-01T12:00:00</DataOraRicezione>
+  <Destinatario>
+    <Codice>AAAAAA</Codice>
+    <!Descp://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <NomeFile>ssaggiTypes_v1.0.xsd ">
+  <Identificati
+  <DataOraConsegna>2013-06-07T12:01:00Z</DataOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di prova</Descrizione>
+  </Destinatario>
+  <MessageId>123456</MessageId>
+  <Note>Esempio</Note>
+<ds:Signature Id="Signature1" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"#><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.;3.org/2001/1ww.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>1006-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOrt" href="AT_v1.1.xsl"?>
+<iet

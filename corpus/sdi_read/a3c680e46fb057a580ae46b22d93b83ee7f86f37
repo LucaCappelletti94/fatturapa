@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href=%RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-D6T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destlzn/RF7y+w92XLgEU6rbCUGu3ne9RMxoADu4yK4XIak=</ds:DigestValue></ds:Reference><du:Reference Id="reference-signedpropeties" Type="http://uri.etsi.org/01903#†††††††††††††††††††††††††††††††††††††††††††††††††††††††††††††††††††††R4WAdpr4hHkoEIiwIDAQAB
+o4IBhDCC†††††††SignedProperties" URI="#SignedProperties_1"><ds:qGSIb3DQEBAQUAA4GNADCBiQKBgQDMxOQj1dj6xgQBwB/S5naHvVqP
+FL25Y3GnAulrcaeO8ZFFK5fWKPgiBwfyJ7qdlznop/erties><xades:Sig

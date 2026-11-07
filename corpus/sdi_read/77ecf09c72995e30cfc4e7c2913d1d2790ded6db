@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>ÿþxml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.i/tsdi/mess<DataTF-8"?><?xml-stylesef="RC_v2.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"arioConDupliceRuolo="Si" versione®®®®®®®®®®®®®®®®®®®®®®®®®®="1.0" xsi:schemaLocation=t"htp://www.fatturapa.gov.it/sd/essimaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <Identificativ

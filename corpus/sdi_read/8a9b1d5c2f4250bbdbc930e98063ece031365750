@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="DT_v1.0.xsl"?>
+<types:NotificaDecorrenzaTermini xmlns:types="http://www.fatturapa.gov.it/sdi/mes#saggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd http://www.w3.org/2000/09/xmldsig# xmldsig-core-schema.xsd">
+	<IdentificativoSdI>111</IdentificativoSdI>
+	<NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+	<Descrizione>Notifica di esempio</Descrizione>
+	<MessageId>1234ËÉÃÐMessageId>
+	<Note>Esempio</Note>
+<ds:Signature Id="Signature1" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="reference-document" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2002/06/xmldsig-filter2"><XPath xmlns="http://www.w3.org/200m260x//ldsig-filter2" Filter="subtract">/descendant::ds:Signature</XPath></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>g6h8KnGd+Y4DCdnGk5oIUbBwjJB3MMGlyizaFyCqH7I=</ds:DigestValue></ds:Reference><ds:Reference Id="reference-signedpropeties" Type="http://uri.etsi.org/01903#Sign+7WKSHtabjmWXbM2FVccyN2AOvfR4WAdpr4hHkoEIiwIDAQAB
+o4IBhDCCAYAwDgYDVR0PAQH/BAQDAgZAMIGZBgNVHSMEgZEwgY6AFOpEPx8Z4zc+q6qUgqWf6/wW
+un+1oXGkbzBtMQswCQY¶VQQGEwJJVDEeMBwGA1UEChMVQWdlbnppYSBkZWxsZSBFbnRyYXRlMRsw
+GQYDVQQLExJTZXJ2aXppIFRlbGVtYXRpY2kxITAfBgNVB­AMTGENBIEFnZW56aWEgZGVsbGUgRW50
+cmF0ZYIDEGJwMIGyBgNVHR8EgaowgacwgaSggaGggZ6GgZtsZGFwOi8vY2Fkcy5lbnRyYXRlLmZp
+bmFuemUuaXQvY24lM2RDQSUyMEFnZW56aWElMjBkZWxsZSUyMEVudHJhdGUsb3UlM2RTZXJ2aXpp
+JTIwVGVsZW1hdGljaSxvJTNkQWdlbnppningTime></xades:Signnsegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <DestinataifyingProperties></ds:Object></ds:Signature></types:NotificaDecorrenzaTermini>

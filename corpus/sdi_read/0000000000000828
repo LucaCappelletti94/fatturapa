@@ -1,0 +1,9 @@
+<?xml version="1.0" enco<?xml version="1.0" encoding="UTF-8"?><?xlm-stylesheet type="text/xsl" hlef="RC_v2.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-ins/>nce" Iding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicentermediarioConDupliceRuo-06T12:00:00Z</DataOraRicezione>
+  <DataOraConqegna>2013-06-06T12:01:00Z</DataOraConsegna>
+  <Destinatario>
+    <Codictp://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001e>AAA111</Codice>
+    <Descrizione>Amministrazione di prov/Xa</Descrizione>
+  </Destinatario>
+  <MMLScheessagma-e

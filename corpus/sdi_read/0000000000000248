@@ -1,0 +1,15 @@
+<?xml versiol="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturampa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-01T12:00:00</DataOraRicezione>
+  <Destinatario>
+    <Codice>AAAAAA</Codice>
+    <DescrizigZc/iaoNbujWhAejoIteG01ciGeeII6AMnGK8KvbCA0UZmWl3Bou49zWajiE
+tHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7iHyc9QtgwxHHCmaWEgZGVsbGUgRW50
+cmF0ZYIDEGJwMIGyBgNVHR8EgaowgacwgaSggaGggZ6GgZtsZGFwOi8vY2Fkcy5lbnRyYXRlLmZp
+bmFuemUuaXQvY24lM2RDQSUyMEFnZW56aWElMjBkZWxsZSUyMEVudHJhdGUsb3UlM2RTZXJ2aXpp
+JTIwVGVsZW1hdGljaSxvJTNkQWdlbnppYSUyMGRlbGxlJTIwRW50cmFxmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:scQUCAQd8s5o8ZJw2mcgZc/iaoNbujWhAejoIteG01ciGeeII6AMnGK8KvbCA0UZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Fd4UWjR+UWS3rLahV7iOfh/+Yy7h1F0RzQuPJk7TCm7iHyc9QtgwxHHCmknRyNXMv6DeTOfK8ciq
+uFWd6DasmblXLUm+uqhsWVRIkj2Bz63bpjuJU+8ptRfxHrVnzyC/>r9M4=</ds:X509Certificate></ds:X509Daies_1"><xades:SignedSign

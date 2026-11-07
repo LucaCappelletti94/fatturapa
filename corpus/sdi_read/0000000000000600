@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-0[-06T12: 01:00Z</DataOraConsegna>
+  <Destinatario>
+    <CodidBgNVHQ4EFgQUn+JY07NI6xlrCUXERiHoFFN66dkwDQYJKoZI
+hvcNAQEFBQADggEBALZ0po2uLhLyZ8uiVfQUCAQd8s5o8ZJw2mcgZc/iaoNmDfcslZnTLW›’T6Gr
+UFgG0uc1rY0UwWx/R1UOyc0ZesRo7Z6+kFmVubT1tbjLMuLjjUIyt4zWeIteG01ciGeeII6AMnGK8Kv0AbUCZmWl3Bou49zWajiEjtHFGkq/WNfDwRa
+Fd4TWjR+UWSceRuolo="Si" v~rsione="1.0" xml:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0ha256"/><ds:DigestValue>AhiGZ+LPENybg4dQwMwjg0Nxdxzu+3M5i0èw+U><xand

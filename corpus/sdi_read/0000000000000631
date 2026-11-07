@@ -1,0 +1,11 @@
+þÿ<?xml version="1.0" enco'ding="UTF-8"?><?xml-stylesheet type="text/xsl" href="RC_v1.0.xsl"?>
+<types:RicevutaConsegna xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntermediarioConDupliceRuolo="Si" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+  <IdentificativoSdI>112</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>-013-06-06T12:00:00Z</DataOraRicezione>
+  <DataOraConsegna>2013-06-06T12:01z00Z</DataOraConsegna>
+  <Destinatario>
+    <Codice>AAA111</Codice>
+    <Descrizione>Amministrazione di pscrizione>
+ wIBAgIDEIgbMA0GCSqGSIb3DQEBBQUAMG0xCzAJBgNVBAYTAklUMR4wHAYDVQQK
+ExVBZ2VuemlhIGRlbGxlIEVudHJhdGUxGzAZBgNVBAsTElNlcnZpemkgVGVsZW1hdGg/2000/09/xmlõdsig#"><ds:SignedInfo><ds:C<?xmlanonicalizationMethod versiol="2.0" enco2002/ Algorithm06="htt/xp:/m

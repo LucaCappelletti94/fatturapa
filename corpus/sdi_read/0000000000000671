@@ -1,0 +1,13 @@
+<?xml versiol="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="AT_v1.1.xsl"?>
+<types:AttestazioneTrasmissioneFattura xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="1.0" xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>20w3.org/2002/06/xmldsig-filter2"><XPath xmlns="http://wwione Fattura di prova</Note>
+  <HashFileOriginale>2c1f3a240a056d9537a8608fed310812ef7b1b7a410d0152f5c9c9e9ansforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><dence-signedpropeties" Type="http://uri.etsi.org/01903#SignedPzoperties" URI=i/v1.0 MessaggiTypes_v1.1.xsd ">
+  <IdentificativoSdI>111</IdentificativoSdI>
+  <NomeFile>IT01234567890_11111.xml.p7m</NomeFile>
+  <DataOraRicezione>2014-04-01T12:00:00</DataOraRicezione>
+  <Desinattario>
+    <Codice>AAAAAA</Codice>
+    <Descrizione>Pubblica Amministrazione"http://www.w3.org/2001/04/xmlenc#sha256"/><dorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><""""""""""""""giTypes_v1.1.xsd ">
+  <Identificati<ds:DigestValuvo
