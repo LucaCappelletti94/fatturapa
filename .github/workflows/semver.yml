@@ -11,9 +11,21 @@ jobs:
   semver:
     runs-on: ubuntu-latest
     steps:
+      - name: Look up the published releases
+        id: published
+        run: |
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --header 'User-Agent: fatturapa-ci (github.com/LucaCappelletti94/fatturapa)' \
+            https://crates.io/api/v1/crates/fatturapa)
+          case "$status" in
+            200) echo "released=true" >> "$GITHUB_OUTPUT" ;;
+            404) echo "released=false" >> "$GITHUB_OUTPUT"
+                 echo "::notice::fatturapa has no release on crates.io, so there is no baseline to compare against" ;;
+            *) echo "::error::crates.io answered $status"; exit 1 ;;
+          esac
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.published.outputs.released == 'true'
         with:
           persist-credentials: false
       - uses: obi1kenobi/cargo-semver-checks-action@6b69fcf40e9b5fb17adeb57e4b6ecd020649a239 # v2.9
-        with:
-          base: ${{ github.event.pull_request.base.sha }}
+        if: steps.published.outputs.released == 'true'
