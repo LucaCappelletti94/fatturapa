@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ROTTO DI PROPOSITO. Aliquota a zero senza codice Natura: e' lo
+     scarto 00400 dello Sdi, fra i piu' frequenti in assoluto.
+     Capita di continuo a chi e' in regime forfettario e dimentica
+     il codice N2.2. Il file non passerebbe nemmeno l'invio. -->
+<p:FatturaElettronica versione="FPR12" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>02233445566</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00009</ProgressivoInvio><FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>02233445566</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Studio Grafico Aurora</Denominazione></Anagrafica>
+        <RegimeFiscale>RF19</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via Garibaldi</Indirizzo><NumeroCivico>5</NumeroCivico>
+        <CAP>50123</CAP><Comune>Firenze</Comune><Provincia>FI</Provincia><Nazione>IT</Nazione></Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>09876543210</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Officine Rossi S.p.A.</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Corso Italia</Indirizzo><NumeroCivico>3</NumeroCivico>
+        <CAP>10121</CAP><Comune>Torino</Comune><Provincia>TO</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali><DatiGeneraliDocumento>
+      <TipoDocumento>TD01</TipoDocumento><Divisa>EUR</Divisa>
+      <Data>2026-09-10</Data><Numero>18</Numero>
+      <ImportoTotaleDocumento>800.00</ImportoTotaleDocumento>
+    </DatiGeneraliDocumento></DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee><NumeroLinea>1</NumeroLinea>
+        <Descrizione>Progettazione identita visiva e manuale marchio</Descrizione>
+        <Quantita>1.00</Quantita><PrezzoUnitario>800.00</PrezzoUnitario>
+        <PrezzoTotale>800.00</PrezzoTotale><AliquotaIVA>0.00</AliquotaIVA></DettaglioLinee>
+      <DatiRiepilogo><AliquotaIVA>0.00</AliquotaIVA>
+        <ImponibileImporto>800.00</ImponibileImporto><Imposta>0.00</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA></DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

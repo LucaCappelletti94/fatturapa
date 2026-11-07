@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>09876543210</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>p0D01</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>UFPROVA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567897</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>01234567897</CodiceFiscale>
+        <Anagrafica><Denominazione>Energia Prova S.p.A.</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>00000000001</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>00000000001</CodiceFiscale>
+        <Anagrafica><Denominazione>Ente di Prova</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-07-10</Data>
+        <Numero>EP 7/26</Numero>
+        <ImportoTotaleDocumento>183.00</ImportoTotaleDocumento>
+        <Causale>Consumo fatturato kWh 542 periodo giugno</Causale>
+      </DatiGeneraliDocumento>
+      <DatiContratto>
+        <IdDocumento>CTR-PROVA</IdDocumento>
+        <CodiceCIG>AB12345678</CodiceCIG>
+      </DatiContratto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Spesa per la materia energia</Descrizione>
+        <DataInizioPeriodo>2026-06-01</DataInizioPeriodo>
+        <DataFinePeriodo>2026-06-30</DataFinePeriodo>
+        <PrezzoTotale>100.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali><TipoDato>POD</TipoDato><RiferimentoTesto>IT001E00000001</RiferimentoTesto></AltriDatiGestionali>
+        <AltriDatiGestionali><TipoDato>OFFERTA</TipoDato><RiferimentoTesto>PLACET FISSA</RiferimentoTesto></AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>Spesa per il trasporto</Descrizione>
+        <DataInizioPeriodo>2026-06-01</DataInizioPeriodo>
+        <DataFinePeriodo>2026-06-30</DataFinePeriodo>
+        <PrezzoTotale>50.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali><TipoDato>POD</TipoDato><RiferimentoTesto>IT001E00000001</RiferimentoTesto></AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>Indennizzo automatico</Descrizione>
+        <PrezzoTotale>-0.01</PrezzoTotale>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N1</Natura>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>150.00</ImponibileImporto>
+        <Imposta>33.00</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

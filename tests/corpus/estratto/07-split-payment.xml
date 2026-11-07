@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fattura verso la pubblica amministrazione, scissione dei
+     pagamenti: l'IVA la versa l'ente, non il fornitore. Quindi le
+     rate NON sommano al totale documento, ed e' corretto cosi'.
+     Un controllo va scritto per non gridare qui.
+     Da notare anche il cliente senza partita IVA: gli enti
+     pubblici hanno solo il codice fiscale. -->
+<p:FatturaElettronica versione="FPA12" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00007</ProgressivoInvio><FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>UF1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567890</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Utensileria Bianchi S.r.l.</Denominazione></Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via Vittorio Veneto</Indirizzo><NumeroCivico>14</NumeroCivico>
+        <CAP>20121</CAP><Comune>Milano</Comune><Provincia>MI</Provincia><Nazione>IT</Nazione></Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>80012345678</CodiceFiscale>
+        <Anagrafica><Denominazione>Comune di Bergamo</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Piazza Matteotti</Indirizzo><NumeroCivico>27</NumeroCivico>
+        <CAP>24122</CAP><Comune>Bergamo</Comune><Provincia>BG</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento><Divisa>EUR</Divisa>
+        <Data>2026-07-03</Data><Numero>2026/355</Numero>
+        <ImportoTotaleDocumento>1220.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto><IdDocumento>CIG-Z1A2B3C4D5</IdDocumento><Data>2026-05-20</Data></DatiOrdineAcquisto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee><NumeroLinea>1</NumeroLinea>
+        <Descrizione>Attrezzatura per officina comunale</Descrizione>
+        <Quantita>1.00</Quantita><PrezzoUnitario>1000.00</PrezzoUnitario>
+        <PrezzoTotale>1000.00</PrezzoTotale><AliquotaIVA>22.00</AliquotaIVA></DettaglioLinee>
+      <DatiRiepilogo><AliquotaIVA>22.00</AliquotaIVA><ImponibileImporto>1000.00</ImponibileImporto>
+        <Imposta>220.00</Imposta><EsigibilitaIVA>S</EsigibilitaIVA></DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento><ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2026-08-31</DataScadenzaPagamento>
+        <ImportoPagamento>1000.00</ImportoPagamento></DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

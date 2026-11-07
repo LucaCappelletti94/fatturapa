@@ -1,4 +1,4 @@
-//! The real-world parser corpus, gathered from the test suites of fifteen
+//! The real-world parser corpus, gathered from the test suites of twenty-nine
 //! independent `FatturaPA` implementations, where their licences allow
 //! redistribution. The licences, the attribution and the outcome of every
 //! file are recorded in `tests/corpus/README.md`.
@@ -15,6 +15,13 @@
 //! report violations are listed in [`EXPECTED_VALIDATE_FINDINGS`]; every
 //! reported violation is a true SDI finding about the file, checked against
 //! the Elenco Controlli v2.0 text.
+//!
+//! The `tappoz` `sample_data` files are named after the SDI codes that their
+//! upstream suite expects, as `_fail_BR_<code>`, `_pass` and
+//! `_warning`. The `tappoz` oracle test reads those codes from the file
+//! names and checks that `validate` reports exactly the codes of the checks
+//! the crate implements, while the codes the crate marks out of reach in
+//! the `validate` doc table are listed in the test with their reason.
 //!
 //! The invoices that carry a `Signature` element round-trip equal, but the
 //! written bytes are not XSD-validated, because the upstream `xsd-parser`
@@ -58,11 +65,24 @@ const EXPECTED_UNWRAP_FAILURES: &[(&str, &str)] = &[
         "fatturaelettronica-php/invalid.xml.p7m",
         "not a CMS structure",
     ),
+    (
+        "fatture-elettroniche-explorer/firmate/IT02345678900_00012.xml.p7m",
+        "not a CMS structure",
+    ),
+    (
+        "odoo-fatturapa-viewer/test-bad.xml.p7m",
+        "not a CMS structure",
+    ),
+    ("p7m-fattura-decoder/truncated.p7m", "not a CMS structure"),
 ];
 
 /// The corpus files whose `XSD` validation is expected to fail, with a
 /// stable part of the reason `xmllint` reports.
 const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
+    (
+        "estratto/05-non-imponibile.xml",
+        "Element 'EsigibilitaIVA': This element is not expected",
+    ),
     (
         "fatturaelettronica-net/IT01234567890_FPA02.xml",
         "The value '10.0' is not accepted by the pattern",
@@ -120,6 +140,34 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
         "is not a valid value of the atomic type 'xs:date'",
     ),
     (
+        "fatture-elettroniche-explorer/carburante/IT00000000001_00004.xml",
+        "onmouseover",
+    ),
+    (
+        "fatture-elettroniche-explorer/casi-limite/IT02345678900_MT_00001.xml",
+        "No matching global declaration available for the validation root",
+    ),
+    (
+        "fatture-elettroniche-explorer/casi-limite/documento-non-fattura.xml",
+        "No matching global declaration available for the validation root",
+    ),
+    (
+        "fatture-elettroniche-explorer/casi-limite/namespace-ns2.xml",
+        "Expected is ( FatturaElettronicaHeader )",
+    ),
+    (
+        "fatture-elettroniche-explorer/casi-limite/namespace-senza-prefisso.xml",
+        "Expected is ( FatturaElettronicaHeader )",
+    ),
+    (
+        "fatture-elettroniche-explorer/casi-limite/senza-data.xml",
+        "Element 'Numero': This element is not expected. Expected is ( Data )",
+    ),
+    (
+        "fatture-elettroniche-explorer/casi-limite/xml-non-valido.xml",
+        "Namespace prefix p on FatturaElettronica is not defined",
+    ),
+    (
         "gobl-sdi/fatturapa.gobl/acube_test.xml",
         "Element 'CodiceDestinatario': This element is not expected",
     ),
@@ -130,6 +178,34 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
     (
         "gobl-sdi/fatturapa.gobl/invoice-windows1252.xml",
         "Element 'CodiceArticolo': Missing child element(s)",
+    ),
+    (
+        "invoice-extract/IT01234567897_00001.xml",
+        "Element 'RegimeFiscale': This element is not expected",
+    ),
+    (
+        "invoice-extract/IT01234567897_00001_RC_001.xml",
+        "No matching global declaration available for the validation root",
+    ),
+    (
+        "invoice-extract/IT02345678904_00042.xml",
+        "Element 'RegimeFiscale': This element is not expected",
+    ),
+    (
+        "invoice-extract/IT03456789019_0A1B2.xml",
+        "Element 'RegimeFiscale': This element is not expected",
+    ),
+    (
+        "invoice-extract/IT03456789019_0A1B3.xml",
+        "Expected is ( FatturaElettronicaHeader )",
+    ),
+    (
+        "invoice-extract/IT04567890126_00017.xml.p7m",
+        "Element 'RegimeFiscale': This element is not expected",
+    ),
+    (
+        "invoice-extract/IT05678901231_00003.xml",
+        "Element 'RegimeFiscale': This element is not expected",
     ),
     (
         "json2fatturapaxml/IT03469550986_PR002.xml",
@@ -156,12 +232,25 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
         "No matching global declaration available for the validation root",
     ),
     (
+        "odoo-fatturapa-viewer/test-bad.xml",
+        "Opening and ending tag mismatch",
+    ),
+    (
         "openfatture/NS_2025-003.xml",
         "No matching global declaration available for the validation root",
     ),
     (
         "openfatture/RC_2025-002.xml",
         "No matching global declaration available for the validation root",
+    ),
+    ("p7m-apri/documento-esempio.pdf.p7m", "Start tag expected"),
+    (
+        "p7m-apri/documento-esempio.pdf.p7m.p7m",
+        "Start tag expected",
+    ),
+    (
+        "p7m-apri/fattura-firmata-esempio.xml.p7m",
+        "Element 'ContattiTrasmittente': This element is not expected",
     ),
     (
         "phax-fatturapa/1.1/IT01234567890_11001.xml",
@@ -321,6 +410,88 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
         "Element 'IdTrasmittente': Missing child element(s)",
     ),
     (
+        "tappoz/fe-xml-sample/templates/tmpl_autofattura_td17.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_forfettario_estera.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_forfettario_nazionale.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_inviata_estera.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_inviata_estera_ritenuta.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_inviata_italiana.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_inviata_italiana_ritenuta.xml",
+        "The value '{{CEDENTE_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/fe-xml-sample/templates/tmpl_ricevuta_td01.xml",
+        "The value '{{SUPPLIER_ID_PAESE}}' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/sample_data/IT01234567890_GCE001_fail_BR_GCE001.xml",
+        "The value '[EMAIL]' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_DATAFATTURACOLLEGATA_ANTECEDENTE_fail_BR_00418.xml",
+        "Element 'Data': This element is not expected",
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_NATURA_N6_SCISSIONE_fail_BR_00420.xml",
+        "Element 'EsigibilitaIVA': This element is not expected",
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_SDI_PEC_fail_BR_00330_CHECKME_.xml",
+        "The value '[EMAIL]' is not accepted by the pattern",
+    ),
+    (
+        "tappoz/sample_data/recursive_test/invoice_cost_1.xml",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    (
+        "tappoz/sample_data/recursive_test/subdir/invoice_cost_2.xml",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    ("utenzepa/dt.xml", "Missing child element(s)"),
+    (
+        "utenzepa/fattura-aca.xml",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    (
+        "utenzepa/fattura-firmata-b64.xml.p7m",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    (
+        "utenzepa/fattura-firmata.xml.p7m",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    (
+        "utenzepa/fattura-pod.xml",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    (
+        "utenzepa/fattura.xml",
+        "Element 'DatiAnagrafici': Missing child element(s)",
+    ),
+    (
+        "utenzepa/mt.xml",
+        "No matching global declaration available for the validation root",
+    ),
+    ("utenzepa/se.xml", "Missing child element(s)"),
+    (
         "zugferd-corpus/eigor/valid/con-ritenuta-acconto-e-cassa-previdenziale.xml",
         "Premature end of data in tag FatturaElettronica",
     ),
@@ -333,10 +504,30 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
 /// The readable invoices on which `validate` or `validate_simplified` is
 /// expected to report violations, as (code, path) pairs, every one a true
 /// SDI finding checked against the Elenco Controlli v2.0 text, and against
-/// the Allegato A 1.9.1 operative specification for the 00471 and 00472
-/// criteria, which its version 2.0 list predates. Every readable invoice
+/// the Allegato A 1.9.1 operative specification for the 00313, 00471 and
+/// 00472 criteria, which its version 2.0 list predates. Every readable invoice
 /// that is not listed here is clean.
 const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
+    (
+        "estratto/08-imposta-errata.xml",
+        &[(
+            "00421",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
+        )],
+    ),
+    (
+        "estratto/09-zero-senza-natura.xml",
+        &[
+            (
+                "00400",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
+            ),
+            (
+                "00429",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
+            ),
+        ],
+    ),
     (
         "fatturaelettronica-php/IT01234567899_000sq.xml",
         &[
@@ -402,6 +593,13 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
     ),
     (
         "json2fatturapaxml/IT03469550986_PR001.xml",
+        &[(
+            "00471",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
+        )],
+    ),
+    (
+        "odoo-fatturapa-viewer/test.xml",
         &[(
             "00471",
             "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
@@ -489,6 +687,318 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
             (
                 "00422",
                 "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT01234567890_GCE004_fail_BR_GCE004_GCE007a.xml",
+        &[
+            (
+                "00401",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
+            ),
+            (
+                "00430",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT01234567890_GCE009_fail_BR_00473_GCE009.xml",
+        &[(
+            "00473",
+            "FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_ALIQUOTA_FRACTION_fail_BR_00424.xml",
+        &[
+            (
+                "00424",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/AliquotaIVA",
+            ),
+            (
+                "00424",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/AliquotaIVA",
+            ),
+            (
+                "00424",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/AliquotaIVA",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_ALIQUOTA_MISSING_RIEPILOGO_fail_BR_00443.xml",
+        &[
+            (
+                "00419",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+            ),
+            (
+                "00443",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/AliquotaIVA",
+            ),
+            (
+                "00422",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_BOTH_FOREIGN_fail_BR_00476.xml",
+        &[(
+            "00476",
+            "FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CASSA_ALIQ0_NO_NATURA_fail_BR_00413.xml",
+        &[(
+            "00413",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[1]/Natura",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414.xml",
+        &[
+            (
+                "00414",
+                "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[1]/Natura",
+            ),
+            (
+                "00444",
+                "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[1]/Natura",
+            ),
+            (
+                "00422",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414_00444_GCE004.xml",
+        &[
+            (
+                "00414",
+                "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[1]/Natura",
+            ),
+            (
+                "00444",
+                "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[1]/Natura",
+            ),
+            (
+                "00430",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CASSA_RITENUTA_NO_DATIRIT_fail_BR_00415.xml",
+        &[(
+            "00415",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiRitenuta",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CC_NO_IDS_fail_BR_00417.xml",
+        &[(
+            "00417",
+            "FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CEDENTE_EQ_CESSIONARIO_fail_BR_00471.xml",
+        &[(
+            "00471",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CEDENTE_NEQ_CESSIONARIO_TD21_fail_BR_00472.xml",
+        &[(
+            "00472",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_CODICE_DEST_6CHARS_fail_BR_00427.xml",
+        &[(
+            "00427",
+            "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_DUPL_LOTTO_fail_BR_00409.xml",
+        &[(
+            "00409",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/Numero",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_IMPONIBILE_WRONG_fail_BR_00422.xml",
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_IMPOSTA_WRONG_fail_BR_00421.xml",
+        &[(
+            "00421",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_IMPOSTA_WRONG_fail_BR_00421_CHECKME_.xml",
+        &[(
+            "00421",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_INVCONT_extra_UE_fail_BR_00313.xml",
+        &[(
+            "00313",
+            "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_IT_CEDENTE_TD17_fail_BR_00473_GCE009.xml",
+        &[(
+            "00473",
+            "FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_NATURA_GENERIC_N2_fail_BR_00445.xml",
+        &[
+            (
+                "00445",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
+            ),
+            (
+                "00445",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_NATURA_MISMATCH_RIEPILOGO_fail_BR_00444.xml",
+        &[(
+            "00444",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_NUMERO_NO_DIGITS_fail_BR_00425.xml",
+        &[(
+            "00425",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/Numero",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_PREZZO_TOTALE_WRONG_fail_BR_00423.xml",
+        &[(
+            "00423",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/PrezzoTotale",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_RIEPILOGO_NONZERO_WITH_NATURA_fail_BR_00401_00430.xml",
+        &[(
+            "00430",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_RIEPILOGO_ZERO_NO_NATURA_fail_BR_00400_00429.xml",
+        &[
+            (
+                "00400",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
+            ),
+            (
+                "00400",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/Natura",
+            ),
+            (
+                "00429",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
+            ),
+        ],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_RITENUTA_MISSING_fail_BR_00411.xml",
+        &[(
+            "00411",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiRitenuta",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_SCONTO_DOC_NO_VALUE_fail_BR_00437.xml",
+        &[(
+            "00437",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/ScontoMaggiorazione[1]",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_SCONTO_LINE_NO_VALUE_fail_BR_00438.xml",
+        &[(
+            "00438",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/ScontoMaggiorazione[1]",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_TD17_NO_IDIVA_CC_fail_BR_00475.xml",
+        &[(
+            "00475",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
+        )],
+    ),
+    (
+        "tappoz/sample_data/IT12345678901_ddddd_TD21_ZERO_ALIQUOTA_fail_BR_00474.xml",
+        &[
+            (
+                "00400",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
+            ),
+            (
+                "00474",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/AliquotaIVA",
+            ),
+        ],
+    ),
+    (
+        "validatefin/IT06363391001_00003.xml",
+        &[
+            (
+                "00445",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[3]/Natura",
+            ),
+            (
+                "00421",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
+            ),
+            (
+                "00445",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[2]/Natura",
+            ),
+            (
+                "00422",
+                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+            ),
+        ],
+    ),
+    (
+        "validatefin/IT06363391001_00004.xml",
+        &[
+            (
+                "00427",
+                "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario",
+            ),
+            (
+                "00425",
+                "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/Numero",
             ),
         ],
     ),
@@ -831,4 +1341,153 @@ fn corpus_files(dir: &Path) -> Vec<std::path::PathBuf> {
     }
     out.sort();
     out
+}
+
+/// The `tappoz` `sample_data` directory, relative to the corpus dir, whose
+/// top-level files the code oracle walks.
+const TAPPOZ_DIR: &str = "tappoz/sample_data";
+
+/// The `tappoz` sample files that fail the XSD validation, which the corpus
+/// test pins in [`EXPECTED_XSD_FAILURES`] and the code oracle skips.
+const TAPPOZ_XSD_INVALID: &[&str] = &[
+    "IT01234567890_GCE001_fail_BR_GCE001.xml",
+    "IT12345678901_ddddd_DATAFATTURACOLLEGATA_ANTECEDENTE_fail_BR_00418.xml",
+    "IT12345678901_ddddd_NATURA_N6_SCISSIONE_fail_BR_00420.xml",
+    "IT12345678901_ddddd_SDI_PEC_fail_BR_00330_CHECKME_.xml",
+];
+
+/// The `tappoz` sample codes the crate does not check, with the reason, so
+/// the code oracle drops them from the expectation of the names that carry
+/// them. The reasons follow the Allegato A 1.9.1 text of each code.
+const TAPPOZ_OUT_OF_REACH: &[(&str, &str)] = &[
+    ("00302", "needs the tax registry"),
+    ("00304", "needs the tax registry"),
+    ("00320", "needs the tax registry"),
+    ("00321", "needs the tax registry"),
+    ("00322", "needs the tax registry"),
+    ("00323", "needs the tax registry"),
+    ("00324", "needs the tax registry"),
+    ("00325", "needs the IVA group registry"),
+    ("00326", "needs the IVA group registry"),
+    (
+        "00330",
+        "decidable from the document but not implemented yet",
+    ),
+    ("00403", "needs the SDI reception date"),
+    ("00404", "needs the SDI state"),
+    ("00428", "guaranteed by construction"),
+    (
+        "00448",
+        "a check on the dati fattura of Appendice 2, not on invoices",
+    ),
+    ("00460", "defined for the simplified invoice"),
+    ("00477", "needs the SDI declaration database"),
+];
+
+/// The `tappoz` sample stems on which `validate` reports codes beyond the
+/// ones the name carries, with those extra codes.
+const TAPPOZ_EXTRA_CODES: &[(&str, &[&str])] = &[
+    (
+        "IT01234567890_GCE004_fail_BR_GCE004_GCE007a",
+        &["00401", "00430"],
+    ),
+    (
+        "IT12345678901_ddddd_ALIQUOTA_MISSING_RIEPILOGO_fail_BR_00443",
+        &["00419", "00422"],
+    ),
+    (
+        "IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414",
+        &["00422", "00444"],
+    ),
+    (
+        "IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414_00444_GCE004",
+        &["00430"],
+    ),
+    (
+        "IT12345678901_ddddd_TD21_ZERO_ALIQUOTA_fail_BR_00474",
+        &["00400"],
+    ),
+];
+
+/// The `tappoz` sample stems whose name carries a code the check does not
+/// flag on the file, with the codes the oracle drops.
+const TAPPOZ_MISLABELED: &[(&str, &[&str])] = &[(
+    "IT12345678901_ddddd_RIEPILOGO_NONZERO_WITH_NATURA_fail_BR_00401_00430",
+    &["00401"],
+)];
+
+/// The `tappoz` `sample_data` files carry the SDI codes their upstream
+/// suite expects in the file name, as `_fail_BR_<code>`, `_pass` and
+/// `_warning`. The test reads those codes and checks that `validate`
+/// reports exactly the codes of the checks the crate implements, and no
+/// other.
+#[test]
+fn tappoz_sample_codes_match_names() {
+    let dir = Path::new(CORPUS_DIR).join(TAPPOZ_DIR);
+    let mut mismatches: Vec<String> = Vec::new();
+    let mut checked = 0;
+    for entry in fs::read_dir(&dir).expect("the tappoz sample dir is checked in") {
+        let path = entry.expect("the read_dir entry is readable").path();
+        if path.is_dir() {
+            continue;
+        }
+        let file_name = path.file_name().expect("the file has a name");
+        let file_name = file_name.to_str().expect("the file name is utf8");
+        if TAPPOZ_XSD_INVALID.contains(&file_name) {
+            continue;
+        }
+        let Some(stem) = file_name.strip_suffix(".xml") else {
+            mismatches.push(format!("{file_name} is not a sample xml file"));
+            continue;
+        };
+        let expected = tappoz_expected_codes(stem);
+        let bytes = fs::read(&path).expect("the sample file is checked in");
+        let parsed = FatturaElettronica::from_xml_slice(&bytes).expect("the tappoz sample reads");
+        let mut found: Vec<String> = validate(&parsed)
+            .into_iter()
+            .map(|violation| violation.code)
+            .collect();
+        found.sort();
+        found.dedup();
+        if expected != found {
+            mismatches.push(format!(
+                "{file_name} expects {expected:?} and reports {found:?}"
+            ));
+        }
+        checked += 1;
+    }
+    assert!(checked > 0, "the tappoz samples are checked in");
+    assert!(mismatches.is_empty(), "{}", mismatches.join("\n"));
+}
+
+/// The SDI codes the `tappoz` sample name `stem` expects, reduced to the
+/// checks the crate implements, sorted and without duplicates. The
+/// `_pass`, `_warning` and unlabeled samples expect no findings.
+fn tappoz_expected_codes(stem: &str) -> Vec<String> {
+    let Some(codes) = stem.split("_fail_BR_").nth(1) else {
+        return Vec::new();
+    };
+    let mut expected: Vec<String> = codes
+        .split('_')
+        .filter(|code| !code.is_empty() && *code != "CHECKME")
+        .filter(|code| !code.starts_with("GCE"))
+        .filter(|code| !TAPPOZ_OUT_OF_REACH.iter().any(|(out, _)| out == code))
+        .filter(|code| {
+            !TAPPOZ_MISLABELED
+                .iter()
+                .any(|(name, dropped)| *name == stem && dropped.contains(code))
+        })
+        .map(ToString::to_string)
+        .collect();
+    let Some(extra) = TAPPOZ_EXTRA_CODES
+        .iter()
+        .find(|(name, _)| *name == stem)
+        .map(|(_, codes)| codes)
+    else {
+        return expected;
+    };
+    expected.extend(extra.iter().map(ToString::to_string));
+    expected.sort();
+    expected.dedup();
+    expected
 }

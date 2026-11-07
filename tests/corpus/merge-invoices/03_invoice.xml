@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema" versione="FPR12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>00000000001</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>37069</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAA2BB</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Telefono>00 00000000</Telefono>
+        <Email>test@mail.com</Email>
+      </ContattiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000001</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>AAAAAAAAAAAA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Test</Indirizzo>
+        <CAP>20099</CAP>
+        <Comune>Sesto San Giovanni</Comune>
+        <Provincia>MI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>MI</Ufficio>
+        <NumeroREA>00000000001</NumeroREA>
+        <CapitaleSociale>10000.00</CapitaleSociale>
+        <SocioUnico>SU</SocioUnico>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>XXXXXXXX WWW</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA YYYYYYYYYY 991</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2020-12-02</Data>
+        <Numero>31727</Numero>
+        <ImportoTotaleDocumento>346.97</ImportoTotaleDocumento>
+        <Causale>CONTRIBUTO CONAI ASSOLTO</Causale>
+        <Causale>Punto di consegna: XXXXXXXX WWW,VIA YYYYYYYYYY 1,00100,ROMA,RM,IT</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <IdDocumento>000000-111111111111</IdDocumento>
+      </DatiOrdineAcquisto>
+      <DatiDDT>
+        <NumeroDDT>9545275</NumeroDDT>
+        <DataDDT>2020-12-01</DataDDT>
+      </DatiDDT>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>SA: Provider article number</CodiceTipo>
+          <CodiceValore>02225203</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>OTV Strip 25 IT RMB (LE)</Descrizione>
+        <Quantita>12.00000000</Quantita>
+        <PrezzoUnitario>7.50000000</PrezzoUnitario>
+        <PrezzoTotale>90.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>Lotto</TipoDato>
+          <RiferimentoTesto>0000000</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>SA: Provider article number</CodiceTipo>
+          <CodiceValore>02225305</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>OTV Strip 1x50 IT RMB (LE)</Descrizione>
+        <Quantita>12.00000000</Quantita>
+        <PrezzoUnitario>15.00000000</PrezzoUnitario>
+        <PrezzoTotale>180.00000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>Lotto</TipoDato>
+          <RiferimentoTesto>1111111</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>SA: Provider article number</CodiceTipo>
+          <CodiceValore>02397801</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>OTDP Lancing Device CH/IT</Descrizione>
+        <Quantita>6.00000000</Quantita>
+        <PrezzoUnitario>17.64000000</PrezzoUnitario>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Importo>17.64000000</Importo>
+        </ScontoMaggiorazione>
+        <PrezzoTotale>0.00000000</PrezzoTotale>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N1</Natura>
+        <AltriDatiGestionali>
+          <TipoDato>Lotto</TipoDato>
+          <RiferimentoTesto>101008R01</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>Sconto</TipoDato>
+          <RiferimentoTesto>Sconto Merce</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>4</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>SA: Provider article number</CodiceTipo>
+          <CodiceValore>02402601</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>OTDP Lancet 25 IT RMB</Descrizione>
+        <Quantita>24.00000000</Quantita>
+        <PrezzoUnitario>0.60000000</PrezzoUnitario>
+        <PrezzoTotale>14.40000000</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>Lotto</TipoDato>
+          <RiferimentoTesto>W20I081</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N1</Natura>
+        <ImponibileImporto>0.00</ImponibileImporto>
+        <Imposta>0.00</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+        <RiferimentoNormativo>Fuori campo IVA Art.15</RiferimentoNormativo>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>284.40</ImponibileImporto>
+        <Imposta>62.57</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP12</ModalitaPagamento>
+        <DataScadenzaPagamento>2021-03-02</DataScadenzaPagamento>
+        <ImportoPagamento>346.97</ImportoPagamento>
+        <IstitutoFinanziario>Bank</IstitutoFinanziario>
+        <IBAN>IT17W0000000000000000000000</IBAN>
+        <BIC>BOFAIT3Y</BIC>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+  <ds:Signature xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" Id="Signature">
+    <ds:SignedInfo Id="Signature-SignedInfo">
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+      <ds:Reference Id="SignedPropertiesID" Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature-SignedProperties">
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>N7850ohV5l2egwFjIs3NtNFNkJuPDIua/XEnEPwK2WI=</ds:DigestValue>
+      </ds:Reference>
+      <ds:Reference URI="">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>0hb6qyTeFn7ELnsF2bswH0SFhOk4nDgDhSOVwiG9kH0=</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue Id="SignatureValue">rZGjKOkgQVOXryvOjElus4zy/Svlw3HTECxClZyi+hTbFHKKUPNS0p6YlngndyGJ+wJvz4BzqJd6aQKahZkIPES4p8YP0gdL4RlA8KSE0UnsO85+RbxFKnxv4za8xNZZt1waHlXA+bznoq/kfZ+K4vewowAZMb+lx75tHQ3D7g4/1q0wJxDgw5pp6rTnDNt7XfwC2GJO7xohYnvJead+L8NVasAayG1yB1157CDJrKl8GqQZufQKAcGmaxEanPxG7Wj4h8Hfnk/HKaiQTKla+pD60jI9hq5m7Z2Y4hj2xuCCOwUTi378GtNvMLGejsRhGdwtnpkFk20q1hAmLcnTAQ==</ds:SignatureValue>
+    <ds:KeyInfo Id="Certificate1">
+      <ds:X509Data>
+        <ds:X509Certificate>MIIDRTCCAi2gAwIBAgIEQjgrajANBgkqhkiG9w0BAQsFADBTMQswCQYDVQQGEwJpdDELMAkGA1UECBMCcm0xDTALBgNVBAcTBHJvbWUxDDAKBgNVBAoTA2RldzEMMAoGA1UECxMDZGV3MQwwCgYDVQQDEwNkZXcwHhcNMjAxMTEzMTQzMDI2WhcNNDAxMTE0MTQzMDI2WjBTMQswCQYDVQQGEwJpdDELMAkGA1UECBMCcm0xDTALBgNVBAcTBHJvbWUxDDAKBgNVBAoTA2RldzEMMAoGA1UECxMDZGV3MQwwCgYDVQQDEwNkZXcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCwT1J/myUxkngvu0GR6SMnBhb/CUeuCgqzSabZhW3CFBwdYwHOp9omfrJiVm81rHvD41TU5ys+EWZn3EeohdvogtlQk6kNLE7KBnXaGHiWmnu4JgeGimuWwg35BGwh0TrVBCnP6RnnUXjJzu6i5Lo2FuFW6z7RbZyBDC8K2+l0+wJRZW8LJvmOE8vLxxUN+aLWI9TYmk55jpmcAU1Gzi+QGVkdFIkfHk5AiViJRx+Fk28NE9EGHE+MYABzwpUwdeXCYe79l2IeDUdPSPLZpwYdn3qhCWvOvCZ+JzancFvd8h6UlW//LhmzdoUMurSbjqMSOdYh9M32cjWnuLPvpftBAgMBAAGjITAfMB0GA1UdDgQWBBRRgluPbGEZ0C6ptwS/J6quOrxjrzANBgkqhkiG9w0BAQsFAAOCAQEAO5dEtpYFQLFvmaTmPdYR8zVznEOVlZUcmax0ttZZfKGnSqm8l316nuIW2gnkRFwak55DOfEh7Z7WTxf1a3yFeOC9fB9zfb1GCvL9umoUWPylU1Wac+cNGN5NHEnrZLsjd++BEcCetZZQHVGT9gfOZKXKt5d0NsdlB7pPNLu5BVxiNdspR08qrZaQl92m+al4bbvwXo/3vg6xFtmqn1jE1Dl9hj+/SSrMUj0kQ6lcW3Ju8U6kLc2Dnfygw1m+pAD8+Y2gOmMg/VNtuRRn0SVv+jKubfdlG5ydx/oib3D2IMgk2BUf2lDMU4fvU3LdpMPkD9kDt/dY13PDMuTIeDMOdA==</ds:X509Certificate>
+      </ds:X509Data>
+      <ds:KeyValue>
+        <ds:RSAKeyValue>
+          <ds:Modulus>xDZwMdqL6NHKoyKyq9WHJox9IAg0EwczYdRjRxhBKnugyIWK4+xvvf9VixRTBYKTk5f+JmOGqdBA8Bd7T1g9kmZJAUDC96z2pFOj0c4li3TYlDp871Ln7CBMRsJ6rDkFtNKV7ED4PmQOjjJoJ+WGVNDCx2fFkl22+B3JvEEy/8G0ealDjbbynzyjjl16QTYc3FmzrBG14pTknO40qRV5DkCJ5fVbpVBVXN7SuI1WxnbNF3UkAjD5vWwBjGHTiFco5yjtrhPizXi7MyTsdK8GfgJzw7WMVMWWxtMvtPOZ90Be0JBgAPPVlgkNTlKu609Mz++1IGS41TopqKGWXaaePQ==</ds:Modulus>
+          <ds:Exponent>AQAB</ds:Exponent>
+        </ds:RSAKeyValue>
+      </ds:KeyValue>
+    </ds:KeyInfo>
+    <ds:Object Id="Signature-Object">
+      <etsi:QualifyingProperties Target="#Signature">
+        <etsi:SignedProperties Id="Signature-SignedProperties">
+          <etsi:SignedSignatureProperties>
+            <etsi:SigningTime>2020-12-03T05:08:30+01:00</etsi:SigningTime>
+            <etsi:SigningCertificate>
+              <etsi:Cert>
+                <etsi:CertDigest>
+                  <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                  <ds:DigestValue>KC00370HIHUay/gsqjB5ReKqKiDt9bugCMYzjjJIUic=</ds:DigestValue>
+                </etsi:CertDigest>
+                <etsi:IssuerSerial>
+                  <ds:X509IssuerName>C=ES, L=Calle Charles Robert Darwin 8 - 46980 - Paterna, O=EDICOM, OID.2.5.4.5=B96490867, CN=CAEDICOM01</ds:X509IssuerName>
+                  <ds:X509SerialNumber>8103326843221690764</ds:X509SerialNumber>
+                </etsi:IssuerSerial>
+              </etsi:Cert>
+            </etsi:SigningCertificate>
+          </etsi:SignedSignatureProperties>
+        </etsi:SignedProperties>
+      </etsi:QualifyingProperties>
+    </ds:Object>
+  </ds:Signature>
+</p:FatturaElettronica>

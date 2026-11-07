@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:FatturaElettronica xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>YYYYYY01A01H501X</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>87</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000001</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00000000001</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AAAAAAAAAAAAA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA TEST</Indirizzo>
+        <NumeroCivico>1</NumeroCivico>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>XXXXXX01A01H501X</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>XXXXXXXX WWWWW</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA YYYYYYYYYY</Indirizzo>
+        <NumeroCivico>1</NumeroCivico>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2020-12-02</Data>
+        <Numero>35</Numero>
+        <ImportoTotaleDocumento>19.52</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>VS/DARE PER LAVAGGIO E STIRATURA</Descrizione>
+        <Quantita>4.00</Quantita>
+        <PrezzoUnitario>4.00</PrezzoUnitario>
+        <PrezzoTotale>16.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>16.00</ImponibileImporto>
+        <Imposta>3.52</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature1">
+    <ds:SignedInfo>
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+      <ds:Reference Id="reference-document" URI="">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2002/06/xmldsig-filter2">
+            <XPath xmlns="http://www.w3.org/2002/06/xmldsig-filter2" Filter="subtract">/descendant::ds:Signature</XPath>
+          </ds:Transform>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>Irvzec0xOV2+6BQLZcIRon00cUImg200xzbXKCQL07I=</ds:DigestValue>
+      </ds:Reference>
+      <ds:Reference Id="reference-signedpropeties" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties_1">
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>VDkIQBW1iks7dkfnORtIsawwRCHQ8mLasvB+a+7AQs0=</ds:DigestValue>
+      </ds:Reference>
+      <ds:Reference Id="reference-keyinfo" URI="#KeyInfoId">
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>jNkvX2n0lu5m37Xp4CTETuMPb1ImOvlsJsaMJAOGK0A=</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue Id="SignatureValue1">
+      cNrFcOGUUObTN/J/c3v2bqLV0YWiIqXg3LQj1Jc3fWRqZXMquOQuGLz10cbsidC894llNB2GVdWk
+      Hgqgwu+UVJOMyNTlH9q8bQZexlKx/fnlXsJgay5UoW4sGsVSbaViL1QRppU4+5Z/b5q5qhj7ZO3w
+      FBCFMNp540lBCUSLepT0PaRIXCvaV4KjyUnhiW5wAAppbAuOmRRFoOovcyXifjHrEwMMI491NxR2
+      2jWCn9KlEwWUnxjL6HnPVdndN0VNF7GF58Hn+HFgRcKJ5C0EuxErExBszzRrhnn8ped8TtGdgRHT
+      TEIcKuqdUOr1eqFtlafHAMPIdDktSrL9kGcf1g==
+    </ds:SignatureValue>
+    <ds:KeyInfo Id="KeyInfoId">
+      <ds:X509Data>
+        <ds:X509Certificate>MIIDRTCCAi2gAwIBAgIEQjgrajANBgkqhkiG9w0BAQsFADBTMQswCQYDVQQGEwJpdDELMAkGA1UECBMCcm0xDTALBgNVBAcTBHJvbWUxDDAKBgNVBAoTA2RldzEMMAoGA1UECxMDZGV3MQwwCgYDVQQDEwNkZXcwHhcNMjAxMTEzMTQzMDI2WhcNNDAxMTE0MTQzMDI2WjBTMQswCQYDVQQGEwJpdDELMAkGA1UECBMCcm0xDTALBgNVBAcTBHJvbWUxDDAKBgNVBAoTA2RldzEMMAoGA1UECxMDZGV3MQwwCgYDVQQDEwNkZXcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCwT1J/myUxkngvu0GR6SMnBhb/CUeuCgqzSabZhW3CFBwdYwHOp9omfrJiVm81rHvD41TU5ys+EWZn3EeohdvogtlQk6kNLE7KBnXaGHiWmnu4JgeGimuWwg35BGwh0TrVBCnP6RnnUXjJzu6i5Lo2FuFW6z7RbZyBDC8K2+l0+wJRZW8LJvmOE8vLxxUN+aLWI9TYmk55jpmcAU1Gzi+QGVkdFIkfHk5AiViJRx+Fk28NE9EGHE+MYABzwpUwdeXCYe79l2IeDUdPSPLZpwYdn3qhCWvOvCZ+JzancFvd8h6UlW//LhmzdoUMurSbjqMSOdYh9M32cjWnuLPvpftBAgMBAAGjITAfMB0GA1UdDgQWBBRRgluPbGEZ0C6ptwS/J6quOrxjrzANBgkqhkiG9w0BAQsFAAOCAQEAO5dEtpYFQLFvmaTmPdYR8zVznEOVlZUcmax0ttZZfKGnSqm8l316nuIW2gnkRFwak55DOfEh7Z7WTxf1a3yFeOC9fB9zfb1GCvL9umoUWPylU1Wac+cNGN5NHEnrZLsjd++BEcCetZZQHVGT9gfOZKXKt5d0NsdlB7pPNLu5BVxiNdspR08qrZaQl92m+al4bbvwXo/3vg6xFtmqn1jE1Dl9hj+/SSrMUj0kQ6lcW3Ju8U6kLc2Dnfygw1m+pAD8+Y2gOmMg/VNtuRRn0SVv+jKubfdlG5ydx/oib3D2IMgk2BUf2lDMU4fvU3LdpMPkD9kDt/dY13PDMuTIeDMOdA==</ds:X509Certificate>
+      </ds:X509Data>
+    </ds:KeyInfo>
+    <ds:Object>
+      <xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1">
+        <xades:SignedProperties Id="SignedProperties_1">
+          <xades:SignedSignatureProperties>
+            <xades:SigningTime>2020-12-02T18:31:27Z</xades:SigningTime>
+          </xades:SignedSignatureProperties>
+        </xades:SignedProperties>
+      </xades:QualifyingProperties>
+    </ds:Object>
+  </ds:Signature>
+</ns2:FatturaElettronica>

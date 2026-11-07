@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:FatturaElettronica versione="FPR12"
+    xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>AAABBB00A00A000A</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>57</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>AB12CD3</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>12345678901</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>AAABBB00A00A000A</CodiceFiscale>
+                <Anagrafica>
+                    <Nome>MARIO</Nome>
+                    <Cognome>ROSSI</Cognome>
+                </Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede>
+                <Indirizzo>VIA ROMA</Indirizzo>
+                <NumeroCivico>42</NumeroCivico>
+                <CAP>11111</CAP>
+                <Comune>ABCDEFG</Comune>
+                <Provincia>AB</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>09876543210</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>09876543210</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>Acme in Italia</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+            <Sede>
+                <Indirizzo>Via Milano</Indirizzo>
+                <NumeroCivico>27</NumeroCivico>
+                <CAP>12345</CAP>
+                <Comune>Aaabbb</Comune>
+                <Provincia>AB</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD01</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2024-10-20</Data>
+                <Numero>4/2024</Numero>
+                <ImportoTotaleDocumento>4160.00</ImportoTotaleDocumento>
+            </DatiGeneraliDocumento>
+        </DatiGenerali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+                <NumeroLinea>1</NumeroLinea>
+                <Descrizione>Beni di Prima Necessità</Descrizione>
+                <Quantita>1.00</Quantita>
+                <PrezzoUnitario>4000.00</PrezzoUnitario>
+                <PrezzoTotale>4000.00</PrezzoTotale>
+                <!-- AliquotaIVA 4.00: Super-reduced rate for basic necessities (bread, milk, fresh fruit) -->
+                <AliquotaIVA>4.00</AliquotaIVA>
+            </DettaglioLinee>
+            <DatiRiepilogo>
+                <AliquotaIVA>4.00</AliquotaIVA>
+                <ImponibileImporto>4000.00</ImponibileImporto>
+                <Imposta>160.00</Imposta>
+                <EsigibilitaIVA>I</EsigibilitaIVA>
+            </DatiRiepilogo>
+        </DatiBeniServizi>
+        <DatiPagamento>
+            <CondizioniPagamento>TP02</CondizioniPagamento>
+            <DettaglioPagamento>
+                <Beneficiario>ROSSI MARIO</Beneficiario>
+                <ModalitaPagamento>MP05</ModalitaPagamento>
+                <DataRiferimentoTerminiPagamento>2024-10-20</DataRiferimentoTerminiPagamento>
+                <DataScadenzaPagamento>2024-11-20</DataScadenzaPagamento>
+                <ImportoPagamento>4160.00</ImportoPagamento>
+                <IBAN>AA12345678901234</IBAN>
+            </DettaglioPagamento>
+        </DatiPagamento>
+    </FatturaElettronicaBody>
+</ns2:FatturaElettronica>

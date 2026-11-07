@@ -1,0 +1,10 @@
+The four `FatturaPA` samples in this directory are the ValidateFin
+`FPR12` sample set, downloaded from the ValidateFin samples page at
+https://validatefin.com/en/resources/samples/fatturapa-fpr12-signed-p7m
+(the files `IT06363391001_00001.xml`, `IT06363391001_00002.xml.p7m`,
+`IT06363391001_00003.xml` and `IT06363391001_00004.xml` under
+https://validatefin.com/samples/).
+
+The page licences the samples under the Creative Commons Attribution 4.0
+International licence, CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
+. The party data is fictitious and self-declared by the publisher.

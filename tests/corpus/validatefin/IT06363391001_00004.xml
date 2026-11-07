@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Deliberately broken, and again VALID against the official XSD.
+
+  This is the single most common reason an invoice to an Italian public administration is
+  rejected: the <CodiceDestinatario>. For a PA (FormatoTrasmissione = FPA12) it must be the
+  SIX-character IPA office code; the seven-character form belongs to private recipients.
+  The XSD allows [A-Z0-9]{6,7} for both, so the schema cannot see the mistake — only SdI
+  control 00427 does.
+
+  Two defects:
+    · 00427 — a 7-character CodiceDestinatario on an FPA12.
+    · 00425 — <Numero>FATTURA</Numero> contains no digit at all. The XSD type is a plain
+              20-character string, so again the schema is happy.
+
+  Everything else in this invoice is correct: the fiscal identifiers pass their check digit,
+  and the VAT arithmetic balances.
+-->
+<p:FatturaElettronica versione="FPA12"
+  xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>06363391001</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00003</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>06363391001</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>ESEMPIO FORNITORE SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA ROMA 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01114601006</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>COMUNE DI ESEMPIO</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>PIAZZA DEL MUNICIPIO 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-06-30</Data>
+        <Numero>FATTURA</Numero>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Manutenzione impianti - contratto annuale</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>500.00</PrezzoUnitario>
+        <PrezzoTotale>500.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>500.00</ImponibileImporto>
+        <Imposta>110.00</Imposta>
+        <EsigibilitaIVA>S</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2026-07-30</DataScadenzaPagamento>
+        <ImportoPagamento>500.00</ImportoPagamento>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

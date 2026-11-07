@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>01234567897</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>Ac0A1</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>UFPROVA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234567897</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Acque di Prova S.p.A.</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>00000000001</CodiceFiscale>
+        <Anagrafica><Denominazione>Ente di Prova</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-05-20</Data>
+        <Numero>W/2026/77</Numero>
+        <ImportoTotaleDocumento>66.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+      <DatiContratto>
+        <IdDocumento>123456</IdDocumento>
+      </DatiContratto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Tariffa acquedotto</Descrizione>
+        <Quantita>37.00</Quantita>
+        <UnitaMisura>Mc</UnitaMisura>
+        <PrezzoUnitario>1.00</PrezzoUnitario>
+        <PrezzoTotale>37.00</PrezzoTotale>
+        <AliquotaIVA>10.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>Imposta fogne</Descrizione>
+        <Quantita>37.00</Quantita>
+        <UnitaMisura>Mc</UnitaMisura>
+        <PrezzoUnitario>0.30</PrezzoUnitario>
+        <PrezzoTotale>11.10</PrezzoTotale>
+        <AliquotaIVA>10.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>3</NumeroLinea>
+        <Descrizione>Imposta depurazione</Descrizione>
+        <Quantita>37.00</Quantita>
+        <UnitaMisura>Mc</UnitaMisura>
+        <PrezzoUnitario>0.30</PrezzoUnitario>
+        <PrezzoTotale>11.10</PrezzoTotale>
+        <AliquotaIVA>10.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>10.00</AliquotaIVA>
+        <ImponibileImporto>59.20</ImponibileImporto>
+        <Imposta>5.92</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
