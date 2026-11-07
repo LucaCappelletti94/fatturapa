@@ -186,8 +186,8 @@ invoice with a 1.4 MB attachment.
 
 Every reported violation is a true SDI finding about the file, checked against
 the Elenco Controlli v2.0 text, and against the Allegato A 1.9.1 operative
-specification for the 00313, 00471 and 00472 criteria, which its version 2.0
-list predates. Every other readable invoice is clean.
+specification for the 00313, 00330, 00471 and 00472 criteria, which its
+version 2.0 list predates. Every other readable invoice is clean.
 
 | File | Codes | What the file does |
 | --- | --- | --- |
@@ -241,6 +241,7 @@ list predates. Every other readable invoice is clean.
 | `tappoz/sample_data/IT12345678901_ddddd_RITENUTA_MISSING_fail_BR_00411.xml` | 00411 | `DatiRitenuta` missing for a line with `Ritenuta SI` |
 | `tappoz/sample_data/IT12345678901_ddddd_SCONTO_DOC_NO_VALUE_fail_BR_00437.xml` | 00437 | a document `ScontoMaggiorazione` with `Tipo` and neither value |
 | `tappoz/sample_data/IT12345678901_ddddd_SCONTO_LINE_NO_VALUE_fail_BR_00438.xml` | 00438 | a line `ScontoMaggiorazione` with `Tipo` and neither value |
+| `tappoz/sample_data/IT12345678901_ddddd_SDI_PEC_fail_BR_00330.xml` | 00330 | the `PECDestinatario` is the SdI operational mailbox `sdi01@pec.fatturapa.it` |
 | `tappoz/sample_data/IT12345678901_ddddd_TD17_NO_IDIVA_CC_fail_BR_00475.xml` | 00475 | `TD29` without the buyer `IdFiscaleIVA` |
 | `tappoz/sample_data/IT12345678901_ddddd_TD21_ZERO_ALIQUOTA_fail_BR_00474.xml` | 00400, 00474 | `TD21` with a zero-rate line missing `Natura` |
 | `validatefin/IT06363391001_00003.xml` | 00445 twice, 00421, 00422 | the generic nature on a line and a riepilogo, plus riepilogo `Imposta` and `ImponibileImporto` off |
