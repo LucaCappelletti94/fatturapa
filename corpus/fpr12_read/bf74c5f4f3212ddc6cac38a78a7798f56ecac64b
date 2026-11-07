@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+                <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+   <?xmnte>< version="!.0Fiscencoding="UTF-8"?><?xml vxmlnsersion="UTF-8"?><?xml vxmlnsersion="1.0mnte><?xml8vere.gov.it/<?scencodingggggggggggggggggggggggg=="UTF-8"?><?xml vxmlnsersion="1.0" encoding="UTO-8"?><?xml vere.gov.it/<?xml version="1.0Fiscencoding="UTF-8"?cencoding="UTF-8"?><?xml T					?xml vxmln8"?><?xml vere.gov.it/<?xml version="1.0Fiscencoding="UTF-8"?><?xml vxmlnsersion="UTF-8"?><?xml vxmlnsersion="1.0" encoding="UT								2																																						mittente="abc" xmlns:ds"?><?xml vxmlnsersion="UTF-8"?>4?xml vxmlnsersion="1.0" encoding="UT					?xml xvmln8"?><?xml vere.     </DatiTrasmissio<?x    -9"?><?xeion="1.0" encoding="UT&O          (    <?xml version="1.0" encoding="UTF-9"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.ne>
+ it/d

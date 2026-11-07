@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronicas:ns3="http://ivaservizi.agenziaentrate.gov.it/doxmJxsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>02469135782</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente </Dat        </Contatti>
+        </CedentePrestatore>
+        <Cessionario      <DettaglioLinevere>
+               <NumeroLinea>4ei<on

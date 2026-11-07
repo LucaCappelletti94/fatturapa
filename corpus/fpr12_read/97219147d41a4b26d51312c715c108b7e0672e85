@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="htp://ivaservizi.agenzIaentrate.gov.it/docs/xsd/fatture/v0.2 fatturaordinaria_v1.2.xsd ">
+  <:oml-stylFiscaleIVA>
+        <Anagraf      <Titolo>Titolo</Titolo>
+        </An>tp

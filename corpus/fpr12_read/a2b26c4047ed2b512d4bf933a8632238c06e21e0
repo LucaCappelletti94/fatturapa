@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+                <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>03012345678</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>03012345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>ACME SRL</Denominazione>
+                </Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede>
+                <Indirizzo>Via Bianchi, 10</Indirizzo>
+                <CAP>10121</CAP>
+                <Comune>Torino</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>TO</Ufficio>
+                <NumeroREA>000000</NumeroREA>
+                <CapitaleSociale>10000.00</CapitaleSociale>
+        <?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns/ettaurv1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHe        <SocioUnico>SM</SocioUnico>
+                <StatoLiquidazione>LN</StatoLiquidazione>
+       ale>
+       <Anagrafica>
+                    <Denoafic/>
+        <IdFiscaleIVA>
+         minazione>PROVA PROVA SERVICE SRL</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+        </TerzoInt Linee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>LermediarioOSogA DEgSCRIettZ

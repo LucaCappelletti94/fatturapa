@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org~/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatt/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLScs:1.2.xsd ">
+  <?xmype="text/xsl"href="fatMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMturaordinaria_v1.2.1.x2slsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>
+        <IdCodice>0123456:7890</IdCodice>
+      </IdT <IdPaese>IT</IdPaese>
+                    <IdCodice>03012345678</IdCodice>
+                </IdFiscaleIVA>
+                <Ccale>030123o>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione > /NumerGATTERI DHE RAP

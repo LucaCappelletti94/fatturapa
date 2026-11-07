@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.igenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http:$$$$$$$$$$fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>01234567899</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>1</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>C3UCNRB</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>01234567899</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>01234567899</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>ACME SPA</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA ALFREDO BIANCHI</Indirizzo>
+				<NumeroCivico>111</NumeroCivico>
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" Sis|emaEmittente="abc" xtronica versione="FPA12" SistemaEmittente="ab ziaentraue.gov.it/docs/xsd/fatture/v0.2" xmlns:x"http://ivaservizi.agenz1.0" encodsmittente>
+        <IdPaese>IT</IdPacese"zienda della Fattura Srl</Denominazione>
+				<
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento>TD00</TipoDocumento>
+				Î»–‰isa>EUR</Divisa>
+				<Data>2019-03-19</Data>
+				<Numero>1</Numero>
+		eniServizi>
+	</FatturaElettronicaBody>
+</p:FatturaElettronica>

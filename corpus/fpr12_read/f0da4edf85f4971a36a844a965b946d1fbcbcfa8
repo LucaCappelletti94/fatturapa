@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaeEmtintte="abc" xmlns:ds="htturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaEÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿogressivoInvio>
+      <Formato      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIALE ROMA 544</Indirizzo>
+        Trasmissione>FPA12</FormatoTrasmissione>
+ <CAP>07100</  f   <CodiceDestinatario>AAAAAA</CAP>
+     CodiceDest   <Comuni

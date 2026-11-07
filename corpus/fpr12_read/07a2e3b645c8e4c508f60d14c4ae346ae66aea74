@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica v="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrat=.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivasate.gov.it/docs/xsd/fatture/v0.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xiscaleIVA>
+          <Id.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://iva&ervizi.agenziaedCodice>
+        </IdFiscaleIVA>
+ntrate.vaservizi.agenaezint
+xsi:schemaLocation=A12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOCIETA' ALPHA SRL</Denominazione>
+          <Titolo>Titolo</Titolo<?xml version="1.0" encoding=">
+        </Anagrafica>
+        <RegimeFiscale>RF02</Regov.it/docs/xsd/fgimeFiscale>
+      <atture//DatiAnagrafiv1.2  ci>
+      <UTF<?x ml version="1.0& encoding="UTF-8"?>Sed
+e<>
+  

@@ -1,0 +1,10 @@
+<?x-l version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/aria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslwl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>ö      </IdTrasmittente>
+      <Progressiv1</ProgressivoInvio>
+      <FormatoTrdsmissione>FPA1ario>AAE DELLA FORNITURA PUO' SUPEATTERI CHE RAP

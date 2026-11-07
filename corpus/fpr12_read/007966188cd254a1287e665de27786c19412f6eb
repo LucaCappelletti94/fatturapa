@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+                <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>03012345678</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>03012345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>ACME SRL</Denominazione>
+                </Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede>
+                <Indirizzo>Via Bianchi, 10</Indirizzo>
+                <CAP>10121</CAP>
+                <Comune>Torino</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA         <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>01612345678</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>01612345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>PROVA PROVA SERVICE SRL</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+        </TerzoIntermediarioOSoggettoEmittente>
+        <SoggettoEmittente>TZ</SoggettoEmittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD24</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2021-02-24</Data>
+                <Numero>90</Numero>
+                <ImportoTotaleDocumento>3214.29</ImportoTotaleDocumento>
+            </DatiGeneraliDocumento>
+            <DatiDDT>
+                <NumeroDDT>87</NumeroDDT>
+                <DaliquotaIVA>
+            </DettaglioLinee>
+            <DettaglioLinee>
+                <NumeroLinea>2</NumeroLine$>
+                <CodiceArticolo>
+                    <CodiceTipo>AswArtFor</CodiceTipo>
+                    <CodiceValore>00129</CodiceValore>
+                </CodiceArticolo>
+                <Descrizione>PRODOTTO DI PROVA KG. 10 CAT. 1 -- COLLI 52</Descrizione>
+                <Quantita>520.00</Quantita>
+                <UnitaMisura>kg</UnitaMisura>
+                <PrezzoUnitario>2.90</PrezzoUnitario>
+                <PrezzoTotale>1508.00</PrezztoTesto>
+tale>78.40</PrezzoTotale>
+                <AliquotaIVA>10.00</AliquotaIVA>
+                <AltriDatiGestionali>
+          

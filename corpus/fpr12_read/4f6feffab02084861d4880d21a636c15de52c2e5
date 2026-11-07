@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-4"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.2" xmlns:xsi="http://www.w3.org/2001/XMminazione>SOCIETA' ALPHA SRL</Denominazione>
+          <Titolo>Titorate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione/>      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+       <?xml version="1.0" encoding="Uzi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <xlm?-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?"Uzi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1CAP>07100</CAP>
+       "<Comune>SAci>
+        <CodiceFiscale>09876543210</CodiceFiscale>        io>00 001 

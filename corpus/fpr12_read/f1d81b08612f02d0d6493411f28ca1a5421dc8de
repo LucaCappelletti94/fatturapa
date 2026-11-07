@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding=bUTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/x.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+  <?xmnte><?xml8vere.gov.it/<?scencodingggggggggggggggggggggggg=="UTF-8"?><?xml vxmlnsersion="1.0" encoding="UTO-8"?><?xml vere.gov.it/<?xml version="1.0Fiscencoding="UTF-8"?><?xml vxmlnsersion="1.0" encoding="@UTO-8"?><?xml vere.gov.it/<?xml version=.00"" encoding="l"FPA25" Sn="1.0Fiscenco/doscdFiscencodin=="UTF-8"?><?encoding="UTF-8"?><?xml vxmlnsersion="1.0" encoding="@UTO-8"?><?xml vere.gov.it/<?xml versio8"?>ca>
+          <Denominazione>SOCIETA' ALPHA SRL</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatS

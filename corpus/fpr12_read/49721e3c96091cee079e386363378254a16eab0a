@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abcx" mlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentra4e.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatutraordinaria_v1.2.xs"d >
+  <?xml-stylesheet rasmissione>
+    <CedentePrestator"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FattIdPaese>
+       e>09876543210</CodiceFiscale>
+        <AnVA>
+       agrafi  

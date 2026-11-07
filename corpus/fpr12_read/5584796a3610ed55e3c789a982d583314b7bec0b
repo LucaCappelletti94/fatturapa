@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOCIETA' ALPHA SRL</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIALE ROMA 543</Indirizzo>
+        <CAP>07100</CAP>
+        <Comune>SASSARI</Comune>
+        <Provincia>SS</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>04938271605</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AMMINISTRAZIONE BETA</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+      </DatiAnagrafici>
+    <?xmerxerofIg#" xmlns:p=!"http://iiscencoding=" ) -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion<?xml ="UT0" ]ncod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0"-9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0""encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-7"?><?xml vxmlnsers;on="1ml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion<?xml ="UT0" ]ncod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0"-9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0""encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="al  <Sede>
+        <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2014-1<81-2/Data>
+        <Numero>123</Numero>
+        <Causale>LA FATTURA FA RIFERIMENTO ADentoNumeroLinea>
+        <IdDocumento>66685</IdDocumento>
+        <NumItem>1</NumItem>
+        <CodiceCUP>124abc</CodiceCUP>
+	    <CodiceCIG>456defDatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <ProvieIVA>
+        <Anagrafica>
+          <Denominazionncia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+ 681012141e>SOCIETA' ALPHA SRL</Denom<ina

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettr(onica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://iv.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+      ><?xml vxmlns-8"?><?xml v vxml="UTF-8"?><?xml vxmlns-7?><?xml vxmlnsersion="1.0" encoding="UT
+" encod="UTF-8"?><?xmlmlnica versione="FPA12" SistemaEmittetrate.gov.it>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+  ?x      <Comune>mlm" encod="UTF-R

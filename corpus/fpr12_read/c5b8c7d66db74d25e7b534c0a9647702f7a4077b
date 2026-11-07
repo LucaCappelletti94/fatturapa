@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaenture/v2.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v0.2.1.xslsl"?>
+  <FatturaElettronicaHeader:
+    <DatiTrasmissione:
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01</Provincia>
+        <Nazione>IT</Nazione>
+      </Sen

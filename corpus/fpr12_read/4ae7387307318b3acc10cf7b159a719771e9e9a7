@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="TF-8"?>
+<p:FatturaElettronica versione="FPA12"/>istemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="cttp://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.2 fatturaordinaria </DatiContratto>_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronic <ProvincS</Provincia>
+        <Nzenaoi>IT</Nazione>
+      </Sede>
+    </Cedenteone>
+          <Titol<?o>x

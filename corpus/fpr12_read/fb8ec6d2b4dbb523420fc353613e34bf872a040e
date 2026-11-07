@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.igenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>01234567899</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>1</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>C3UCNRB</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>01234567899</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>01234567899</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>ACME SPA</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA ALFREDO LIANCHI</Indirizzo>
+				<NumeroCivico>111</NumeroCivico>
+				<CAP>30010</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CedentePrestatore>
+		<CessionarioCommittente>
+			<DatiAnagrafici>
+				<CodiceFiscale>01234567894</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>Azienda della Fattura Srl</Denominazione>
+				</Anagrafica>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>Via Rossi</Indirizzo>
+				<NumeroCivico>222</NumeroCivico>
+				<CAP>31100</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento>TD01</TipoDocumento>
+				<Divisa>EUR</Divisa>
+				<Data>2019-03-19</Data>
+				<Numero>1</Numero>
+				<DatiRitenuta>
+					<TipoRitenuta>RT02</TipoRitenuta>
+					<ImportoRitenuta>4.41</ImportoRitenuta>
+					<AliquotaRitenuta>11.50</AliquotaRitenuta>
+					<CausalePagamento>U</CausalePagamento>
+				</DatiRitenuta>
+				<DatiCassaPrevidenziale>
+					<TipoCassa>TC03</TipoCassa>
+					<AlCassa>4.00</AlCassa>
+					<ImportoContributoCassa>36.88</ImportoContributoCassa>
+					<ImponibileCassa>922.00</ImponibileCassa>
+					<AliquotaIVA>22.00</AliquotaIVA>
+				</DatiCassaPrevidenziale>
+				<DatiCassaPrevidenziale>
+					<TipoCassa>TC22</TipoCassa>
+					<AlCassa>4.00</AlCassa>
+					<ImportoContributoCassa>38.36</ImportoContributoCassa>
+					<ImponibileCassa>958.88</ImponibileCassa>
+					<AliquotaIVA>22.00</AliquotaIVA>
+					<Ritenuta>SI</Ritenuta>
+				</DatiCassaPrevidenziale>
+				<ImportoTotaleDocumento>2486.02</ImportoTotaleDocumento>
+				<Causale>Descrizione della causale del documento AAAABBBBBB 1324325y82973482 hbtg2vy14t5fy</Causale>
+			</DatiGeneraliDocumento>
+		</DatiGenerali>
+		<DatiBeniServizi>
+			<DettaglioLinee>
+				<NumeroLinea>1</NumeroLinea>
+				<Descrizione>PRODOTTO A</Descrizione>
+				<Quantita>1.00</Quantita>
+				<DataInizioPeriodo>2019-03-19</DataInizioPeriodo>
+				<DataFinePeriodo>2020-03-18</DataFinePeriodo>
+				<PrezzoUnitario>652.0000</PrezzoUnitario>
+				<PrezzoTotale>652.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<AltriDatiGestionali>
+					<TipoDato>CASSA-PREV</TipoDato>
+					<RiferimentoTesto>ENASARCO TC07</RiferimentoTesto>
+					<RiferimentoNumero>53.79</RiferimentoNumero>
+				</AltriDatiGestionali>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>2</NumeroLinea>
+				<Descrizione>Prodotto B</Descrizione>
+				<Quantita>2.00</Quantita>
+				<PrezzoUnitario>452.0000</PrezzoUnitario>
+				<PrezzoTotale>452.00</PrezzoTotale>
+				<AliquotaIVA>0.00</AliquotaIVA>
+				<Natura>N2</Natura>
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abdocs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOCIETA' ALPHA SRL</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIALE ROMA 543</Indirizzo>
+        <CAP>07100</CAP>
+        <Comune>SASSARI</Comune>
+        <Provincia>SS</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>09876543210</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AMMINISTRAZIONE BETA</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2014-12-18</Data>
+        <Numero>123</Numero>
+        <Causale>LA FATTURA FA RIFERIMENTO AD UNA OPERAZIONE AAAA BBBBBBBBBBBBBBBBBB CCC DDDDDDDDDDDDDDD E FFFFFFFFFFFFFFFFFFFF GGGGGGGGGG HHHHHHH II LLLLLLLLLLLLLLLLL MMM NNNNN OO PPPPPPPPPPP QQQQ RRRR SSSSSSSSSSSSSS</Causale>
+        <Causale>SEGUE DESCRIZIONE CAUSALE NEL CASO IN CUI NON SIANO STATI SUFFICIENTI 200 CARATTERI AAAAAAAAAAA BBBBBBBBBBBBBBBBB</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>66685</IdDocumento>
+        <NumItem>1</NumItem>
+        <CodiceCUP>123abc</CodiceCUP>
+	    <CodiceCIG>456def</CodiceCIG>
+      </DatiOrdineAcquisto>
+      <DatiContratto>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>123</IdDocumento>
+	    <Data>2016-09-01</Data>
+	    <NumItem>5</NumItem>
+	    <CodiceCUP>123abc</CodiceCUP>
+	    <CodiceCIG>456def</CodiceCIG>
+      </DatiContratto>
+      <DatiConvenzione>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>456</IdDocumento>
+	    <NumIte			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>3</NumeroLinea>
+				<Descrizione>Prodotto con Sconto 10%</Descrizione>
+				<Quantita>0.00</Quantita>
+				<PrezzoUnitario>300.0000</PrezzoUnitario>
+				<ScontoMaggiorazione>
+					<Tipo>SC</Tipo>
+					<Percentuale>10.00</Percentuale>
+				</ScontoMaggiorazione>
+				<PrezzoTotale>270.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>4</NumeroLinea>
+				<Descrizione>Prodotto split payment 1</Descrizione>
+				<Quantita>1.00</Quantita>
+				<PrezzoUnitario>20.0000</PrezzoUnitario>
+				<PrezzoTotale>20.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>5</NumeroLinea>
+				<Descrizione>Prodotto split payment 2</Descrizione>
+				<Quantita>1.00</Quantita>
+				<PrezzoUnitario>650.0000</Prem>5</NumItem>
+	    <CodiceCUP>123abzzoUnc</CodiceCUP>
+	   itario>
+				<PrezzoTotale>650.

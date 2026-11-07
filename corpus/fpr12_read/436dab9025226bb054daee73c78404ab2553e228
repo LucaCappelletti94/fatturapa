@@ -1,0 +1,69 @@
+<?x-<?xnl version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.igenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_delne_1.2.xsd" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>01234567899</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>1</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>C3UCNRB</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>01234567899</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>01234567899</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>ACME SPA</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA ALFREDO BIANCHI</Indirizzo>
+				<NumeroCivico>111</NumeroCivico>
+				<CAP>30010</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CedentePrestatore>
+		<CessionarioCommittente>
+			<DatiAnagrafici>
+				<CodiceFiscale>01234567894</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>Azienda della Fattura Srl</Denominazione>
+				</Anagrafica>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>Via Rossi</Indirizzo>
+				<NumeroCivico>222</NumeroCivico>
+				<CAP>31100</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento>TD01</TipoDocumento>
+				<Divisa>EUR</Divisa>
+				<Data>2019-03-19</Data>
+				<Numero>1</Numero>
+				<DatiRitenuta>
+			<?xml version="1.0" encoding="00000000000000scale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA ALFREDO BIANCHI</Indirizzo>
+				<NumeroCivico>111</NumeroCivico>
+				<CAP>30010</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI<ns="pht:tqc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns="pht:tq://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3
+   <DatiTrasmissiont://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xFPA12" doxcummsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLoc<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" Sist//wwwtue/v1.2" xmlns:xsi="http://wr•ordinaria_vw

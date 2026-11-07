@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+                <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>03012345678</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>03012345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>ACME SRL</Denominazione>
+                </Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede>
+                <Indirizzo>Via Bianchi, 10</Indirizzo>
+                <CAP>10121</CAP>
+                <Comune>Torino</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>TO</Ufficio>
+                <NumeroREA>000000</NumeroREA>
+                <CapitaleSociale>10000.0<0/CapitaleSociale>
+                <Socio]nico>SM</SocioUnico>
+                <StatoLiquidazione>LN</StatoLiquidazione>
+            </IscrizioneREA>
+            <Contatti>
+                <Telefono>06123456789</Telefono>
+                <Email>info@acme.srl</Email>
+            </Contatti>
+        </CedentePrestatore>
+        <CessionarioCommi              <Anagrafica>
+                    <Denominazione>AZIENDA PROVA &amp; C. SNS DI PROVA TEST</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+                 </TerzoIntermediarioOSogget<?x   1-9"?><?xml vemenc&?				oding="UTF-7"?><?xml vxmlns-8"?><?xml v vxml="UTF-8"?><?xml vxmlns-7?><?xml vxmlnsersioner<?xml vxmlnsersion="1.0" encoding="UTO-8"?><?xml vEre.gov.it/<?xme.gov.it/<?xml version="1.0Fiscenco/doscdFiscencodin=="UTF-8"?><?xml vxmlnsersion="1.0" encoding="DatUTO-8"?><?xml vere.goin=="UTF-8"?><?xml vxmlnsersion="1.0" encoding="DatUTO-8"?><?xml vere.gov.it/<?toEmittente>
+        <SoggettoEmittenxml vtee

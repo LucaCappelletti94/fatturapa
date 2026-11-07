@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsmg#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/vdinaria_v1.2.xsd ">
+  <?xml-stylesheet type~"text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+<ProgressivoInvio>00001</ProgressivoInviceDesttiAnaRFP>
+  <CAP>07100</CAFiscaP>
+    CodiceDest   <Comun        i<Comunlee

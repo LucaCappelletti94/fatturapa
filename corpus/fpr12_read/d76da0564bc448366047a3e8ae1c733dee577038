@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaent./09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+                <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>03012345678</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>03012345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>ACME SRL</Denominazione>
+                </Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede>
+                <Indirizzo>Via Bianchi, 10</Indirizzo>
+                <CAP>10121</CAP>
+                <Comune>Torino</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+            <IscrizioneREA>
+                <Ufficio>TO</Ufficio>
+                <NumeroREA>000000</NumeroREA>
+                <CapitaleSociale>10000.00</CapitaleSociale>
+                <SocioUnico>SM</SocioUnico>
+                <StatoLiquidazione>LN슬슬슬슬슬슬슬슬슬슬슬슬�</StatoLiquidazione>
+    $       </IscrizioneREA>
+   erali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+   entoTesto>
+                </AltriDatiGestionali>
+            </DettaglioLinee>
+            <DettaglioLinee>
+                <NumeroLinea>3</NumeroLinea>
+                <CodiceArticolo>
+                    <CodiceTipo>AswArtFor</CodiceTipo>
+                    <CodiceValore>00008</CodiceValore>
+                </CodiceArticolo>
+                <Descrizione>ALTRO PRODOTTO DI PROVA KG.20 -- COLLI 3</Descrizione>
+                <Qua.tita>60.00</Quantita>
+                <UnitaMisura>kg</Unlo>
+                <Descrizione>TEST TEST AAAAA 123456789 AAA BBBB</Descrizione>
+                <Quantita>16.00</Quantita>
+                <UnitaMisura>kg</UnitaMisura>
+                <PrezzoUnitario>4.90</PrezzoUnitario>
+                <PrezzoTotale>78.40</PrezzoTotale>
+                <AliquotaIVA>10.00</AliquotaIVA>
+                <AltriDatiGestionali>
+          

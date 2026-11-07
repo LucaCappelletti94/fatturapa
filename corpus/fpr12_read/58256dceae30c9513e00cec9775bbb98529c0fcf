@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:Fronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://wwwvizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>  
+<FatturaElettronicaHeader>
+ ?   <DatiTraatiBeniServizi>
+      <DettaglioLinee>
+                    A FORNITURA PUO' SUPERARE IÑ CENT RAP

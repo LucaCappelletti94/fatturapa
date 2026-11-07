@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abcx" mlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentraocs/xsd/fatture/v1.2" xmlns:xsi="http://wwws/xsd/fatture/v1.2 fatutraordinaria_v1.2.xs"d >
+  <?xml-stùlesheet rasmissione>
+    <CedentePrafi  

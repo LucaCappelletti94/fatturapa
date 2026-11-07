@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<?xml-stylesheet type="text/xsl" href="fatturaordinaria_v1.2.1.xsl" ?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/20A0/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd" xmlns:p="http://ivaserizvi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02182030391</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>32</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>UFYAGJK</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Telefono>345/555444</Telefono>
+      </ContattiTrasmittente>
+      <PECDestinatario>cir2000snc@pec.it</PECDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>12345678901</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02182030391</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>Azienda di esempio</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via dei Roditori 15/v</Indirizzo>
+        <CAP>12100</CAP>
+        <Comune>Villa dei Roditori</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Telefono>345/555444</Telefono>
+        <Fax>035/555443</Fax>
+      </ConVtatti>
+    </Cede      <IdDocumento>99bis</IdDocumento>
+      </DatiFattureCo     </ScontoMaggiorazione>
+        <ScontoMaggiorazione>
+       ggiorazione>
+        <Scon1toMaggiorazion/DatiTrasmissione>
+    <CedentePrestatore>
+  e>
+         <Tipo>SC</Tipo>
+          <P    <D

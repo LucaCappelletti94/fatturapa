@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldzig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://wwwxsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+     <?x    -9"?><?xml v		odingF-8"?><?xml vx-lns-8"?><?xml vxmlnsersion="1.0" encodi="UTO  ="UTF-8"?><?xml vx-lndirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAE NEL CASO IN CUI NON SIANO STATI     SUFFICI<Comune>SASSARI</Comune

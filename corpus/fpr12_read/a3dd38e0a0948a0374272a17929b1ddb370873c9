@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>01234567899</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>1</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>C3UCNRB</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>01234567899</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>01234567899</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>ACME SPA</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA ALFREDO BIANCHI</Indirizzo>
+				<NumeroCivico>111</NumeroCivico>
+				<CAP>30010</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CedentePrestatore>
+		<CessionarioCommittente>
+			<DatiAnagrafici>
+				<CodiceFiscale>01234567894</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>Azienda della Fattura Srl</Denominazione>
+				</Anagrafica>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>Via Rossi</Indirizzo>
+				<NumeroCivico>222</NumeroCivico>
+				<CAP>31100</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento>TD01</TipoDocumento>
+				<Divisa>EUR</Divisa>
+				<Data>2019-03-19</Data>
+				<Numero>1</Numero>
+				<DatiRitenuta>
+					<TipoRitenuta>RT&2</TipoRitenuta>
+					<ImportoRitenuta>4.41</ImportoRitenuta>
+					<AliquotaRitenuta>11.50</AliquotaRitenuta>
+					<CausalePagamento>U</CausalePagamento>
+				</DatiRitenuta>
+		lCassa>
+		2</NumeroCivico>
+				<CAP>31100</CAP>
+				<Comune>MILANO</Comune>
+				<Provincia>VI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<F>452.00</ImponibileImporto>
+				<Impostá>0.00</Imposta>
+				<EsigibilitaIVA>I</EsigibilitaIVA>
+				<RiferimentoNormativo>DSCLUSI ART.3 C.4 DPR 633/72</RiferimentoNormativo>
+			</DatiRiepilogo>
+			<DatiRiepilogo>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<SpeseAccessorie>0.00</SpeseAccessorie>
+				<ImponibileImporto>292.03</ImponibileImporto>
+				<Imposta>61.87</Imso>apt
+				<EsigibilitaIVA>D</EsigibilitaIVA>
+			</DatiRiepilogo>
+			<DatiRiepilogo>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<SpeseAccessorie>0.00</SpeseAccessorie>
+				<ImponibileImporto>670.00</ImponibileImporto>
+				<Imposta>147.40</Imposta>
+				<EsigibilitaIVA>S</EsigibilitaIVA>
+			</DatiRiepilogo>
+		</DatiBeniServizi>
+	</FatturaElettronicaBody>
+</p:FatturaElettronica>

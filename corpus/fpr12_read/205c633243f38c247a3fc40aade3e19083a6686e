@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="h-ttp://ivaservizi.agenziaentrate.godPaese>
+        <ivaservizi.1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader><?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittexte="abc" xmlns:ds="http://www.w3.orginatario>AAAAAA</CodiceDrio>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02469135780</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOCIETA' ALPHA SRL</Denominazi/2000/09/xmldsig#" xmlns:p="http://ivaservizi xmlns:xsi="http<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" Sistem://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocatioaEmittente="abc" xmlns:ds="http://www.w6.org/2000/09/xmldsig#" xmlione>
+      </Sede>
+    </CedentePrestatore>
+  IV 

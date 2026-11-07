@@ -1,0 +1,10 @@
+<?xml versi*on="1.0" encoding="0TF-8"?>
+<p:FatturaElettrlnica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gdocs/xsd/fatt)ure/v1.2" xmlns:xsi="http://www.w3.org/2001/XM.agen#ziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinariam_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader><?xml version="1.0" encoding="UTF-8eDestinatar      </Anagrafica>
+ Id=        <RegimeFiscale>RF01</RegimeFiscale>
+      <io>AAAAAA</CodiceDestinataricumento>
+        <TipoDocumento>TD01</Tip/DatiAnagrafioDocumento>
+       < Divisa>EUR</Di<?xml ve<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica Sistersion="1.0" encoding="UTF:8"?>
+<p:FatmaEtmitu

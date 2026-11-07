@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><FatturaElettronica xmlns="http://ivaservizi.agenziaentrate.gov.it/d/4002/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12">
+  <FatturaElettronicaHeader xmlns="">
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00000</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>FUFUFUF</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Email>local_part@domai~.it</Email>
+      </Contat/tiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <Datente>
+      <ProgressivoInvio>00000</PogressivoInvio>
+  sione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>FUFUFUF</CodiceDeslitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</FatturaElettronica>

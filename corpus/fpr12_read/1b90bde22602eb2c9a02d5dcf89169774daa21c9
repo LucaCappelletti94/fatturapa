@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.igenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>01234567899</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>1</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>C3UCNRB</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>01234567899</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>01234F-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xm?x    -9"?><?xml vemenc&?				oding=UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoDinw="UT0" encod="UTF-2"?>E?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="SistemUT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="UT0" encoding="UTO        <?xml vxmln567899</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>ACME SPA</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA ALFRE	<JJJJJJJJJJJJJJJJJJJJJJJJJImponibileCassa>922.00</ImponibileCassa>
+					<AliquotaIVA>22.00</AliquotaIVA>
+				</DatiCassaPrevidenziale>
+				<DatiCassaPrevidenziale>
+					<TipoCassa>TC22</TipoCassa>
+					<AlCassa>4.00</AlCassa>
+					<ImportoContributoCassa>38.36</ImportoContributoCassa>
+					<ImponibileCassa>958.88</ImponibileCassa>
+					<AliquotaIVA>22.00</AliquotaIVA>
+					<Ritenuta>SI</Ritenuta>
+				</DatiCassaPrevidenziale>
+				<ImportoTotaleDocumento>2="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xm?x    -9"?><?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoDinw="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="SistemUT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="UT0" encoding="UTO        <?xml vxmlns-4"?><?xml vg=" )  -9"?;?xml vemenc&?				odin="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="SistemUT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="UT0" encoding="UTO        <?xml vxmlns-4"?><?xml vxmlnsers;?><?xml vxmlnsersion="1.0" encodinw="UT0" encod="UTF-2"?><?xml vxml="UTF-8™?><?xml vxmlns-8?><?xml vÿmlnsersion="1.0" encoding="SistemUT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="UT0" enc/DatiGenerali>
+		<DatiBeniServizi>
+			<DettaglioLinee>
+				<NumeroLinea>1</NumeroLinea>
+				<Descrizione>PRODOTTO A</Descrizione>
+				<Quantita>1.00</Q<PrezzoUnitario>20.0000</PrezzoUnitario>
+				<PrezzoTotale>20.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<EsigibilitaIVA>S</EsigibilitaIVA>
+			</DatiRiepilogo>
+		</DatiBeniServizi>
+	</FatturaElettronicaBody>
+</p:FatturaElettronica>

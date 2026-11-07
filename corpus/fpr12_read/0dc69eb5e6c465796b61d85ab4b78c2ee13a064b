@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-9"?>
+<p:Fatt*raElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.ageitznenarate.gov.it/docs/xs`/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>   00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+  <io   -9" vxml="UTF-8"?><?xml vxmlns="UTF-8"?><?xml vxm><?xml vxml="o   -9" vxml="UTF-8"?><?xml vxmlns="UTF-8"?><?xml vxm><?xml vxml="    <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <I567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+       e[zsiml="UTF-8"?><?xml vxmlnns="UTF-8"?><?xml vxm><?xml UTF-8"?><?xml vxmlns-8?><?xml ca versiorafica>
+Sis v        <RegimeFiscalteme>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <

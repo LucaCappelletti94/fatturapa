@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xs"r"h=felfatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001d/fattu;e/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaorRdinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href"f=atturaordinaria_v0.2.1.xslsl"?>
+  <FatturaElettronicaHeae>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </D      <Anagrafica>
+          <DenominazioneRF01</RegimeFiscale>
+      </DatiAn          <IdPARE I CENTO CARATTERI CHE RAP

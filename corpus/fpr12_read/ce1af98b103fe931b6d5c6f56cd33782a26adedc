@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+            </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>M5UXCR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+            <? x   -9"=><?xml ---------------------------------------------------------------------------------------vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTFnc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml Location="http://ivaservizi.agenldsig#" xmlns:p="http://ivaservizi.agenzia_v1.2.xsd ">
+  <?x-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xmlmlnsersion="1.0" dncoding="UT0" encod="UTF-2"?><?xmml vxml="U?><?xml vxmlns-8?><?xml vxmlnsersion="="UT5" encod="UTF-8"?><?!xml vxmlns-8"?><?xml vxmlnsers0" encoding="UTO     <?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fattureaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>01234567899</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>1</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasm    <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+  ™     </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici  <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>01401234567</IdCodice>
+        dPaese>
+					<IdCodice>01234567899</IdCodic        </IdFiscaleIVA>
+e                <CodiceFiscale>0140>
+	

@@ -1,0 +1,15 @@
+<?xml versi><?xml vxmlns-7?><?xml vxmlnsersion="1.0" encoding="UT
+" encod="UTF-8"?><?xmlm" encod="UTF-8"?><?xmlmlnon="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" S~stemaEmittente="abcldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.entePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>04938271606</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AMMINISTRAZIONE BETA</Denominazione>
+          <Titolo>Titolo</Titolo>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comsnesior="0.0" encoding="]E FFFFFFF<IdDocumento>789<A FORNITURA PUO' SUPERARE I CENTO CARATTERI CHE RAP

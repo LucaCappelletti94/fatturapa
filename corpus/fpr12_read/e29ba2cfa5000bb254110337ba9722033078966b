@@ -1,0 +1,111 @@
+<?xml verofIg#" xvmlns:p=!"http://ivasemvizi.ag.gov.it/doscdFiscencoding="UTF-4"?><?xml vxmlnsersion="1.0" encoding="UTmlns:p=!"http://ivaservizi.ag.gov.it/doscdFiscencoding="UTF-8"?><?xml vxmlnsersion="1.0" elcoding="UTO-8"xmlnsersion="1.0" encoding="[[[[[[[[[[[[[[[[[vxmlnsersion="0.0" e#ncoding="UTO-8"?><?xml vere.gov.it/<?xml version=.0" encoding="[[[?><?xml vere.gov.it/<?xml version=" xvmlns:p=!"http://ivasemvizi.ag.gov.it/doscdFiscencoding="UTF-erofIg#" xvmlns:p=!"http://ivasemvizi.ag.gov.it/doscdFiscencoding="UTF-4"?><?xml vxmlnsersion="1.0" encoding="UTmlns:p=!"http://ivaservizi.ag.gov.it/doscdFiscencoding="UTF-8"?><?xml vxmlnsersion="1.0" elcoding="UTO-8"xmlnsersion="1.0" encoding="[[[[[[[[[[[[[[[[[vxmlnsersion="0.0" e#ncoding="UTO-8"?><?xml vere.gov.it/<?xml version=.0" encoding="[[[?><?xml $ere.gov.it/<?xml version=" xvmlns:p=!"http://ivasemvizi.ag.gov.it/doscdFiscencoding="UTF-4"?><?xml vxmlnsersion="1.0" encoding="UTmlns:p=!"http://ivaservizi.ag.gov.it/doscdFiscencoding="UTF-8"?><?xml vxmlnsersion="1.0" elcoding="UTO-8"xmlnsersion="1.0" encoding="[[[[[[[[[[[[[[[[[vxmlnsersion="1.0" e#ncoding="UTO-8"?><?xml vere.gov.it/<?xml version=.0" encoding="[[[?><?xml vere.gofIg#" xvmlns:p=!"http://ivasemvizi.ag.gov.it/doscdFiscencoding="UTF-4"?><?xml vxmlnsersion="<?xml version="1.0" encoding="windows-1252"?>
+<?xml-stylesheet type="text/xsl" href="fatturaordinaria_v1.2.1.xsl" ?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02182030391</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>32</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>UFYAGJK</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Telefono>345/555444</Telefono>
+      </ContattiTrasmittente>
+      <PECDestinatario>cir2000snc@pec.it</PECDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>12345678901</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>02182030391</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>Azienda di esempio</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via dei Roditori 15/v</Indirizzo>
+        <CAP>12100</CAP>
+        <Comune>Villa dei Roditori</Comune>
+        <Provincia>RA</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <Contatti>
+        <Telefono>345/555444</Telefono>
+        <Fax>035/555443</Fax>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01180680397</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>CIR 2000 snc</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>viale IV Novembre 86</Indirizzo>
+        <CAP>48122</CAP>
+        <Comune>Marina di Ravenna</Comune>
+        <Provincia>RI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD06</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2017-01-27</Data>
+        <Numero>3</Numero>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Percentuale>10.01.0" encoding="UTmlns:p=!"http://ivaservizi.ag.gov.it/doscdFiscencoding="UTF-8"?><?xml vxmlnsersion="1.0" elcoding="UTO-8"xmlnsersion="1.0" encoding="[[[[[[[[[[[[[[[[[vxmlnsersion="1.0" e#ncoding="UTO-8"?><?xml vere.gov.it/<?xml version=.0" encoding="[[[?><?xml vere.gov.it/<?xml version=" xvmlns:p=!"http://ivasemvizi.ag.gov.it/doscdFiscencoding="UTF-4"?><?xml vxmlnsersion="1.0" encoding="UTmlns0</Percentuale>
+        </ScontoMaggiorazione>
+        <ScontoMaggiorazione>
+          <Tipo>SC</Tipo>
+          <Importo>7.00</Importo>
+        </ScontoMaggiorazione>
+        <DatiRitenuta>
+          <TipoRitenuta>RT02</TipoRitenuta>
+          <ImportoRitenuta>27.55</ImportoRitenuta>
+          <AliquotaRitenuta>20.00</AliquotaRitenuta>
+          <CausalePagamento>A</Causal<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>ALPHA SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIALE ROMA 543</Indirizzo>
+        <CAP>07100</CAP>
+        <Comune>SASSARI</Comune>
+        <Provincia>SS</Provincia>
+        <Nazione>IT</NaziDDDDDDDDDDDDDDD E FFFFFFFFFFFFFFFFFFFF GGGGGGGGGG HHHHHHH II LLLLLLLLLLLLLLLLL MMM NNNNN OO PPPPPPPPPPP QQQion="1.0" enconidg="UTO-8"?><?xml vere.

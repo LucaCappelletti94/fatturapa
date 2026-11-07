@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsigv.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLS.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+    <? elvxmssion="1.0<?xml version="1?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT5" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" lne="ocUTF-8"?><?xml vxmlnw-8"?><?xml vxmlnsers;on="1.0" encoding="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnser<?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="    -9"?;?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" enc2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?od="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UUTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnseF-8"?>
+<p:FatturaElettronica versione="FPA12" Sistione>
+    <Ceders;on="1.0" encontePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+<?xml version="1.0"0encoding="          <IdCodice>01234567889UT<

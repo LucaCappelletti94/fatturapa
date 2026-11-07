@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v0.2" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchcs/xsd/fatture/v1.2 http://www.tafturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_Fa">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+      <ContattiTrasmittente/>
+    </DatiTrsion="1.0" Encod<?xml vml vxmlnsersion="UTF-8"?><?xml vxmln>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+      <ConlioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

@@ -1,0 +1,26 @@
+<!-??4Â$xÿIdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOCIETA' ALP   <istemaEmittente="abc" xmlns:ds="http://wwwttp://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsf/fatture/v2.2 fatturaordinaria_v1.2.xsd 
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        <~IdFiscaleIVA>
+        <Anagrafica>
+          <Denomin">
+  ÿÿÿsheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+Invio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <Codirizzo>
+        <CAP>07100</CAP>
+        ceDestinatario>AA<Comune>SAAAAA<SSARI</C/Comune>
+odi 

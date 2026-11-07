@@ -1,0 +1,24 @@
+<?xml ver#sio<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#a_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"hAref="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese></IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>Fv1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-styleshe  </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafiT</IdPaese>
+          <IdCodice>00617283945</IdCodice>
+        </IdFiscaleIVA>et type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTiTrasmissione>
+      <IdTrasmittente>
+    
+        <Idn0" encoding="UTF-8"?>
+<p:FatturaElettronica versione=ronica versiding="UTF-4"?>a>
+  Paese>IT</IdPaese>
+        <IdCodice>01234567890</IdCod  

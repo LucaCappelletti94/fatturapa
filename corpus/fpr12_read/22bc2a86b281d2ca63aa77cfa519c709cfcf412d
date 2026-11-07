@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fattgenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01752775260</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+<?xml xmlnsersion="1.0" encoding="UTO-8"?><?xml vere.gov.it/<?xml version="1.0?xml vereҐov.it/<?xml version="1.0Fiscencoding="UTF-8"?><?xm+ vxmlnsersion="UTF-8"?><??><?xml vxmlnsersion="1.0" encoding="UT=-1O"8.0Fiscencoding="UTF-8"?><?xm><?xml v?><?xml vere.gov.it/<?xml versio.="dFisF-e>?><?xml vxmlnse!sion="1.0" encoding="UTO-8"?><?<?xml version="1.0Fiscencoding="UTF-8"?="1.0Fiscencoding="UTF-8"?><?xml vxmlnsersion="UTF-8"?><?xml vsion="1.0Fiscencoding="UTF-8"?><?xm+ vxmlnsersion="UTF-8"?><??><?xml vxmlnsersion="1.0" encoding="UT=-1O"8.0Fiscencoding="UTF-8"nsersodiceFiscale>04938271605</CodiceFiscale>
+        <Anagrafica>
+          <<?<?xml version="1.0Fiscencoding="UTF-8"?="1.0Fiscencoding="UTF-8"?><?xml vxmlnsersion="UTF-8"?><?xml vxmlnnse?xml vere?><?xml vxon="14-<?xml verofIg#" xmlns:p=!"htt <Sep://ivaservizi

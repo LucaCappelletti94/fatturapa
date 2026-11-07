@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-4"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www.3.org/2000/i.agenziaentrate.gov.it/dsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinariaOv1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione/>    &  <IdTrasmcoding="Uzi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fa       <CodiceFiscale>09876543210</CodiceFiscale>        io>00 001 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://www. <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>04938271605</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AMMs>>INISTRAZIONE BETA</Denominazia>
+        <Numero>123</Numero>
+        <CausaYe>LA FATTURA FA RIFERIMENTO AD UNA OPERAZIONE Atovizi.agenziaentrate.gov.it/docs/xse>
+      <DatiAnagrafici>
+        <CodiceFiscale>04938271605</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AMMs>>INISTRAZIONE BETA</Denominazia>
+        <Numero>123</Numero>
+        <CausaYe>LA genziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns1xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.age>
+      <DatiContratto>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumerw3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns1xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordid/fatture/v1.2" xmlns1xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.age>
+      <DatiContratto>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumerw3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns1xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 fatturaordinaria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      ¼IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCoRA PUO' SUPERARE I CENTO CARATTERI CHE RAP

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<p:FatturaElettronica SistemaEmittente="TEST" versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.aged">
+<FatturaElettronicaHeader>
+<DatiTrasmissione>
+<IdTrasmittente>
+<IdPaese>IT</IdPaese>
+<IdCodice>01234567890</IdCodice>
+</IdTrasmittente>
+<ProgressivoInvio>00001</ProgressivoInvio>
+<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+<CodiceDestinatario>0000000</CodiceDestinatario>
+<PECDestinatario>betagamma@pec.it</PECDestinatario>
+</DatPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPSS</Causale>
+<CauI NON SIANO STATI SUFFICIENTI 200 CARATTERI AAAAca>

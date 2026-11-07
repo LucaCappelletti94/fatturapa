@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://wwu.w3.orgd/fatture/v1.2" xmlns:xsi="http://www.w3.orgrasmittente>
+      <Pr/ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.2 fatturaordinaria </DatiContratto>_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fa#########################################################tMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001                              "          </ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</Form 		entoNumer.o

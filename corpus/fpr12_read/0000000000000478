@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http://wwxsi3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLture/v1.2 fatturaordinaria_v/1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMtura=ordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPA12</FormatoTrasmissione>
+      <CodiceDestinatario>AAAAAA</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+  <?x    -9"?><?xml vemenc&?				oding="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8nsersion="1.0" encoding="UT0" encod="mlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vx~lnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encodinw="UT0" encoding="UTO  "?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encodinw="UT0" encoding="UTO                      d="UTF-2"?><?xml vx"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encodinw="UT0" encoding="UTO                      d="UTF-2"?><?xml vxml="UTF-8"?><?xml vxm><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="0.0" encoding="UT0" encod="UTF-8"?><?xmlmlnsersion="1.0" encoding="UT0" encod="mlnsersion="1.0" encoding="UT0" encod="UTF-2"?><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vx~lnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encodinw="UT0" encoding="UTO  "?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encodinw="UT0" encoding="UTO                      d="UTF-2"?><?xml vxml="UTF-8"?><?xml vxm><?xml vxml="~UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xmlmlnsersion="1.0" encoding,"UT0" encod="UTF-2"?><?xmml vxml="UTF-8"?><?xml vxmlns-8?><?xml vxmlnsersion="1.0" encoding="UT0" encod="UTF-8"?><?xml vxmlns-8"?><?xml vxmlnsers;on="1.0" encoding="UT0" encoding="UTO                      d="UTF-2"?><?xml vxml="UTF-8"?><?xml vxm><?xml vxml="UTF-8"?><?xml vxmlns-8?><?xml vx      <IdFiscaleIVA>
+          <IdPaese>ImlnsT</IdeP

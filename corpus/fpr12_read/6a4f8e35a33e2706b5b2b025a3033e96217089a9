@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SimtemaEmittente="abc" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlnxsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLodentePrestat  <FatturaElettronicaHeader>
+    >
+      <IdTrasmittente>
+        <IdPaese>	T</IdPaese>
+        <IdCodkice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoIPERARE I CENTO CARATTERI CeiarsHE RAP

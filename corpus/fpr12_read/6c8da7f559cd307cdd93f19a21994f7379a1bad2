@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><FatturaElettronica xmlns="http://ivaservizi.agenzorg/2001/XMLSchema-instance" versione="FPR12">
+  <FatturaElettronicaHeader xmlns="">
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00000</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>FUFUFUF</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Email>local_part@domai~.it</Email>
+      </ContattiTrasmittente>
+    </DatiTrasmica versione="FPA12" SistemaEmittente="abhttp://ivaservizi.agenziaent.gov.it/docs/xsd/fatture/v1.2 fatturaordinadPaese>IT</IdPaese>
+          <IdCodice>01

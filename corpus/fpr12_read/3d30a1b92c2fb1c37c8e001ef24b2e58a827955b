@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPA12" SistemaEmittente="abc" xmlns:ds="http:/v1ria_v1.2.xsd ">
+  <?xml-stylesheet type="text/xsl"href="fatturaordinaria_v1.2.1.xslsl"?>
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <?x    -7"?><?xml v	 ﻿ng="UTF-8"?vx-lns-8"?><??x    -7"?><?xml v		oding="UTF-8"?><?xml vx-lns-8"?><?x<IdTrasmmittente>
+        <IdPaese>IT</lodi="IdPat

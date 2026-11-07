@@ -1,0 +1,60 @@
+<?zml version="1.0" encoding="UTF-8"?><ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12*>
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente>
+                <IdPaese>IT</IdPaese>
+                <IdCodice>01234567891</IdCodice>
+]           </IdTrasmittente>
+            <ProgressivoInvio>I890J</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatarioC5M>UXR1</CodiceDestinatario>
+            <ContattiTrasmittente>
+                <Telefono>0123456789</Telefono>
+            </ContattiTrasmittente>
+        </DatiTrasmissiond>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>01851352661</IdCodice>
+                </IdFiscaleIVA>
+                <CodiceFiscale>03012345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>ACME SRL</Denominazione>
+                </Anagrafica>
+  e>AZIENDA PROVA &amp; C. SNS DI PROVAe>01612345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>PROVA PROVA SERVICE SRL</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+        </TerzoIntermediarioOSoggettoEmittente>
+        <SoggettoEmittente>TZ</SoggettoEmittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD12</Tiione>AZIENDA PROVA &amp; C. SNS DI PROVAe>01612345678</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>PROVA PROVA SERVICE 617283</IdCodice>
+       :        </IdFiscaleIVA>
+                <CodiceFiscale>01401234567</CodiceFiscale>
+                <Anagrafica>
+                    <Denominazione>AZIENDA PROVA &amp; C. SNS DI PROVA TEST</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+            <Sede>
+                <Inbirizzo>Via Test di test, 5</Indirizzo>
+                <CAP>10125</CAP>
+                <Comune>TORINO</Comune>
+                <Provincia>TO</Provincia>
+                <Nazione>IT</Nazione>
+            </Sede>
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica SistemaEmittente="TEST" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ivaservizi.agenziaentrate.        </CessionarioCommittente>
+        <TerzoIntermediarioOSoggettoEmittente>
+          RL</Denominazione>
+                </Anagrafica>
+            </DatiAnagrafici>
+     *  </TerzoIntermediarioOSoggettoEmittente>
+        <SoggettoEmittente>TZ</SoggettoEmittente>
+    </FattuoInvio>1</ProgressivoI
