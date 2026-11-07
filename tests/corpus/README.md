@@ -128,7 +128,10 @@ invoice with a 1.4 MB attachment.
 ### Files on which `validate` reports violations
 
 Every reported violation is a true SDI finding about the file, checked against
-the Elenco Controlli v2.0 text. Every other readable invoice is clean.
+the Elenco Controlli v2.0 text, and against the Allegato A 1.9.1 operative
+specification for 00471, whose version 2.0 list predates the extension to
+`TD01`, `TD02`, `TD03`, `TD06`, `TD24`, `TD25` and `TD28`. Every other
+readable invoice is clean.
 
 | File | Codes | What the file does |
 | --- | --- | --- |
@@ -137,6 +140,8 @@ the Elenco Controlli v2.0 text. Every other readable invoice is clean.
 | `gobl-sdi/gobl.fatturapa/out/invoice-b2g.xml` | 00427 | `FPA12` with a seven character `CodiceDestinatario` |
 | `gobl-sdi/gobl.fatturapa/out/invoice-simple-with-credits.xml` | 00423 | a credit line with positive amounts and a negative `PrezzoTotale` |
 | `horstoeko-invoicesuite/02_technical_xml_fatturapa.xml` | 00423 | a line `ScontoMaggiorazione` with both `Percentuale` and `Importo` |
+| `json2fatturapaxml/IT03469550986_PA001.xml` | 00471 | a `TD01` with a seller and a buyer sharing the same `IdFiscaleIVA` |
+| `json2fatturapaxml/IT03469550986_PR001.xml` | 00471 | a `TD01` with a seller and a buyer sharing the same `IdFiscaleIVA` |
 | `kamerozkan/rejected_arithmetic_fpr12.xml` | 00421, 00422 | riepilogo `Imposta` and `ImponibileImporto` off from the recomputed values |
 | `marco-mastella/xmlInvoices/IT01234567890_FPR03.xml` | 00421, 00422 | riepilogo `Imposta` off by one cent and `ImponibileImporto` off by two |
 | `phax-fatturapa/122/bad/IT01234567890_FPR01_TD29_RF20.xml` | 00475 | `TD29` without the buyer `IdFiscaleIVA` |
