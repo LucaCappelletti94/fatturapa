@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Regola BR_00420: <Natura> con valore di tipo N6 a fronte di <EsigibilitaIVA> uguale a S
+     (scissione pagamenti) in DatiRiepilogo: il regime di scissione dei pagamenti è
+     incompatibile con l'inversione contabile (reverse charge). (vale solo per le fatture ordinarie).
+     Fonte: Allegato A - Specifiche tecniche vers 1.9, pag. 118, "Verifica di coerenza sul contenuto".
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9 -->
+<ns2:FatturaElettronica versione="FPR12"
+    xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdTrasmittente>
+            <ProgressivoInvio>00001</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CEDENTE TEST SRL</Denominazione></Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA ROMA 1</Indirizzo><CAP>00100</CAP><Comune>ROMA</Comune><Nazione>IT</Nazione></Sede>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>98765432100</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CLIENTE TEST SRL</Denominazione></Anagrafica>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA MILANO 2</Indirizzo><CAP>20100</CAP><Comune>MILANO</Comune><Nazione>IT</Nazione></Sede>
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD01</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2026-01-15</Data>
+                <Numero>FT/2026/1</Numero>
+            </DatiGeneraliDocumento>
+        </DatiGenerali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+                <NumeroLinea>1</NumeroLinea>
+                <Descrizione>Servizi</Descrizione>
+                <PrezzoUnitario>100.00000000</PrezzoUnitario>
+                <PrezzoTotale>100.00000000</PrezzoTotale>
+                <AliquotaIVA>0.00</AliquotaIVA>
+                <Natura>N6.1</Natura>
+            </DettaglioLinee>
+            <DatiRiepilogo>
+                <AliquotaIVA>0.00</AliquotaIVA>
+                <!-- VIOLAZIONE BR_00420: Natura=N6.1 (reverse charge) incompatibile con EsigibilitaIVA=S (scissione pagamenti) -->
+                <Natura>N6.1</Natura>
+                <EsigibilitaIVA>S</EsigibilitaIVA>
+                <ImponibileImporto>100.00</ImponibileImporto>
+                <Imposta>0.00</Imposta>
+            </DatiRiepilogo>
+        </DatiBeniServizi>
+    </FatturaElettronicaBody>
+</ns2:FatturaElettronica>

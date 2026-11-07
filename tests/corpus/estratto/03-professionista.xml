@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- La parcella di un professionista: cassa previdenziale 4 %,
+     ritenuta d'acconto 20 %, bollo da 2 euro.
+     E' il caso che smonta i controlli scritti male, perche' qui
+     "imponibile piu' imposta" NON fa il totale documento, e il
+     totale documento NON e' quello che si paga. Entrambe le
+     differenze sono legittime. -->
+<p:FatturaElettronica versione="FPR12" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>11122233344</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00003</ProgressivoInvio><FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>11122233344</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>BNCLRA80A41H501K</CodiceFiscale>
+        <Anagrafica><Nome>Laura</Nome><Cognome>Bianchi</Cognome></Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via dei Mille</Indirizzo><NumeroCivico>7</NumeroCivico>
+        <CAP>00185</CAP><Comune>Roma</Comune><Provincia>RM</Provincia><Nazione>IT</Nazione></Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>09876543210</IdCodice></IdFiscaleIVA>
+        <Anagrafica><Denominazione>Officine Rossi S.p.A.</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Corso Italia</Indirizzo><NumeroCivico>3</NumeroCivico>
+        <CAP>10121</CAP><Comune>Torino</Comune><Provincia>TO</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD06</TipoDocumento><Divisa>EUR</Divisa>
+        <Data>2026-02-28</Data><Numero>7/2026</Numero>
+        <DatiRitenuta>
+          <TipoRitenuta>RT01</TipoRitenuta><ImportoRitenuta>200.00</ImportoRitenuta>
+          <AliquotaRitenuta>20.00</AliquotaRitenuta><CausalePagamento>A</CausalePagamento>
+        </DatiRitenuta>
+        <DatiBollo><BolloVirtuale>SI</BolloVirtuale><ImportoBollo>2.00</ImportoBollo></DatiBollo>
+        <DatiCassaPrevidenziale>
+          <TipoCassa>TC22</TipoCassa><AlCassa>4.00</AlCassa>
+          <ImportoContributoCassa>40.00</ImportoContributoCassa>
+          <ImponibileCassa>1000.00</ImponibileCassa><AliquotaIVA>22.00</AliquotaIVA>
+        </DatiCassaPrevidenziale>
+        <ImportoTotaleDocumento>1270.80</ImportoTotaleDocumento>
+        <Causale>Consulenza tecnica gennaio-febbraio 2026</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee><NumeroLinea>1</NumeroLinea>
+        <Descrizione>Consulenza tecnica e assistenza progettuale</Descrizione>
+        <Quantita>20.00</Quantita><UnitaMisura>ORE</UnitaMisura>
+        <PrezzoUnitario>50.00</PrezzoUnitario><PrezzoTotale>1000.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA><Ritenuta>SI</Ritenuta></DettaglioLinee>
+      <DatiRiepilogo><AliquotaIVA>22.00</AliquotaIVA><ImponibileImporto>1040.00</ImponibileImporto>
+        <Imposta>228.80</Imposta><EsigibilitaIVA>I</EsigibilitaIVA></DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento><ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2026-03-30</DataScadenzaPagamento>
+        <ImportoPagamento>1070.80</ImportoPagamento>
+        <IBAN>IT40S0542811101000000567890</IBAN></DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

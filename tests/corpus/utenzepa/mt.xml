@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<types:FileMetadati xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0" versione="1.0"><IdentificativoSdI>99000000001</IdentificativoSdI><NomeFile>IT01234567897_a1B2c.xml.p7m</NomeFile><CodiceDestinatario>UFPROVA</CodiceDestinatario><Formato>FPA12</Formato><TentativiInvio>1</TentativiInvio><MessageId>1</MessageId></types:FileMetadati>

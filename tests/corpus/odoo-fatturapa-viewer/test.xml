@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:FatturaElettronica xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>00000000000</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>TEST01</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+      <PECDestinatario>demo@example.com</PECDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Demo Supplier SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Esempio 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>Roma</Comune>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <StabileOrganizzazione>
+        <Indirizzo>Via Esempio 2</Indirizzo>
+        <CAP>20100</CAP>
+        <Comune>Milano</Comune>
+        <Nazione>IT</Nazione>
+      </StabileOrganizzazione>
+      <RiferimentoAmministrazione>P.IVA: 00000000000</RiferimentoAmministrazione>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>Demo Customer SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Esempio 3</Indirizzo>
+        <CAP>25019</CAP>
+        <Comune>Sirmione</Comune>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2024-01-18</Data>
+        <Numero>TEST-0001</Numero>
+        <ImportoTotaleDocumento>37.62</ImportoTotaleDocumento>
+        <Arrotondamento>0.00</Arrotondamento>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <IdDocumento>ORDER-0001</IdDocumento>
+        <Data>2024-01-17</Data>
+      </DatiOrdineAcquisto>
+      <DatiContratto>
+        <IdDocumento>ORDER-0001</IdDocumento>
+        <Data>2024-01-17</Data>
+      </DatiContratto>
+      <DatiTrasporto>
+        <IndirizzoResa>
+          <Indirizzo>Via Esempio 4</Indirizzo>
+          <CAP>25019</CAP>
+          <Comune>Sirmione</Comune>
+          <Nazione>IT</Nazione>
+        </IndirizzoResa>
+      </DatiTrasporto>
+      <FatturaPrincipale>
+        <NumeroFatturaPrincipale>TEST-0001</NumeroFatturaPrincipale>
+        <DataFatturaPrincipale>2024-01-18</DataFatturaPrincipale>
+      </FatturaPrincipale>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Costi di spedizione</Descrizione>
+        <Quantita>1.00</Quantita>
+        <DataInizioPeriodo>2024-01-18</DataInizioPeriodo>
+        <DataFinePeriodo>2024-01-18</DataFinePeriodo>
+        <PrezzoUnitario>0.00</PrezzoUnitario>
+        <PrezzoTotale>0.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>OrdinatoDa</TipoDato>
+          <RiferimentoTesto>Demo User</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>Spedito da</TipoDato>
+          <RiferimentoTesto>Via Esempio 5,00000,Demo City,IT</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>Spedito a</TipoDato>
+          <RiferimentoTesto>Via Esempio 4,25019,Sirmione,IT</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>Contratto</TipoDato>
+          <RiferimentoTesto>ORDER-0001</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>Prodotto demo</Descrizione>
+        <Quantita>1.00</Quantita>
+        <DataInizioPeriodo>2024-01-18</DataInizioPeriodo>
+        <DataFinePeriodo>2024-01-18</DataFinePeriodo>
+        <PrezzoUnitario>30.84</PrezzoUnitario>
+        <PrezzoTotale>30.84</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>Spedito da</TipoDato>
+          <RiferimentoTesto>Via Esempio 5,00000,Demo City,IT</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>Spedito a</TipoDato>
+          <RiferimentoTesto>Via Esempio 4,25019,Sirmione,IT</RiferimentoTesto>
+        </AltriDatiGestionali>
+        <AltriDatiGestionali>
+          <TipoDato>Contratto</TipoDato>
+          <RiferimentoTesto>ORDER-0001</RiferimentoTesto>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <Arrotondamento>-0.02</Arrotondamento>
+        <ImponibileImporto>30.82</ImponibileImporto>
+        <Imposta>6.78</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP08</ModalitaPagamento>
+        <DataRiferimentoTerminiPagamento>2024-01-18</DataRiferimentoTerminiPagamento>
+        <ImportoPagamento>37.62</ImportoPagamento>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</ns2:FatturaElettronica>

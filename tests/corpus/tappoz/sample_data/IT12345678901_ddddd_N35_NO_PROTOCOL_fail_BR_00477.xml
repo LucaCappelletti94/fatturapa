@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Regola BR_00477: Per TipoDocumento = TD28 (acquisti da San Marino con IVA) il
+     campo <Natura> deve essere valorizzato con N3.5 (operazioni non soggette a IVA
+     per acquisti da San Marino con IVA in fattura cartacea).
+     Fonte: Allegato A - Specifiche tecniche vers 1.9, pag. 121, "Verifica di coerenza sul contenuto".
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9 -->
+<ns2:FatturaElettronica versione="FPR12"
+    xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdTrasmittente>
+            <ProgressivoInvio>00001</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CEDENTE TEST SRL</Denominazione></Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA ROMA 1</Indirizzo><CAP>00100</CAP><Comune>ROMA</Comune><Nazione>IT</Nazione></Sede>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>98765432100</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CLIENTE TEST SRL</Denominazione></Anagrafica>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA MILANO 2</Indirizzo><CAP>20100</CAP><Comune>MILANO</Comune><Nazione>IT</Nazione></Sede>
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD01</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2026-01-15</Data>
+                <Numero>FT/2026/1</Numero>
+            </DatiGeneraliDocumento>
+        </DatiGenerali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+                <NumeroLinea>1</NumeroLinea>
+                <Descrizione>Operazione non imponibile art.8 c.1 lett.c</Descrizione>
+                <PrezzoUnitario>100.00000000</PrezzoUnitario>
+                <PrezzoTotale>100.00000000</PrezzoTotale>
+                <AliquotaIVA>0.00</AliquotaIVA>
+                <Natura>N3.5</Natura>
+            </DettaglioLinee>
+            <DatiRiepilogo>
+                <AliquotaIVA>0.00</AliquotaIVA>
+                <Natura>N3.5</Natura>
+                <!-- VIOLAZIONE BR_00477: TD28 richiede Natura=N3.5, ma manca -->
+                <ImponibileImporto>100.00</ImponibileImporto>
+                <Imposta>0.00</Imposta>
+            </DatiRiepilogo>
+        </DatiBeniServizi>
+    </FatturaElettronicaBody>
+</ns2:FatturaElettronica>

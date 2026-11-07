@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Regola BR_00422: <ImponibileImporto> non calcolato secondo le regole tecniche.
+     Per ogni aliquota IVA distinta deve essere uguale a: Σ PrezzoTotale (linee con stessa
+     aliquota) + Σ ImportoContributoCassa (cassa con stessa aliquota) + Arrotondamento
+     (blocco di riepilogo corrente). Tolleranza ammessa: ±1 euro. (vale solo per le
+     fatture ordinarie).
+     Fonte: Allegato A - Specifiche tecniche vers 1.9, pag. 118, "Verifica di coerenza sul contenuto".
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9 -->
+<ns2:FatturaElettronica versione="FPR12"
+    xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdTrasmittente>
+            <ProgressivoInvio>00001</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CEDENTE TEST SRL</Denominazione></Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA ROMA 1</Indirizzo><CAP>00100</CAP><Comune>ROMA</Comune><Nazione>IT</Nazione></Sede>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>98765432100</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CLIENTE TEST SRL</Denominazione></Anagrafica>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA MILANO 2</Indirizzo><CAP>20100</CAP><Comune>MILANO</Comune><Nazione>IT</Nazione></Sede>
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD01</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2026-01-15</Data>
+                <Numero>FT/2026/1</Numero>
+            </DatiGeneraliDocumento>
+        </DatiGenerali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+                <NumeroLinea>1</NumeroLinea>
+                <Descrizione>Hardware Server Racks</Descrizione>
+                <PrezzoUnitario>120.00000000</PrezzoUnitario>
+                <PrezzoTotale>120.00000000</PrezzoTotale>
+                <AliquotaIVA>22.00</AliquotaIVA>
+            </DettaglioLinee>
+            <DettaglioLinee>
+                <NumeroLinea>2</NumeroLinea>
+                <Descrizione>Cavi e accessori di rete</Descrizione>
+                <PrezzoUnitario>80.00000000</PrezzoUnitario>
+                <PrezzoTotale>80.00000000</PrezzoTotale>
+                <AliquotaIVA>22.00</AliquotaIVA>
+            </DettaglioLinee>
+            <!-- Somma PrezzoTotale per AliquotaIVA=22.00 è 200.00 (120+80) -->
+            <DatiRiepilogo>
+                <AliquotaIVA>22.00</AliquotaIVA>
+                <!-- VIOLAZIONE BR_00422: ImponibileImporto=300.00 ma somma PrezzoTotale è 200.00 -->
+                <ImponibileImporto>300.00</ImponibileImporto>
+                <Imposta>66.00</Imposta>
+            </DatiRiepilogo>
+        </DatiBeniServizi>
+    </FatturaElettronicaBody>
+</ns2:FatturaElettronica>

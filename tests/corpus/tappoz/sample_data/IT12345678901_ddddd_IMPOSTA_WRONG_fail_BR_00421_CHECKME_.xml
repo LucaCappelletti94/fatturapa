@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Regola BR_00421: <Imposta> non calcolata secondo le regole tecniche.
+     Formula: Imposta = round(AliquotaIVA * ImponibileImporto / 100, 2) con arrotondamento
+     half-up. Tolleranza ammessa: ±0,01 euro. (vale solo per le fatture ordinarie).
+     Fonte: Allegato A - Specifiche tecniche vers 1.9, pag. 118, "Verifica di coerenza sul contenuto".
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9
+     NOTA: Duplicato di IT12345678901_ddddd_IMPOSTA_WRONG_fail_BR_00421.xml per verifica -->
+<ns2:FatturaElettronica versione="FPR12"
+    xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdTrasmittente>
+            <ProgressivoInvio>00001</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CEDENTE TEST SRL</Denominazione></Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA ROMA 1</Indirizzo><CAP>00100</CAP><Comune>ROMA</Comune><Nazione>IT</Nazione></Sede>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>98765432100</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CLIENTE TEST SRL</Denominazione></Anagrafica>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA MILANO 2</Indirizzo><CAP>20100</CAP><Comune>MILANO</Comune><Nazione>IT</Nazione></Sede>
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD01</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2026-01-15</Data>
+                <Numero>FT/2026/1</Numero>
+            </DatiGeneraliDocumento>
+        </DatiGenerali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+                <NumeroLinea>1</NumeroLinea>
+                <Descrizione>Licenze software annuali</Descrizione>
+                <PrezzoUnitario>70.00000000</PrezzoUnitario>
+                <PrezzoTotale>70.00000000</PrezzoTotale>
+                <AliquotaIVA>22.00</AliquotaIVA>
+            </DettaglioLinee>
+            <DettaglioLinee>
+                <NumeroLinea>2</NumeroLinea>
+                <Descrizione>Servizi di installazione</Descrizione>
+                <PrezzoUnitario>30.00000000</PrezzoUnitario>
+                <PrezzoTotale>30.00000000</PrezzoTotale>
+                <AliquotaIVA>22.00</AliquotaIVA>
+            </DettaglioLinee>
+            <DatiRiepilogo>
+                <AliquotaIVA>22.00</AliquotaIVA>
+                <ImponibileImporto>100.00</ImponibileImporto>
+                <!-- VIOLAZIONE BR_00421: Imposta=25.00 ma dovrebbe essere round(22.00 * 100.00 / 100, 2) = 22.00 -->
+                <Imposta>25.00</Imposta>
+            </DatiRiepilogo>
+        </DatiBeniServizi>
+    </FatturaElettronicaBody>
+</ns2:FatturaElettronica>

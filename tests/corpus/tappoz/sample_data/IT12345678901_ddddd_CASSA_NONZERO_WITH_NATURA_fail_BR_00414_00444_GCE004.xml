@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Regola BR_00414: In DatiCassaPrevidenziale, se <AliquotaIVA>!=0 non deve esserci <Natura>.
+     Fonte: Allegato A - Specifiche tecniche vers 1.9, pag. 117, §2.1.7.
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9
+
+Regola BR_00444: Non c'è corrispondenza tra i valori di <Natura> nelle linee
+     di dettaglio o nei DatiCassaPrevidenziale e quelli nei DatiRiepilogo: tutti i
+     valori di natura presenti nelle linee di dettaglio o nei DatiCassaPrevidenziale
+     devono comparire anche nei DatiRiepilogo. (vale solo per le fatture ordinarie).
+     Fonte: Allegato A - Specifiche tecniche vers 1.9, pag. 120, "Verifica di coerenza sul contenuto".
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9
+
+Regola GCE004: Il tipo documento TD16 (integrazione fattura reverse charge
+     interno) deve essere utilizzato esclusivamente con codici Natura da N6.1 a N6.9.
+     Fonte: Guida alla compilazione delle fatture elettroniche e dell'esterometro – Versione 1.10, pag. 10, sezione TD16.
+     URL: https://www.agenziaentrate.gov.it/portale/documents/d/guest/guida_compilazione-fe-esterometro-v1-10_aprile_2025 -->
+<ns2:FatturaElettronica versione="FPR12"
+    xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+    <FatturaElettronicaHeader>
+        <DatiTrasmissione>
+            <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdTrasmittente>
+            <ProgressivoInvio>00001</ProgressivoInvio>
+            <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+            <CodiceDestinatario>ABCDEF1</CodiceDestinatario>
+        </DatiTrasmissione>
+        <CedentePrestatore>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>12345678901</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CEDENTE TEST SRL</Denominazione></Anagrafica>
+                <RegimeFiscale>RF01</RegimeFiscale>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA ROMA 1</Indirizzo><CAP>00100</CAP><Comune>ROMA</Comune><Nazione>IT</Nazione></Sede>
+        </CedentePrestatore>
+        <CessionarioCommittente>
+            <DatiAnagrafici>
+                <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>98765432100</IdCodice></IdFiscaleIVA>
+                <Anagrafica><Denominazione>CLIENTE TEST SRL</Denominazione></Anagrafica>
+            </DatiAnagrafici>
+            <Sede><Indirizzo>VIA MILANO 2</Indirizzo><CAP>20100</CAP><Comune>MILANO</Comune><Nazione>IT</Nazione></Sede>
+        </CessionarioCommittente>
+    </FatturaElettronicaHeader>
+    <FatturaElettronicaBody>
+        <DatiGenerali>
+            <DatiGeneraliDocumento>
+                <TipoDocumento>TD16</TipoDocumento>
+                <Divisa>EUR</Divisa>
+                <Data>2026-01-15</Data>
+                <Numero>FT/2026/1</Numero>
+                <DatiCassaPrevidenziale>
+                    <TipoCassa>TC01</TipoCassa>
+                    <AlCassa>4.00</AlCassa>
+                    <ImportoContributoCassa>50.00</ImportoContributoCassa>
+                    <AliquotaIVA>22.00</AliquotaIVA>
+                    <!-- VIOLAZIONE BR_00414: AliquotaIVA!=0 (22.00) ma Natura è presente -->
+                    <!-- VIOLAZIONE BR_00444: Natura=N6.1 non presente in DatiRiepilogo -->
+                    <Natura>N6.1</Natura>
+                </DatiCassaPrevidenziale>
+            </DatiGeneraliDocumento>
+        </DatiGenerali>
+        <DatiBeniServizi>
+            <DettaglioLinee>
+                <NumeroLinea>1</NumeroLinea>
+                <Descrizione>Servizi</Descrizione>
+                <PrezzoUnitario>100.00000000</PrezzoUnitario>
+                <PrezzoTotale>100.00000000</PrezzoTotale>
+                <AliquotaIVA>22.00</AliquotaIVA>
+            </DettaglioLinee>
+            <DatiRiepilogo>
+                <AliquotaIVA>22.00</AliquotaIVA>
+                <!-- VIOLAZIONE BR_00444: Natura=N2.1 differisce da DatiCassaPrevidenziale N6.1 -->
+                <!-- VIOLAZIONE GCE004: TD16 richiede Natura N6.x (N6.1-N6.9), non N2.1 -->
+                <Natura>N2.1</Natura>
+                <ImponibileImporto>150.00</ImponibileImporto>
+                <Imposta>33.00</Imposta>
+            </DatiRiepilogo>
+        </DatiBeniServizi>
+    </FatturaElettronicaBody>
+</ns2:FatturaElettronica>
