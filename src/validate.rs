@@ -6,6 +6,12 @@
 //! SDI error code, a short English message and the path of the offending
 //! element. `validate` returns every violation it finds, not only the first.
 //!
+//! The 00471 and 00472 criteria follow the *Allegato A* technical
+//! specification 1.9.1, history row 1.7.1 of 01/10/2022, rather than the
+//! version 2.0 list, which predates the extension to `TD01`, `TD02`, `TD03`,
+//! `TD06`, `TD24`, `TD25` and `TD28` of the ordinary invoice, `TD07` of the
+//! simplified invoice and `TD27` for 00472.
+//!
 //! Paths use the official element names, with 1-based indices for repeated
 //! elements, relative to the document root, such as
 //! `FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/Natura`.
@@ -73,8 +79,8 @@
 //! | 00443 | line or cassa rate missing from the `DatiRiepilogo` blocks | implemented | out of reach |
 //! | 00444 | line or cassa `Natura` missing from the `DatiRiepilogo` blocks | implemented | out of reach |
 //! | 00445 | the generic nature `N2`, `N3` or `N6` | implemented | implemented, `N6` is not a simplified nature |
-//! | 00471 | seller and buyer identical for the document type | implemented | out of reach, the simplified types are `TD07` to `TD09` |
-//! | 00472 | seller and buyer must be identical for `TD21` | implemented | out of reach |
+//! | 00471 | seller and buyer identical for the document type | implemented | implemented, only for `TD07` |
+//! | 00472 | seller and buyer must be identical for `TD21` and `TD27` | implemented | out of reach |
 //! | 00473 | seller `IdPaese` not allowed for the document type | implemented | out of reach |
 //! | 00474 | `TD21` with a zero-rate line | implemented | out of reach |
 //! | 00475 | buyer `IdFiscaleIVA` required for the document type | implemented | out of reach |
@@ -249,6 +255,18 @@ pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violatio
             .content
             .dati_generali_documento
             .content;
+        if doc_data.tipo_documento == crate::generated::fsm10::TipoDocumentoType::Td07
+            && buyer
+                .id_fiscale_iva
+                .as_ref()
+                .is_some_and(|buyer| buyer == seller)
+        {
+            v.push(Violation::new(
+                "00471",
+                format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
+                "the seller and the buyer are identical for this TipoDocumento",
+            ));
+        }
         if !doc_data.numero.bytes().any(|b| b.is_ascii_digit()) {
             v.push(Violation::new(
                 "00425",
@@ -754,8 +772,31 @@ fn check_credit_note_dates(
     }
 }
 
-/// The 00471, 00472 and 00475 checks on the parties against the document
-/// type.
+/// The `TipoDocumento` values for which 00471 rejects an identical seller
+/// and buyer, per the Allegato A 1.9.1 list.
+const IDENTICAL_PARTIES_REJECTED: &[TipoDocumentoType] = &[
+    TipoDocumentoType::Td01,
+    TipoDocumentoType::Td02,
+    TipoDocumentoType::Td03,
+    TipoDocumentoType::Td06,
+    TipoDocumentoType::Td16,
+    TipoDocumentoType::Td17,
+    TipoDocumentoType::Td18,
+    TipoDocumentoType::Td19,
+    TipoDocumentoType::Td20,
+    TipoDocumentoType::Td24,
+    TipoDocumentoType::Td25,
+    TipoDocumentoType::Td28,
+    TipoDocumentoType::Td29,
+];
+
+/// The `TipoDocumento` values for which 00472 requires an identical seller
+/// and buyer, per the Allegato A 1.9.1 list.
+const IDENTICAL_PARTIES_REQUIRED: &[TipoDocumentoType] =
+    &[TipoDocumentoType::Td21, TipoDocumentoType::Td27];
+
+/// The 00471, 00472, 00473 and 00475 checks on the parties against the
+/// document type.
 fn check_parties(
     bi: usize,
     tipo: &TipoDocumentoType,
@@ -774,37 +815,29 @@ fn check_parties(
         .content
         .dati_anagrafici
         .content;
-    match *tipo {
-        TipoDocumentoType::Td16
-        | TipoDocumentoType::Td17
-        | TipoDocumentoType::Td18
-        | TipoDocumentoType::Td19
-        | TipoDocumentoType::Td20
-        | TipoDocumentoType::Td29
-            if buyer
-                .id_fiscale_iva
-                .as_ref()
-                .is_some_and(|buyer| buyer == seller) =>
-        {
-            v.push(Violation::new(
-                "00471",
-                format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
-                "the seller and the buyer are identical for this TipoDocumento",
-            ));
-        }
-        TipoDocumentoType::Td21
-            if buyer
-                .id_fiscale_iva
-                .as_ref()
-                .is_some_and(|buyer| buyer != seller) =>
-        {
-            v.push(Violation::new(
-                "00472",
-                format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
-                "the seller and the buyer differ for this TipoDocumento",
-            ));
-        }
-        _ => {}
+    if IDENTICAL_PARTIES_REJECTED.contains(tipo)
+        && buyer
+            .id_fiscale_iva
+            .as_ref()
+            .is_some_and(|buyer| buyer == seller)
+    {
+        v.push(Violation::new(
+            "00471",
+            format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
+            "the seller and the buyer are identical for this TipoDocumento",
+        ));
+    }
+    if IDENTICAL_PARTIES_REQUIRED.contains(tipo)
+        && buyer
+            .id_fiscale_iva
+            .as_ref()
+            .is_some_and(|buyer| buyer != seller)
+    {
+        v.push(Violation::new(
+            "00472",
+            format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/TipoDocumento"),
+            "the seller and the buyer differ for this TipoDocumento",
+        ));
     }
     if matches!(
         tipo,

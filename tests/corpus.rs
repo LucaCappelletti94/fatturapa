@@ -332,8 +332,10 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
 
 /// The readable invoices on which `validate` or `validate_simplified` is
 /// expected to report violations, as (code, path) pairs, every one a true
-/// SDI finding checked against the Elenco Controlli v2.0 text. Every
-/// readable invoice that is not listed here is clean.
+/// SDI finding checked against the Elenco Controlli v2.0 text, and against
+/// the Allegato A 1.9.1 operative specification for the 00471 and 00472
+/// criteria, which its version 2.0 list predates. Every readable invoice
+/// that is not listed here is clean.
 const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
     (
         "fatturaelettronica-php/IT01234567899_000sq.xml",
@@ -382,6 +384,20 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
         &[(
             "00423",
             "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/PrezzoTotale",
+        )],
+    ),
+    (
+        "json2fatturapaxml/IT03469550986_PA001.xml",
+        &[(
+            "00471",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
+        )],
+    ),
+    (
+        "json2fatturapaxml/IT03469550986_PR001.xml",
+        &[(
+            "00471",
+            "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento",
         )],
     ),
     (

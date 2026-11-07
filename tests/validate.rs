@@ -844,6 +844,84 @@ fn code_00472_different_parties_for_td21() {
     assert_absent(&validate(&doc), "00472");
 }
 
+/// 00471: for `TD01`, `TD02`, `TD03`, `TD06`, `TD24`, `TD25` and `TD28` the
+/// seller and the buyer must differ; the internal transfer `TD26` stays
+/// outside the check; the base document with a different buyer passes.
+#[test]
+fn code_00471_identical_parties_for_the_sale_and_transfer_types() {
+    for tipo in [
+        g::TipoDocumentoType::Td01,
+        g::TipoDocumentoType::Td02,
+        g::TipoDocumentoType::Td03,
+        g::TipoDocumentoType::Td06,
+        g::TipoDocumentoType::Td24,
+        g::TipoDocumentoType::Td25,
+        g::TipoDocumentoType::Td26,
+        g::TipoDocumentoType::Td28,
+    ] {
+        let expect_00471 = tipo != g::TipoDocumentoType::Td26;
+        let mut doc = base();
+        doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_generali
+            .content
+            .dati_generali_documento
+            .content
+            .tipo_documento = tipo;
+        let buyer = &mut doc
+            .content
+            .fattura_elettronica_header
+            .content
+            .cessionario_committente
+            .content
+            .dati_anagrafici
+            .content;
+        buyer.id_fiscale_iva = Some(id_iva("IT", "01234567897"));
+        if expect_00471 {
+            assert_has(&validate(&doc), "00471");
+        } else {
+            assert_absent(&validate(&doc), "00471");
+        }
+    }
+
+    let doc = base();
+    assert_absent(&validate(&doc), "00471");
+}
+
+/// 00472: for `TD27` the seller and the buyer must be identical; the base
+/// document with a different buyer triggers it and the same buyer passes.
+#[test]
+fn code_00472_different_parties_for_td27() {
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = g::TipoDocumentoType::Td27;
+    assert_has(&validate(&doc), "00472");
+
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = g::TipoDocumentoType::Td27;
+    let buyer = &mut doc
+        .content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .dati_anagrafici
+        .content;
+    buyer.id_fiscale_iva = Some(id_iva("IT", "01234567897"));
+    assert_absent(&validate(&doc), "00472");
+}
+
 /// 00473: for `TD17` an Italian seller is not allowed and for `TD29` a
 /// non-Italian seller is; a non-Italian seller with `TD17` passes.
 #[test]
@@ -1675,4 +1753,42 @@ fn code_00476_simplified() {
         .content
         .id_fiscale_iva = Some(sg_id("IT", "IT0987654321"));
     assert_absent(&validate_simplified(&doc), "00476");
+}
+
+/// 00471: for `TD07` the simplified seller and the buyer must differ. The
+/// same parties trigger it, the base buyer with a tax code passes, and the
+/// same parties with a `TD08` correction pass.
+#[test]
+fn code_00471_simplified() {
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .identificativi_fiscali
+        .content
+        .id_fiscale_iva = Some(sg_id("IT", "01234567890"));
+    assert_has(&validate_simplified(&doc), "00471");
+
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = sg::TipoDocumentoType::Td08;
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cessionario_committente
+        .content
+        .identificativi_fiscali
+        .content
+        .id_fiscale_iva = Some(sg_id("IT", "01234567890"));
+    assert_absent(&validate_simplified(&doc), "00471");
+
+    let doc = doc_simplified();
+    assert_absent(&validate_simplified(&doc), "00471");
 }
