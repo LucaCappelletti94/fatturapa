@@ -504,9 +504,9 @@ const EXPECTED_XSD_FAILURES: &[(&str, &str)] = &[
 /// The readable invoices on which `validate` or `validate_simplified` is
 /// expected to report violations, as (code, path) pairs, every one a true
 /// SDI finding checked against the Elenco Controlli v2.0 text, and against
-/// the Allegato A 1.9.1 operative specification for the 00313, 00471 and
-/// 00472 criteria, which its version 2.0 list predates. Every readable invoice
-/// that is not listed here is clean.
+/// the Allegato A 1.9.1 operative specification for the 00313, 00330,
+/// 00471 and 00472 criteria, which its version 2.0 list predates. Every
+/// readable invoice that is not listed here is clean.
 const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
     (
         "estratto/08-imposta-errata.xml",
@@ -949,6 +949,13 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
         )],
     ),
     (
+        "tappoz/sample_data/IT12345678901_ddddd_SDI_PEC_fail_BR_00330.xml",
+        &[(
+            "00330",
+            "FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario",
+        )],
+    ),
+    (
         "tappoz/sample_data/IT12345678901_ddddd_TD17_NO_IDIVA_CC_fail_BR_00475.xml",
         &[(
             "00475",
@@ -1369,10 +1376,6 @@ const TAPPOZ_OUT_OF_REACH: &[(&str, &str)] = &[
     ("00324", "needs the tax registry"),
     ("00325", "needs the IVA group registry"),
     ("00326", "needs the IVA group registry"),
-    (
-        "00330",
-        "decidable from the document but not implemented yet",
-    ),
     ("00403", "needs the SDI reception date"),
     ("00404", "needs the SDI state"),
     ("00428", "guaranteed by construction"),

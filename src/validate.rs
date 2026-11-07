@@ -16,6 +16,11 @@
 //! per the operative specification *Allegato A*, version 1.9.1, which
 //! updated the control for the simplified invoice on 01/01/2022.
 //!
+//! The check 00330 is not in the Elenco Controlli. The crate implements it
+//! per the operative specification *Allegato A*, version 1.9.1, whose
+//! `PECDestinatario` paragraph forbids the SDI operational mailboxes of
+//! the pattern `sdixx@pec.fatturapa.it`.
+//!
 //! Paths use the official element names, with 1-based indices for repeated
 //! elements, relative to the document root, such as
 //! `FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/Natura`.
@@ -55,6 +60,7 @@
 //! | 00322 | seller tax code missing for an IVA group | out of reach, tax registry | out of reach |
 //! | 00323 | seller VAT number ceased for more than 5 years | out of reach, tax registry | out of reach |
 //! | 00324 | buyer VAT number and tax code not coherent | out of reach, tax registry | out of reach |
+//! | 00330 | `PECDestinatario` is an SDI operational PEC mailbox | implemented | implemented |
 //! | 00398 | IPA office not identified for a Centrale code | out of reach, IPA registry | out of reach |
 //! | 00399 | buyer missing from the IPA registry | out of reach, IPA registry | out of reach |
 //! | 00400 | line `Natura` missing at a zero `AliquotaIVA` | implemented | out of reach, the simplified invoice has no lines |
@@ -191,6 +197,23 @@ const fn is_generic_natura(natura: Option<&NaturaType>) -> bool {
     )
 }
 
+/// Whether the `PECDestinatario` `pec` is one of the SDI operational
+/// mailboxes, check 00330. The *Allegato A* 1.9.1 `PECDestinatario`
+/// paragraph forbids the addresses of the pattern
+/// `sdixx@pec.fatturapa.it`, the load balanced set of mailboxes the SDI
+/// uses to receive the files, the first being `sdi01`. The check is the
+/// exact match of the 22 character pattern, the `xx` any two characters,
+/// ignoring case, since the e-mail domain is case insensitive per RFC 5321
+/// and the `pec.fatturapa.it` domain belongs to the SDI, so no private
+/// mailbox is misreported.
+fn is_sdi_pec_mailbox(pec: &str) -> bool {
+    let bytes = pec.as_bytes();
+    bytes.len() == 22
+        && bytes[..3].eq_ignore_ascii_case(b"sdi")
+        && bytes[5] == b'@'
+        && bytes[6..].eq_ignore_ascii_case(b"pec.fatturapa.it")
+}
+
 /// The `N6` family of reverse charge natures.
 const fn is_n6(natura: &NaturaType) -> bool {
     matches!(
@@ -235,15 +258,27 @@ pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violatio
     v
 }
 
-/// The header-level checks of the simplified invoice, 00313, 00417, 00427
-/// and 00476.
+/// The header-level checks of the simplified invoice, 00313, 00330, 00417,
+/// 00427 and 00476.
 fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) {
-    let cod = &header.dati_trasmissione.content.codice_destinatario;
+    let trasmissione = &header.dati_trasmissione.content;
+    let cod = &trasmissione.codice_destinatario;
     if cod.len() == 6 {
         v.push(Violation::new(
             "00427",
             "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario".to_string(),
             "a 6 character CodiceDestinatario is not allowed in FSM10",
+        ));
+    }
+    if trasmissione
+        .pec_destinatario
+        .as_deref()
+        .is_some_and(is_sdi_pec_mailbox)
+    {
+        v.push(Violation::new(
+            "00330",
+            "FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario".to_string(),
+            "the PECDestinatario is one of the SDI operational PEC mailboxes",
         ));
     }
     let buyer = &header
@@ -406,7 +441,7 @@ fn check_simplified_cap(
     }
 }
 
-/// The header-level checks 00313, 00417, 00427 and 00476.
+/// The header-level checks 00313, 00330, 00417, 00427 and 00476.
 fn check_header(header: &FatturaElettronicaHeaderTypeContent, v: &mut Vec<Violation>) {
     let trasmissione = &header.dati_trasmissione.content;
     let cod = &trasmissione.codice_destinatario;
@@ -419,6 +454,17 @@ fn check_header(header: &FatturaElettronicaHeaderTypeContent, v: &mut Vec<Violat
             ));
         }
         _ => {}
+    }
+    if trasmissione
+        .pec_destinatario
+        .as_deref()
+        .is_some_and(is_sdi_pec_mailbox)
+    {
+        v.push(Violation::new(
+            "00330",
+            "FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario".to_string(),
+            "the PECDestinatario is one of the SDI operational PEC mailboxes",
+        ));
     }
     let buyer = &header
         .cessionario_committente

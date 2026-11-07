@@ -288,6 +288,45 @@ fn code_00313_xxxxxxx_without_the_buyer_iva() {
     assert_absent(&validate(&doc), "00417");
 }
 
+/// 00330: a `PECDestinatario` on one of the `SdI` operational mailboxes,
+/// the pattern `sdixx@pec.fatturapa.it`, triggers it. The match ignores
+/// case, the e-mail domain being case insensitive. A local part shorter
+/// or longer than the `sdi` prefix and the two characters, and any other
+/// domain, pass.
+#[test]
+fn code_00330_sdi_pec_mailbox() {
+    for (pec, expected) in [
+        ("sdi01@pec.fatturapa.it", true),
+        ("SDI01@PEC.FATTURAPA.IT", true),
+        ("Sdi42@Pec.FatturaPa.IT", true),
+        ("sdi99@pec.fatturapa.it", true),
+        ("sdi1@pec.fatturapa.it", false),
+        ("sdi001@pec.fatturapa.it", false),
+        ("sdi01@pec.fattura.it", false),
+        ("sdi01@pec.fatturapa.it.example.com", false),
+        ("beta@pec.it", false),
+        ("abc01@pec.fatturapa.it", false),
+        ("sdi01#pec.fatturapa.it", false),
+        ("sdi01@pec.fatturapa.xy", false),
+        ("sd\u{e9}1@pec.fatturapa.it", false),
+    ] {
+        let mut doc = base();
+        doc.content
+            .fattura_elettronica_header
+            .content
+            .dati_trasmissione
+            .content
+            .pec_destinatario = Some(pec.to_string());
+        let v = validate(&doc);
+        if expected {
+            assert_has(&v, "00330");
+        } else {
+            assert_absent(&v, "00330");
+        }
+    }
+    assert_absent(&validate(&base()), "00330");
+}
+
 /// 00400: a zero-rate line without a `Natura` triggers it; the same line
 /// with a `Natura` passes.
 #[test]
@@ -1781,6 +1820,41 @@ fn code_00313_simplified() {
 
     let doc = doc_simplified();
     assert_absent(&validate_simplified(&doc), "00313");
+}
+
+/// 00330: a simplified `PECDestinatario` on one of the `SdI` operational
+/// mailboxes triggers it, case insensitively; the base document passes.
+#[test]
+fn code_00330_simplified() {
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .pec_destinatario = Some("sdi01@pec.fatturapa.it".to_string());
+    assert_has(&validate_simplified(&doc), "00330");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .pec_destinatario = Some("SDI03@PEC.FATTURAPA.IT".to_string());
+    assert_has(&validate_simplified(&doc), "00330");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .pec_destinatario = Some("beta@pec.it".to_string());
+    assert_absent(&validate_simplified(&doc), "00330");
+
+    let doc = doc_simplified();
+    assert_absent(&validate_simplified(&doc), "00330");
 }
 
 /// 00417: a simplified buyer with neither identifier triggers it; the base

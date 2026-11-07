@@ -2654,6 +2654,30 @@ mod tests {
         );
     }
 
+    /// The `Recipient::Pec` of one of the `SDI` operational mailboxes is
+    /// rejected at `build` with 00330.
+    #[test]
+    fn domestic_rejects_an_sdi_pec_mailbox_with_00330() {
+        let built = Invoice::domestic(
+            &seller(),
+            &buyer_rome(),
+            Recipient::Pec("sdi01@pec.fatturapa.it".parse().expect("a valid pec")),
+            taxed_line(10000),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .build();
+        assert!(
+            matches!(
+                &built,
+                Err(BuildError::Violations(violations))
+                    if violations.iter().any(|v| v.code == "00330")
+            ),
+            "the SdI PEC mailbox must fail with 00330: {built:?}"
+        );
+    }
+
     #[test]
     fn cross_border_lines_carry_the_seven_ter_nature() {
         let doc = Invoice::cross_border_services(&seller(), &buyer_us(), seven_ter_line())
