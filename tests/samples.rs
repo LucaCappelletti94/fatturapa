@@ -40,14 +40,24 @@ fn round_trip_sdi<T: Document + std::fmt::Debug + PartialEq>(file: &str) {
     assert_eq!(doc, reread);
 }
 
-/// The `round_trip_sdi` variant for the signed samples: it reads the sample,
-/// writes it and re-reads it equal, without XSD-validating the written bytes,
-/// because writing a `ds:Signature` waits for the upstream `xsd-parser` fix.
-fn read_stable_sdi<T: Document + std::fmt::Debug + PartialEq>(file: &str) {
-    let doc = T::from_xml_slice(&support::sample_bytes(file)).expect("the sample reads");
-    let bytes = doc.to_xml_vec().expect("the message serialises");
-    let reread = T::from_xml_slice(&bytes).expect("the written message reads");
-    assert_eq!(doc, reread);
+/// The `round_trip_sdi` variant for the signed samples. It reads the sample,
+/// writes it and re-reads it. The written bytes are not XSD-validated, because
+/// the `xsd-parser` writes the `ds:Signature` reference without its namespace
+/// (Bergmann89/xsd-parser#308). The two reads must be
+/// equal in every field. The only part that may differ is the namespace
+/// declarations of the `xs:any` content inside the signature, which the
+/// `xsd-parser` does not keep stable on serialisation. The macro normalises the
+/// signature of both reads before comparing the whole message.
+macro_rules! read_stable_sdi_signed {
+    ($type:ty, $file:expr) => {
+        let mut doc =
+            <$type>::from_xml_slice(&support::sample_bytes($file)).expect("the sample reads");
+        let bytes = doc.to_xml_vec().expect("the message serialises");
+        let mut reread = <$type>::from_xml_slice(&bytes).expect("the written message reads");
+        doc.content.signature = support::normalize_sdi_signature(doc.content.signature);
+        reread.content.signature = support::normalize_sdi_signature(reread.content.signature);
+        assert_eq!(doc, reread, "the {} sample round-trips", stringify!($type));
+    };
 }
 
 /// `FPA01` is an ordinary invoice sample, the public administration flavour.
@@ -164,10 +174,13 @@ fn sample_ec_round_trip() {
 }
 
 /// `AT` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_at_read_stable() {
-    read_stable_sdi::<AttestazioneTrasmissioneFattura>("IT01234567890_11111_AT_001.xml");
+    read_stable_sdi_signed!(
+        AttestazioneTrasmissioneFattura,
+        "IT01234567890_11111_AT_001.xml"
+    );
 }
 
 /// `AT` written bytes validate against the SDI schema.
@@ -178,10 +191,10 @@ fn sample_at_written_validates() {
 }
 
 /// `DT` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_dt_read_stable() {
-    read_stable_sdi::<NotificaDecorrenzaTermini>("IT01234567890_11111_DT_001.xml");
+    read_stable_sdi_signed!(NotificaDecorrenzaTermini, "IT01234567890_11111_DT_001.xml");
 }
 
 /// `DT` written bytes validate against the SDI schema.
@@ -192,10 +205,10 @@ fn sample_dt_written_validates() {
 }
 
 /// `MC` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_mc_read_stable() {
-    read_stable_sdi::<NotificaMancataConsegna>("IT01234567890_11111_MC_001.xml");
+    read_stable_sdi_signed!(NotificaMancataConsegna, "IT01234567890_11111_MC_001.xml");
 }
 
 /// `MC` written bytes validate against the SDI schema.
@@ -206,10 +219,10 @@ fn sample_mc_written_validates() {
 }
 
 /// `NE` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_ne_read_stable() {
-    read_stable_sdi::<NotificaEsito>("IT01234567890_11111_NE_001.xml");
+    read_stable_sdi_signed!(NotificaEsito, "IT01234567890_11111_NE_001.xml");
 }
 
 /// `NE` written bytes validate against the SDI schema.
@@ -220,10 +233,10 @@ fn sample_ne_written_validates() {
 }
 
 /// `NS` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_ns_read_stable() {
-    read_stable_sdi::<NotificaScarto>("IT01234567890_11111_NS_001.xml");
+    read_stable_sdi_signed!(NotificaScarto, "IT01234567890_11111_NS_001.xml");
 }
 
 /// `NS` written bytes validate against the SDI schema.
@@ -234,10 +247,10 @@ fn sample_ns_written_validates() {
 }
 
 /// `RC` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_rc_read_stable() {
-    read_stable_sdi::<RicevutaConsegna>("IT01234567890_11111_RC_001.xml");
+    read_stable_sdi_signed!(RicevutaConsegna, "IT01234567890_11111_RC_001.xml");
 }
 
 /// `RC` written bytes validate against the SDI schema.
@@ -248,10 +261,10 @@ fn sample_rc_written_validates() {
 }
 
 /// `SE` carries a `ds:Signature`. Reading and re-reading the written copy
-/// must stay equal; the XSD validation waits for the upstream fix.
+/// must succeed; the XSD validation waits for the upstream fix.
 #[test]
 fn sample_se_read_stable() {
-    read_stable_sdi::<ScartoEsitoCommittente>("IT01234567890_11111_SE_001.xml");
+    read_stable_sdi_signed!(ScartoEsitoCommittente, "IT01234567890_11111_SE_001.xml");
 }
 
 /// `SE` written bytes validate against the SDI schema.

@@ -582,11 +582,13 @@ pub(crate) fn signature() -> sdi::Signature {
                     canonicalization_method: sdi::CanonicalizationMethodType {
                         algorithm: "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"
                             .to_string(),
+                        content: sdi::CanonicalizationMethodTypeContent { any: Vec::new() },
                     },
                     signature_method: sdi::SignatureMethodType {
                         algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1".to_string(),
                         content: sdi::SignatureMethodTypeContent {
                             hmac_output_length: None,
+                            any: Vec::new(),
                         },
                     },
                     reference: vec![sdi::ReferenceType {
@@ -597,6 +599,7 @@ pub(crate) fn signature() -> sdi::Signature {
                             transforms: None,
                             digest_method: sdi::DigestMethodType {
                                 algorithm: "http://www.w3.org/2000/09/xmldsig#sha1".to_string(),
+                                content: sdi::DigestMethodTypeContent { any: Vec::new() },
                             },
                             digest_value: Base64String("QVFBQVFBVQ==".to_string()),
                         },

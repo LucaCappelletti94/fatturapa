@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>00000000001</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>8SBV6</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>RN00000</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Telefono>00-000000000</Telefono>
+      </ContattiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000001</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00000000001</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AAAAAAAAAA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Test, 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>Roma</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>RM</Ufficio>
+        <NumeroREA>2222222</NumeroREA>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+      <Contatti>
+        <Email>test@mail.com</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>XXXXXX01A01H501X</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>XXXXXXXX WWW</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA YYYYYYYYYY 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000002</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00000000002</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>BBBBBBBBBBBB</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2020-12-11</Data>
+        <Numero>492/B</Numero>
+        <ImportoTotaleDocumento>20.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>AswArtFor</CodiceTipo>
+          <CodiceValore>8034028330476</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>CAFFE'</Descrizione>
+        <Quantita>1.00</Quantita>
+        <UnitaMisura>SCT</UnitaMisura>
+        <PrezzoUnitario>18.18</PrezzoUnitario>
+        <PrezzoTotale>18.18</PrezzoTotale>
+        <AliquotaIVA>10.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>10.00</AliquotaIVA>
+        <Arrotondamento>0.00</Arrotondamento>
+        <ImponibileImporto>18.18</ImponibileImporto>
+        <Imposta>1.82</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP01</ModalitaPagamento>
+        <DataScadenzaPagamento>2020-12-11</DataScadenzaPagamento>
+        <ImportoPagamento>20.00</ImportoPagamento>
+      </DettaglioPagamento>
+    </DatiPagamento>
+    <Allegati>
+      <NomeAttachment>Fattura.pdf</NomeAttachment>
+      <FormatoAttachment>PDF</FormatoAttachment>
+      <DescrizioneAttachment>Documento elettronico</DescrizioneAttachment>
+      <Attachment>JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9GaWx0ZXIvRmxhdGVEZWNvZGUvTGVuZ3RoIDU5Pj5zdHJlYW0KeJwr5HIK4TJRsDC2UAhJ4TJQ0DU0AzH03QwVDI0UQtK4NNwSS0pKixI1Q7KA0gYgSdcQrkAuAHCkDRgKZW5kc3RyZWFtCmVuZG9iago0IDAgb2JqCjw8L0NvbnRlbnRzIDIgMCBSL1R5cGUvUGFnZS9SZXNvdXJjZXM8PC9Gb250PDwvRjEgMSAwIFI+Pj4+L1BhcmVudCAzIDAgUi9NZWRpYUJveFswIDAgNTk1IDg0Ml0+PgplbmRvYmoKMSAwIG9iago8PC9TdWJ0eXBlL1R5cGUxL1R5cGUvRm9udC9CYXNlRm9udC9IZWx2ZXRpY2EvRW5jb2RpbmcvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjMgMCBvYmoKPDwvS2lkc1s0IDAgUl0vVHlwZS9QYWdlcy9Db3VudCAxPj4KZW5kb2JqCjUgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDMgMCBSPj4KZW5kb2JqCjYgMCBvYmoKPDwvTW9kRGF0ZShEOjIwMjEwMTI5MTAxNzI0KzAxJzAwJykvQ3JlYXRpb25EYXRlKEQ6MjAyMTAxMjkxMDE3MjQrMDEnMDAnKS9Qcm9kdWNlcihpVGV4dK4gNS41LjUgqTIwMDAtMjAxNCBpVGV4dCBHcm91cCBOViBcKEFHUEwtdmVyc2lvblwpKT4+CmVuZG9iagp4cmVmCjAgNwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNTIgMDAwMDAgbiAKMDAwMDAwMDAxNSAwMDAwMCBuIAowMDAwMDAwMzQwIDAwMDAwIG4gCjAwMDAwMDAxNDAgMDAwMDAgbiAKMDAwMDAwMDM5MSAwMDAwMCBuIAowMDAwMDAwNDM2IDAwMDAwIG4gCnRyYWlsZXIKPDwvSW5mbyA2IDAgUi9JRCBbPDU2ZDIwZWVkZGQ1YTk3MjUxNjAwNTc2ZGZhNTA0YjZhPjw1NmQyMGVlZGRkNWE5NzI1MTYwMDU3NmRmYTUwNGI2YT5dL1Jvb3QgNSAwIFIvU2l6ZSA3Pj4KJWlUZXh0LTUuNS41CnN0YXJ0eHJlZgo1OTMKJSVFT0YK</Attachment>
+    </Allegati>
+  </FatturaElettronicaBody>
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="id-3b27cad6d48b4ffd4f3117d1b0e35850">
+    <ds:SignedInfo>
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+      <ds:Reference URI="">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2002/06/xmldsig-filter2">
+            <dsig-xpath:XPath xmlns:dsig-xpath="http://www.w3.org/2002/06/xmldsig-filter2" Filter="subtract">/descendant::ds:Signature</dsig-xpath:XPath>
+          </ds:Transform>
+          <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+          <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>eJA8fGo3wbWTL4L/xfk2BMfTEQtr8TDV1AEPopfnwoo=</ds:DigestValue>
+      </ds:Reference>
+      <ds:Reference URI="#keyinfo-id-3b27cad6d48b4ffd4f3117d1b0e35850">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>2h5ygUwuEw0IXB/MS39RuNh2KoGni4yM+Ptk0NZ0RQ4=</ds:DigestValue>
+      </ds:Reference>
+      <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#xades-id-3b27cad6d48b4ffd4f3117d1b0e35850">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>RlMV4m39eI+mvVtw0jAH1t6DSJ7QCOA5v7KLxS0qeOQ=</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue Id="value-id-3b27cad6d48b4ffd4f3117d1b0e35850">iKttK5sZ6tOhm2zFKPNjXVO/k11n7sNsAtidm5N2hSzBDtTH7zFIECNiAbP+wwWowk1mc6A32gftavNFq1Du520mRu+lV4NuN6q9TQcNva1v8ci6cxTykb0lNqItkNpv8EHETdwMqn+ip2pOxURxcst98N4o49KEmvHU+12/d/QFUKKO1nva8UO/3DdtdqiUcv2A6yijzWulCzdVnmUQJuIJACpyPKcj1BrX3jQJm5QlbpaSadjKGHYuIdFSWpfxeWsemnBIfKIn0yyYlO001KwHA32+URGPkNT4pNjmpW8PM9cd5JMo9qiPTjVetpqTC++nHjpSzv7+b+P5d9y89A==</ds:SignatureValue>
+    <ds:KeyInfo Id="keyinfo-id-3b27cad6d48b4ffd4f3117d1b0e35850">
+      <ds:X509Data>
+        <ds:X509Certificate>MIIDRTCCAi2gAwIBAgIEQjgrajANBgkqhkiG9w0BAQsFADBTMQswCQYDVQQGEwJpdDELMAkGA1UECBMCcm0xDTALBgNVBAcTBHJvbWUxDDAKBgNVBAoTA2RldzEMMAoGA1UECxMDZGV3MQwwCgYDVQQDEwNkZXcwHhcNMjAxMTEzMTQzMDI2WhcNNDAxMTE0MTQzMDI2WjBTMQswCQYDVQQGEwJpdDELMAkGA1UECBMCcm0xDTALBgNVBAcTBHJvbWUxDDAKBgNVBAoTA2RldzEMMAoGA1UECxMDZGV3MQwwCgYDVQQDEwNkZXcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCwT1J/myUxkngvu0GR6SMnBhb/CUeuCgqzSabZhW3CFBwdYwHOp9omfrJiVm81rHvD41TU5ys+EWZn3EeohdvogtlQk6kNLE7KBnXaGHiWmnu4JgeGimuWwg35BGwh0TrVBCnP6RnnUXjJzu6i5Lo2FuFW6z7RbZyBDC8K2+l0+wJRZW8LJvmOE8vLxxUN+aLWI9TYmk55jpmcAU1Gzi+QGVkdFIkfHk5AiViJRx+Fk28NE9EGHE+MYABzwpUwdeXCYe79l2IeDUdPSPLZpwYdn3qhCWvOvCZ+JzancFvd8h6UlW//LhmzdoUMurSbjqMSOdYh9M32cjWnuLPvpftBAgMBAAGjITAfMB0GA1UdDgQWBBRRgluPbGEZ0C6ptwS/J6quOrxjrzANBgkqhkiG9w0BAQsFAAOCAQEAO5dEtpYFQLFvmaTmPdYR8zVznEOVlZUcmax0ttZZfKGnSqm8l316nuIW2gnkRFwak55DOfEh7Z7WTxf1a3yFeOC9fB9zfb1GCvL9umoUWPylU1Wac+cNGN5NHEnrZLsjd++BEcCetZZQHVGT9gfOZKXKt5d0NsdlB7pPNLu5BVxiNdspR08qrZaQl92m+al4bbvwXo/3vg6xFtmqn1jE1Dl9hj+/SSrMUj0kQ6lcW3Ju8U6kLc2Dnfygw1m+pAD8+Y2gOmMg/VNtuRRn0SVv+jKubfdlG5ydx/oib3D2IMgk2BUf2lDMU4fvU3LdpMPkD9kDt/dY13PDMuTIeDMOdA==</ds:X509Certificate>
+      </ds:X509Data>
+    </ds:KeyInfo>
+    <ds:Object>
+      <xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#id-3b27cad6d48b4ffd4f3117d1b0e35850">
+        <xades:SignedProperties Id="xades-id-3b27cad6d48b4ffd4f3117d1b0e35850">
+          <xades:SignedSignatureProperties>
+            <xades:SigningTime>2020-12-11T23:46:45Z</xades:SigningTime>
+            <xades:SigningCertificateV2>
+              <xades:Cert>
+                <xades:CertDigest>
+                  <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                  <ds:DigestValue>Yp5L3w4leUw3QWd5L2BkeYc8X5ckMe9LRH+CvtmUjks=</ds:DigestValue>
+                </xades:CertDigest>
+                <xades:IssuerSerialV2>MIGOMIGBpH8wfTELMAkGA1UEBhMCSVQxJDAiBgNVBAoMG05hbWlyaWFsIFMucC5BLi8wMjA0NjU3MDQyNjEgMB4GA1UECwwXQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkxJjAkBgNVBAMMHU5hbWlyaWFsIENBIEZpcm1hIFF1YWxpZmljYXRhAggUExWgsMqAJw==</xades:IssuerSerialV2>
+              </xades:Cert>
+            </xades:SigningCertificateV2>
+          </xades:SignedSignatureProperties>
+          <xades:SignedDataObjectProperties>
+            <xades:DataObjectFormat ObjectReference="#null">
+              <xades:MimeType>application/octet-stream</xades:MimeType>
+            </xades:DataObjectFormat>
+          </xades:SignedDataObjectProperties>
+        </xades:SignedProperties>
+      </xades:QualifyingProperties>
+    </ds:Object>
+  </ds:Signature>
+</ns3:FatturaElettronica>

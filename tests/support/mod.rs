@@ -11,9 +11,149 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+use fatturapa::generated::{fpr12, fsm10, sdi};
 use fatturapa::ids::{EuCountry, Provincia, RegimeFiscale};
 use fatturapa::party::{Address, Business, Buyer, Company, Seller};
 use iso_country::Country;
+use xsd_parser_types::xml::{AnyElement, Attributes, Element, Value};
+
+/// The `xsd-parser` serializer re-emits the namespace declarations that
+/// were in scope when a parsed `xs:any` element was read, as `xmlns`
+/// attributes on that element and on every element inside it. Those
+/// declarations and the namespace maps are the only part of the element
+/// that varies across a read-modify-write cycle, so the normalizer drops
+/// the `xmlns` and `xmlns:*` attributes and the namespace maps of the
+/// element and of every element inside it, and keeps the name, every other
+/// attribute and the content.
+fn normalize_element(element: Element<'static>) -> Element<'static> {
+    let Element {
+        name,
+        values,
+        attributes,
+        ..
+    } = element;
+    Element {
+        name,
+        values: values
+            .into_iter()
+            .map(|value| match value {
+                Value::Element(nested) => Value::Element(normalize_element(nested)),
+                other => other,
+            })
+            .collect(),
+        attributes: Attributes(
+            attributes
+                .0
+                .into_iter()
+                .filter(|(key, _)| !is_namespace_declaration(&key.0))
+                .collect(),
+        ),
+        ..Element::default()
+    }
+}
+
+/// Whether the attribute name `key` is a namespace declaration, `xmlns` or
+/// `xmlns:prefix`.
+fn is_namespace_declaration(key: &[u8]) -> bool {
+    key == b"xmlns" || key.starts_with(b"xmlns:")
+}
+
+/// Normalise a parsed `xs:any` element, keeping the name, the attributes
+/// and the content and dropping the namespace declarations at every level.
+fn normalize_any(any: AnyElement) -> AnyElement {
+    normalize_element(any)
+}
+
+/// Generate the `xs:any` normalizer for a module's XML-DSig `Signature`.
+macro_rules! normalize_signature_impl {
+    ($module:ident, $name:ident) => {
+        /// Return `signature` with every `xs:any` element normalised, so
+        /// that the signature of the first read and of the re-read of the
+        /// same bytes compare equal.
+        pub(crate) fn $name(mut signature: $module::Signature) -> $module::Signature {
+            let signed_info = &mut signature.content.signed_info.content;
+            for any in signed_info.canonicalization_method.content.any.iter_mut() {
+                *any = normalize_any(std::mem::take(any));
+            }
+            for any in signed_info.signature_method.content.any.iter_mut() {
+                *any = normalize_any(std::mem::take(any));
+            }
+            for reference in signed_info.reference.iter_mut() {
+                if let Some(transforms) = &mut reference.content.transforms {
+                    for transform in transforms.content.transform.iter_mut() {
+                        for content in transform.content.iter_mut() {
+                            if let $module::TransformTypeContent::Any(any) = content {
+                                *any = normalize_any(std::mem::take(any));
+                            }
+                        }
+                    }
+                }
+                for any in reference.content.digest_method.content.any.iter_mut() {
+                    *any = normalize_any(std::mem::take(any));
+                }
+            }
+            if let Some(key_info) = &mut signature.content.key_info {
+                for content in key_info.content.iter_mut() {
+                    match content {
+                        $module::KeyInfoTypeContent::Any(any) => {
+                            *any = normalize_any(std::mem::take(any));
+                        }
+                        $module::KeyInfoTypeContent::KeyValue(key_value) => {
+                            if let $module::KeyValueTypeContent::Any(any) = &mut key_value.content {
+                                *any = normalize_any(std::mem::take(any));
+                            }
+                        }
+                        $module::KeyInfoTypeContent::X509Data(x509_data) => {
+                            for entry in x509_data.content.iter_mut() {
+                                if let $module::X509DataContent19TypeContent::Any(any) =
+                                    &mut entry.content_19.content
+                                {
+                                    *any = normalize_any(std::mem::take(any));
+                                }
+                            }
+                        }
+                        $module::KeyInfoTypeContent::PgpData(pgp_data) => {
+                            if let $module::PgpDataTypeContent::Content23(content) =
+                                &mut pgp_data.content
+                            {
+                                for any in content.content.any.iter_mut() {
+                                    *any = normalize_any(std::mem::take(any));
+                                }
+                            }
+                            if let $module::PgpDataTypeContent::Content25(content) =
+                                &mut pgp_data.content
+                            {
+                                for any in content.content.any.iter_mut() {
+                                    *any = normalize_any(std::mem::take(any));
+                                }
+                            }
+                        }
+                        $module::KeyInfoTypeContent::SpkiData(spki_data) => {
+                            for content in spki_data.content.iter_mut() {
+                                if let Some(any) = &mut content.any {
+                                    *any = normalize_any(std::mem::take(any));
+                                }
+                            }
+                        }
+                        $module::KeyInfoTypeContent::KeyName(_)
+                        | $module::KeyInfoTypeContent::RetrievalMethod(_)
+                        | $module::KeyInfoTypeContent::MgmtData(_) => {}
+                    }
+                }
+            }
+            for object in signature.content.object.iter_mut() {
+                for content in object.content.iter_mut() {
+                    content.any = normalize_any(std::mem::take(&mut content.any));
+                }
+            }
+            signature
+        }
+    };
+}
+
+normalize_signature_impl!(fpr12, normalize_fpr12_signature);
+normalize_signature_impl!(fsm10, normalize_fsm10_signature);
+normalize_signature_impl!(sdi, normalize_sdi_signature);
 
 /// The XML catalog that maps the W3C XML-DSig address onto the local copy.
 pub(crate) fn catalog() -> PathBuf {
