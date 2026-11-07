@@ -1,0 +1,25 @@
+0‚	*†H†÷ ‚ù0‚õ10	`†He0‚4	*†H†÷ ‚%‚!<?xml ve 
+xsi:schemaLoc      <FormatoTrasmissione>>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>123</IdDocumento>
+	    <Data>2012-09-01</Data>
+	    <NumItem>5</NumItem>
+	    <CodiceCUP>123ab>
+      <Datsporto spa</Denominazi     <ImponibileImporto>5.00</ImponibileImporto>
+  vio>00001</ProgressivoInvio>
+      <FormatoTrasmw.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLoc      <FormatoTrasmissione>>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>123</IdDocumento>
+	    <Data>2012-09-01</Data>
+	    <NumItem>5</NumItem>
+	    <CodiceCUP>123abc</CodiceCUP>
+	    <CodiceCIG>456def</CodiceCIG>
+      </DatiContratto>
+      <Datsporto spa</Denominazi     <ImponibileImporto>5.00</ImponibileImporto>
+        <Imposta>1.10</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+    
