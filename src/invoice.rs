@@ -2587,6 +2587,73 @@ mod tests {
         assert_eq!(validate::validate(&doc), Vec::new());
     }
 
+    /// An EU business of `EuCountry::It` is the one `Business` value whose
+    /// `IdPaese` is `IT`, and the `XXXXXXX` code of the cross-border
+    /// scenario must reject it at `build` with 00313.
+    #[test]
+    fn cross_border_rejects_an_italian_client_with_00313() {
+        let buyer = Business::eu(
+            crate::ids::EuCountry::It,
+            "ACME SRL".parse().expect("a valid denomination"),
+            "IT12345678901".parse().expect("a valid identifier"),
+            rome(),
+        );
+        let built = Invoice::cross_border_services(&seller(), &buyer, seven_ter_line())
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build();
+        assert!(
+            matches!(
+                &built,
+                Err(BuildError::Violations(violations))
+                    if violations.iter().any(|v| v.code == "00313")
+            ),
+            "the Italian client must fail with 00313: {built:?}"
+        );
+    }
+
+    /// The `Recipient` code `XXXXXXX` of a domestic buyer is rejected at
+    /// `build` with 00313, on the domestic and the self-invoice paths.
+    #[test]
+    fn domestic_and_self_invoice_reject_xxxxxxx_with_00313() {
+        let recipient =
+            Recipient::Codice(CodiceDestinatario::try_new("XXXXXXX").expect("the code parses"));
+        let domestic = Invoice::domestic(&seller(), &buyer_rome(), recipient, taxed_line(2200))
+            .progressivo(progressivo())
+            .date(date())
+            .numero(numero())
+            .build();
+        assert!(
+            matches!(
+                &domestic,
+                Err(BuildError::Violations(violations))
+                    if violations.iter().any(|v| v.code == "00313")
+            ),
+            "the domestic buyer must fail with 00313: {domestic:?}"
+        );
+        let recipient =
+            Recipient::Codice(CodiceDestinatario::try_new("XXXXXXX").expect("the code parses"));
+        let self_invoice = SelfInvoice::td17(
+            &supplier_de(),
+            &buyer_company(),
+            recipient,
+            taxed_line(2200),
+        )
+        .progressivo(progressivo())
+        .date(date())
+        .numero(numero())
+        .build();
+        assert!(
+            matches!(
+                &self_invoice,
+                Err(BuildError::Violations(violations))
+                    if violations.iter().any(|v| v.code == "00313")
+            ),
+            "the self-invoice buyer must fail with 00313: {self_invoice:?}"
+        );
+    }
+
     #[test]
     fn cross_border_lines_carry_the_seven_ter_nature() {
         let doc = Invoice::cross_border_services(&seller(), &buyer_us(), seven_ter_line())
