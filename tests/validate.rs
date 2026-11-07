@@ -354,6 +354,34 @@ fn code_00401_line_with_natura_and_rate() {
     assert_absent(&validate(&doc), "00401");
 }
 
+/// 00401 and 00430: a line or a riepilogo `Natura` at a non-zero
+/// `AliquotaIVA` is allowed when the `TipoDocumento` is `TD16`, the
+/// integration of the reverse charge invoice, per the Allegato A 1.9.1
+/// exception. The same values in the base `TD01` trigger both checks.
+#[test]
+fn code_00401_and_00430_exempt_for_td16() {
+    let mut doc = base();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = g::TipoDocumentoType::Td16;
+    line(&mut doc).natura = Some(g::NaturaType::N61);
+    riep(&mut doc).natura = Some(g::NaturaType::N61);
+    let v = validate(&doc);
+    assert_absent(&v, "00401");
+    assert_absent(&v, "00430");
+
+    let mut doc = base();
+    line(&mut doc).natura = Some(g::NaturaType::N61);
+    riep(&mut doc).natura = Some(g::NaturaType::N61);
+    let v = validate(&doc);
+    assert_has(&v, "00401");
+    assert_has(&v, "00430");
+}
+
 /// 00409: two bodies with the same number and year both being ordinary
 /// invoices trigger it; the same pair with one credit note passes.
 #[test]
@@ -1945,8 +1973,9 @@ fn code_00425_simplified() {
     assert_absent(&validate_simplified(&doc), "00425");
 }
 
-/// 00427: a 6 character `CodiceDestinatario` in `FSM10` triggers it; the
-/// base 7 character code passes.
+/// 00427 is defined for the ordinary invoice, so `validate_simplified`
+/// does not report it for a 6 character `CodiceDestinatario`, the reader
+/// enforcing the 7 character value of the `FSM10` schema.
 #[test]
 fn code_00427_simplified() {
     let mut doc = doc_simplified();
@@ -1956,10 +1985,118 @@ fn code_00427_simplified() {
         .dati_trasmissione
         .content
         .codice_destinatario = "ABC123".to_string();
-    assert_has(&validate_simplified(&doc), "00427");
+    assert_absent(&validate_simplified(&doc), "00427");
 
     let doc = doc_simplified();
     assert_absent(&validate_simplified(&doc), "00427");
+}
+
+/// 00400: a simplified `DatiBeniServizi` with a zero `Aliquota` and no
+/// `Natura` triggers it. The same block with a `Natura` passes, and the
+/// base block with a non-zero rate passes.
+#[test]
+fn code_00400_simplified() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .dati_iva
+        .content
+        .aliquota = Some(amount("0.00"));
+    assert_has(&validate_simplified(&doc), "00400");
+
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .dati_iva
+        .content
+        .aliquota = Some(amount("0.00"));
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .natura = Some(sg::NaturaType::N4);
+    assert_absent(&validate_simplified(&doc), "00400");
+
+    let doc = doc_simplified();
+    assert_absent(&validate_simplified(&doc), "00400");
+}
+
+/// 00401: a simplified `DatiBeniServizi` with a `Natura` and a non-zero
+/// `Aliquota` triggers it. The base block without a `Natura` passes.
+#[test]
+fn code_00401_simplified() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .natura = Some(sg::NaturaType::N4);
+    assert_has(&validate_simplified(&doc), "00401");
+
+    let doc = doc_simplified();
+    assert_absent(&validate_simplified(&doc), "00401");
+}
+
+/// 00409: two simplified bodies with the same number and year trigger it.
+/// The same pair with one `TD08` correction passes, a pair of `TD08`
+/// corrections triggers it, and the same number in different years passes.
+#[test]
+fn code_00409_simplified() {
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_body
+        .push(doc.content.fattura_elettronica_body[0].clone());
+    assert_has(&validate_simplified(&doc), "00409");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_body
+        .push(doc.content.fattura_elettronica_body[0].clone());
+    doc.content.fattura_elettronica_body[1]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = sg::TipoDocumentoType::Td08;
+    assert_absent(&validate_simplified(&doc), "00409");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_body
+        .push(doc.content.fattura_elettronica_body[0].clone());
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = sg::TipoDocumentoType::Td08;
+    doc.content.fattura_elettronica_body[1]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = sg::TipoDocumentoType::Td08;
+    assert_has(&validate_simplified(&doc), "00409");
+
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_body
+        .push(doc.content.fattura_elettronica_body[0].clone());
+    doc.content.fattura_elettronica_body[1]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .data = date(2025, 11, 4);
+    assert_absent(&validate_simplified(&doc), "00409");
 }
 
 /// 00445: the generic nature `N2` in a simplified `DatiBeniServizi` is not

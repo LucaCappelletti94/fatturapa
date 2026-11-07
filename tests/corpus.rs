@@ -691,19 +691,6 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
         ],
     ),
     (
-        "tappoz/sample_data/IT01234567890_GCE004_fail_BR_GCE004_GCE007a.xml",
-        &[
-            (
-                "00401",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[1]/Natura",
-            ),
-            (
-                "00430",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
-            ),
-        ],
-    ),
-    (
         "tappoz/sample_data/IT01234567890_GCE009_fail_BR_00473_GCE009.xml",
         &[(
             "00473",
@@ -785,10 +772,6 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
             (
                 "00444",
                 "FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[1]/Natura",
-            ),
-            (
-                "00430",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Natura",
             ),
         ],
     ),
@@ -1391,20 +1374,12 @@ const TAPPOZ_OUT_OF_REACH: &[(&str, &str)] = &[
 /// ones the name carries, with those extra codes.
 const TAPPOZ_EXTRA_CODES: &[(&str, &[&str])] = &[
     (
-        "IT01234567890_GCE004_fail_BR_GCE004_GCE007a",
-        &["00401", "00430"],
-    ),
-    (
         "IT12345678901_ddddd_ALIQUOTA_MISSING_RIEPILOGO_fail_BR_00443",
         &["00419", "00422"],
     ),
     (
         "IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414",
         &["00422", "00444"],
-    ),
-    (
-        "IT12345678901_ddddd_CASSA_NONZERO_WITH_NATURA_fail_BR_00414_00444_GCE004",
-        &["00430"],
     ),
     (
         "IT12345678901_ddddd_TD21_ZERO_ALIQUOTA_fail_BR_00474",

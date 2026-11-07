@@ -12,6 +12,12 @@
 //! `TD06`, `TD24`, `TD25` and `TD28` of the ordinary invoice, `TD07` of the
 //! simplified invoice and `TD27` for 00472.
 //!
+//! The 00401 and 00430 criteria carry the `TD16` exception of the *Allegato
+//! A* 1.9.1 text, which the version 2.0 list does not state, and the 00400,
+//! 00401 and 00409 checks apply to the simplified invoice per the *Allegato
+//! A* 1.9.1 descriptions, which the version 2.0 list scopes to the ordinary
+//! invoice.
+//!
 //! The check 00313 is not in the Elenco Controlli. The crate implements it
 //! per the operative specification *Allegato A*, version 1.9.1, which
 //! updated the control for the simplified invoice on 01/01/2022.
@@ -60,14 +66,17 @@
 //! | 00322 | seller tax code missing for an IVA group | out of reach, tax registry | out of reach |
 //! | 00323 | seller VAT number ceased for more than 5 years | out of reach, tax registry | out of reach |
 //! | 00324 | buyer VAT number and tax code not coherent | out of reach, tax registry | out of reach |
+//! | 00325 | buyer tax code not of an IVA group member | out of reach, IVA group registry | out of reach |
+//! | 00326 | buyer tax code missing for a buyer IVA group | out of reach, IVA group registry | out of reach |
+//! | 00327 | buyer group tax code without the group VAT number | out of reach, IVA group registry | out of reach |
 //! | 00330 | `PECDestinatario` is an SDI operational PEC mailbox | implemented | implemented |
 //! | 00398 | IPA office not identified for a Centrale code | out of reach, IPA registry | out of reach |
 //! | 00399 | buyer missing from the IPA registry | out of reach, IPA registry | out of reach |
-//! | 00400 | line `Natura` missing at a zero `AliquotaIVA` | implemented | out of reach, the simplified invoice has no lines |
-//! | 00401 | line `Natura` present at a non-zero `AliquotaIVA` | implemented | out of reach |
+//! | 00400 | the `Natura` missing at a zero rate | implemented | implemented, the `DatiBeniServizi` `Natura` |
+//! | 00401 | the `Natura` present at a non-zero rate, the `TD16` is exempt | implemented | implemented, the `DatiBeniServizi` `Natura` |
 //! | 00403 | invoice date after the reception date | out of reach, needs the SDI reception date | out of reach |
 //! | 00404 | duplicate invoice | out of reach, SDI state | out of reach |
-//! | 00409 | duplicate invoice in the same document | implemented | out of reach, the check is defined for the ordinary invoice |
+//! | 00409 | duplicate invoice in the same document | implemented | implemented |
 //! | 00411 | `DatiRitenuta` missing for a line with `Ritenuta SI` | implemented | out of reach, no lines |
 //! | 00413 | cassa `Natura` missing at a zero `AliquotaIVA` | implemented | out of reach, no cassa blocks |
 //! | 00414 | cassa `Natura` present at a non-zero `AliquotaIVA` | implemented | out of reach |
@@ -81,10 +90,10 @@
 //! | 00423 | `PrezzoTotale` not computed per the specification | implemented | out of reach, no lines |
 //! | 00424 | rate not expressed as a percentage | implemented | implemented |
 //! | 00425 | `Numero` without any digit | implemented | implemented |
-//! | 00427 | `CodiceDestinatario` length wrong for the `FormatoTrasmissione` | implemented | implemented |
+//! | 00427 | `CodiceDestinatario` length wrong for the `FormatoTrasmissione` | implemented | out of reach, the `FSM10` schema enforces the 7 characters |
 //! | 00428 | `FormatoTrasmissione` not coherent with `versione` | guaranteed by construction, the two fields are one enumeration | guaranteed by construction |
 //! | 00429 | riepilogo `Natura` missing at a zero `AliquotaIVA` | implemented | out of reach |
-//! | 00430 | riepilogo `Natura` present at a non-zero `AliquotaIVA` | implemented | out of reach |
+//! | 00430 | riepilogo `Natura` present at a non-zero `AliquotaIVA`, the `TD16` is exempt | implemented | out of reach |
 //! | 00437 | document `ScontoMaggiorazione` with `Tipo` and neither value | implemented | out of reach, no such element |
 //! | 00438 | line `ScontoMaggiorazione` with `Tipo` and neither value | implemented | out of reach |
 //! | 00443 | line or cassa rate missing from the `DatiRiepilogo` blocks | implemented | out of reach |
@@ -111,7 +120,7 @@ use crate::generated::fpr12::{
 use crate::generated::fsm10::{
     FatturaElettronicaBodyType as BodySemplificato,
     FatturaElettronicaHeaderTypeContent as HeaderSemplificato, NaturaType as NaturaSemplificata,
-    RegimeFiscaleType as RegimeFiscaleSemplificata,
+    RegimeFiscaleType as RegimeFiscaleSemplificata, TipoDocumentoType as TipoDocumentoSemplificato,
 };
 use crate::{FatturaElettronica, FatturaElettronicaSemplificata};
 use rust_decimal::{Decimal, RoundingStrategy};
@@ -255,22 +264,16 @@ pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violatio
     for (bi, body) in doc.content.fattura_elettronica_body.iter().enumerate() {
         check_simplified_body(bi, body, header, &mut v);
     }
+    check_simplified_lot(&doc.content.fattura_elettronica_body, &mut v);
     v
 }
 
-/// The header-level checks of the simplified invoice, 00313, 00330, 00417,
-/// 00427 and 00476.
+/// The header-level checks of the simplified invoice, 00313, 00330, 00417
+/// and 00476.
 fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) {
-    let trasmissione = &header.dati_trasmissione.content;
-    let cod = &trasmissione.codice_destinatario;
-    if cod.len() == 6 {
-        v.push(Violation::new(
-            "00427",
-            "FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario".to_string(),
-            "a 6 character CodiceDestinatario is not allowed in FSM10",
-        ));
-    }
-    if trasmissione
+    if header
+        .dati_trasmissione
+        .content
         .pec_destinatario
         .as_deref()
         .is_some_and(is_sdi_pec_mailbox)
@@ -293,7 +296,8 @@ fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) 
             "the buyer has neither IdFiscaleIVA nor CodiceFiscale",
         ));
     }
-    if cod == crate::ids::CodiceDestinatario::FOREIGN
+    if header.dati_trasmissione.content.codice_destinatario
+        == crate::ids::CodiceDestinatario::FOREIGN
         && buyer
             .id_fiscale_iva
             .as_ref()
@@ -320,8 +324,8 @@ fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) 
     }
 }
 
-/// The body-level checks of the simplified invoice, 00418, 00424, 00425,
-/// 00445, 00460 and 00471.
+/// The body-level checks of the simplified invoice, 00400, 00401, 00418,
+/// 00424, 00425, 00445, 00460 and 00471.
 fn check_simplified_body(
     bi: usize,
     body: &BodySemplificato,
@@ -377,6 +381,19 @@ fn check_simplified_body(
         let spath = format!("{bpath}/DatiBeniServizi[{}]", si + 1);
         let beni = &beni.content;
         let aliquota = beni.dati_iva.content.aliquota.as_ref();
+        if aliquota.is_some_and(|a| a.0 == Decimal::ZERO) && beni.natura.is_none() {
+            v.push(Violation::new(
+                "00400",
+                format!("{spath}/Natura"),
+                "Natura is missing on a DatiBeniServizi whose Aliquota is zero",
+            ));
+        } else if aliquota.is_some_and(|a| a.0 != Decimal::ZERO) && beni.natura.is_some() {
+            v.push(Violation::new(
+                "00401",
+                format!("{spath}/Natura"),
+                "Natura is present on a DatiBeniServizi whose Aliquota is not zero",
+            ));
+        }
         if aliquota.is_some_and(|a| a.0 != Decimal::ZERO && a.0 < Decimal::ONE) {
             v.push(Violation::new(
                 "00424",
@@ -543,6 +560,7 @@ fn check_body(
         &beni.dati_riepilogo,
         &beni.dettaglio_linee,
         &doc_data.dati_cassa_previdenziale,
+        &doc_data.tipo_documento,
         &bpath,
         v,
     );
@@ -563,6 +581,9 @@ fn check_numero(numero: &str, bpath: &str, v: &mut Vec<Violation>) {
 }
 
 /// The line checks 00400, 00401, 00423, 00424, 00438, 00445 and 00474.
+/// 00401 carries the `TD16` exception of the Allegato A 1.9.1 text, which
+/// allows a line `Natura` at a non-zero `AliquotaIVA` on the integration of
+/// the reverse charge invoice.
 fn check_lines(
     lines: &[DettaglioLineeType],
     tipo: &TipoDocumentoType,
@@ -578,7 +599,10 @@ fn check_lines(
                 format!("{lpath}/Natura"),
                 "Natura is missing on a line whose AliquotaIVA is zero",
             ));
-        } else if line.aliquota_iva.0 != Decimal::ZERO && line.natura.is_some() {
+        } else if line.aliquota_iva.0 != Decimal::ZERO
+            && line.natura.is_some()
+            && *tipo != TipoDocumentoType::Td16
+        {
             v.push(Violation::new(
                 "00401",
                 format!("{lpath}/Natura"),
@@ -787,10 +811,14 @@ fn check_rate_coverage(
 }
 
 /// The riepilogo checks 00420, 00421, 00422, 00424, 00429, 00430 and 00445.
+/// 00430 carries the `TD16` exception of the Allegato A 1.9.1 text, which
+/// allows a riepilogo `Natura` at a non-zero `AliquotaIVA` on the
+/// integration of the reverse charge invoice.
 fn check_riepilogo(
     riep: &[DatiRiepilogoType],
     lines: &[DettaglioLineeType],
     cassa: &[DatiCassaPrevidenzialeType],
+    tipo: &TipoDocumentoType,
     bpath: &str,
     v: &mut Vec<Violation>,
 ) {
@@ -803,7 +831,10 @@ fn check_riepilogo(
                 format!("{rpath}/Natura"),
                 "Natura is missing in a DatiRiepilogo whose AliquotaIVA is zero",
             ));
-        } else if r.aliquota_iva.0 != Decimal::ZERO && r.natura.is_some() {
+        } else if r.aliquota_iva.0 != Decimal::ZERO
+            && r.natura.is_some()
+            && *tipo != TipoDocumentoType::Td16
+        {
             v.push(Violation::new(
                 "00430",
                 format!("{rpath}/Natura"),
@@ -1066,6 +1097,46 @@ fn check_lot(bodies: &[FatturaElettronicaBodyType], v: &mut Vec<Violation>) {
                 && dn.tipo_documento == TipoDocumentoType::Td04;
             let one_credit_note = df.tipo_documento == TipoDocumentoType::Td04
                 || dn.tipo_documento == TipoDocumentoType::Td04;
+            if !one_credit_note || both_credit_notes {
+                v.push(Violation::new(
+                    "00409",
+                    format!(
+                        "FatturaElettronicaBody[{}]/DatiGenerali/DatiGeneraliDocumento/Numero",
+                        f + 1
+                    ),
+                    "the invoice number repeats an invoice already in the same document",
+                ));
+            }
+        }
+    }
+}
+
+/// The 00409 check, on the invoice numbers of the whole simplified
+/// document. The `TD08` correction of an already-issued invoice waives the
+/// check for a pair of which it is one member, and the simplified invoice
+/// carries no `Art73`, so the comparison is always on the year.
+fn check_simplified_lot(bodies: &[BodySemplificato], v: &mut Vec<Violation>) {
+    for (f, body_f) in bodies.iter().enumerate() {
+        let df = &body_f
+            .content
+            .dati_generali
+            .content
+            .dati_generali_documento
+            .content;
+        for body_n in bodies.iter().skip(f + 1) {
+            let dn = &body_n
+                .content
+                .dati_generali
+                .content
+                .dati_generali_documento
+                .content;
+            if df.numero != dn.numero || df.data.0.year() != dn.data.0.year() {
+                continue;
+            }
+            let both_credit_notes = df.tipo_documento == TipoDocumentoSemplificato::Td08
+                && dn.tipo_documento == TipoDocumentoSemplificato::Td08;
+            let one_credit_note = df.tipo_documento == TipoDocumentoSemplificato::Td08
+                || dn.tipo_documento == TipoDocumentoSemplificato::Td08;
             if !one_credit_note || both_credit_notes {
                 v.push(Violation::new(
                     "00409",
