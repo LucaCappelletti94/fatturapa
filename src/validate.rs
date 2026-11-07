@@ -62,7 +62,7 @@
 //! | 00414 | cassa `Natura` present at a non-zero `AliquotaIVA` | implemented | out of reach |
 //! | 00415 | `DatiRitenuta` missing for a cassa with `Ritenuta SI` | implemented | out of reach |
 //! | 00417 | buyer `IdFiscaleIVA` and `CodiceFiscale` both absent | implemented | implemented |
-//! | 00418 | credit note dated before the linked invoice | implemented | out of reach, no `DatiFattureCollegate` |
+//! | 00418 | linked invoice dated after the document | implemented | implemented, the `Data` before the `DataFR` |
 //! | 00419 | `DatiRiepilogo` missing for a rate value | implemented | out of reach, no `DatiRiepilogo` |
 //! | 00420 | `Natura N6` with `EsigibilitaIVA S` | implemented | out of reach, no `EsigibilitaIVA` |
 //! | 00421 | `Imposta` not computed per the specification | implemented | out of reach, no `ImponibileImporto` |
@@ -274,6 +274,18 @@ pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violatio
                 "Numero contains no digit",
             ));
         }
+        let generali = &body.content.dati_generali.content;
+        if generali
+            .dati_fattura_rettificata
+            .as_ref()
+            .is_some_and(|rettificata| doc_data.data < rettificata.content.data_fr)
+        {
+            v.push(Violation::new(
+                "00418",
+                format!("{bpath}/DatiGenerali/DatiFatturaRettificata/DataFR"),
+                "the linked invoice is dated after the document",
+            ));
+        }
         for (si, beni) in body.content.dati_beni_servizi.iter().enumerate() {
             let spath = format!("{bpath}/DatiBeniServizi[{}]", si + 1);
             let beni = &beni.content;
@@ -383,13 +395,7 @@ fn check_body(
         v,
     );
     check_sconti(&doc_data.sconto_maggiorazione, &bpath, v);
-    check_credit_note_dates(
-        &generali.dati_fatture_collegate,
-        doc_data.data,
-        &doc_data.tipo_documento,
-        &bpath,
-        v,
-    );
+    check_linked_invoice_dates(&generali.dati_fatture_collegate, doc_data.data, &bpath, v);
     check_parties(bi, &doc_data.tipo_documento, header, v);
 }
 
@@ -749,24 +755,20 @@ fn check_sconti(sconti: &[ScontoMaggiorazioneType], bpath: &str, v: &mut Vec<Vio
     }
 }
 
-/// The 00418 check: a `TD04` credit note must not be dated before any of its
-/// linked invoices.
-fn check_credit_note_dates(
+/// The 00418 check: the `Data` of every linked invoice must not be after
+/// the document `Data`, of every `TipoDocumento`.
+fn check_linked_invoice_dates(
     collegate: &[DatiDocumentiCorrelatiType],
     data: Date,
-    tipo: &TipoDocumentoType,
     bpath: &str,
     v: &mut Vec<Violation>,
 ) {
-    if *tipo != TipoDocumentoType::Td04 {
-        return;
-    }
     for (ci, correlato) in collegate.iter().enumerate() {
         if correlato.content.data.as_ref().is_some_and(|d| data < *d) {
             v.push(Violation::new(
                 "00418",
                 format!("{bpath}/DatiGenerali/DatiFattureCollegate[{}]/Data", ci + 1),
-                "the credit note is dated before the linked invoice",
+                "the linked invoice is dated after the document",
             ));
         }
     }
