@@ -3690,7 +3690,7 @@ mod tests {
         .original_invoice("ORIG-001", "2026-11-04")
         .build()
         .expect("the same-date original invoice passes");
-        assert!(validate::validate(&doc).is_empty());
+        assert_eq!(validate::validate(&doc), Vec::new());
     }
 
     /// A line built without its `Quantita` writes the element absent,
