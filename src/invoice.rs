@@ -107,7 +107,8 @@ const FOREIGN_CODICE_DESTINATARIO: &str = "XXXXXXX";
 /// channel.
 const PEC_CODICE_DESTINATARIO: &str = "0000000";
 
-/// The 77.47 EUR stamp duty threshold of the DPR 642/72.
+/// The 77.47 EUR stamp duty threshold of the DPR 642/72, the `DatiBollo`
+/// block written only when the total exceeds it.
 const BOLLO_THRESHOLD: Decimal = Decimal::from_parts(7747, 0, 0, false, 2);
 
 /// The 2.00 EUR amount of the virtual stamp duty.
@@ -1287,8 +1288,10 @@ impl<'a, 'b, P, D, N> InvoiceDomesticBuilder<'a, 'b, P, D, N> {
         self
     }
 
-    /// Enables the virtual stamp duty, the 2.00 euros amount when the
-    /// computed total exceeds 77.47 euros.
+    /// Enables the virtual stamp duty, which writes the `DatiBollo` block
+    /// with `BolloVirtuale SI` and the 2.00 euros `ImportoBollo` when the
+    /// computed total exceeds 77.47 euros, the exclusive threshold of the
+    /// DPR 642/72, and omits the block at or below it.
     pub fn bollo<G>(mut self, value: G) -> Self
     where
         bool: TryFrom<G>,
@@ -2300,12 +2303,11 @@ fn assemble_body(inputs: BodyInputs) -> Result<FatturaElettronicaBodyType, Build
     } = collect_lines(lines, &currency)?;
     let (riep, totale) = riepilogo(groups, &references);
     let importo_totale = validate::round_half_2(totale);
-    let bollo = if bollo {
-        let importo = (importo_totale > BOLLO_THRESHOLD).then_some(Amount(BOLLO_IMPORT));
+    let bollo = if bollo && importo_totale > BOLLO_THRESHOLD {
         Some(DatiBolloType {
             content: DatiBolloTypeContent {
                 bollo_virtuale: BolloVirtualeType::Si,
-                importo_bollo: importo,
+                importo_bollo: Some(Amount(BOLLO_IMPORT)),
             },
         })
     } else {

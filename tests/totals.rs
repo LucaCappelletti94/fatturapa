@@ -185,8 +185,8 @@ fn line_total_applies_several_sconto_maggiorazione_blocks() {
 }
 
 /// The stamp duty applies strictly above 77.47, so a total of exactly
-/// 77.47 declares the virtual stamp duty without the 2.00 amount and
-/// 77.48 writes it.
+/// 77.47 writes no `DatiBollo` at all and 77.48 writes the
+/// `BolloVirtuale` `SI` with the 2.00 amount.
 #[test]
 fn stamp_duty_applies_strictly_above_the_threshold() {
     for price in ["77.47", "77.48"] {
@@ -221,15 +221,17 @@ fn stamp_duty_applies_strictly_above_the_threshold() {
             .dati_generali_documento
             .content;
         assert_eq!(generali.importo_totale_documento, Some(amount(price)));
-        let bollo = generali
-            .dati_bollo
-            .as_ref()
-            .expect("the stamp duty is present");
-        assert_eq!(bollo.content.bollo_virtuale, g::BolloVirtualeType::Si);
-        assert_eq!(
-            bollo.content.importo_bollo,
-            (price == "77.48").then_some(amount("2.00"))
-        );
+        let bollo = generali.dati_bollo.as_ref();
+        if price == "77.47" {
+            assert!(
+                bollo.is_none(),
+                "the total at the threshold writes no stamp duty"
+            );
+        } else {
+            let bollo = bollo.expect("the stamp duty is present");
+            assert_eq!(bollo.content.bollo_virtuale, g::BolloVirtualeType::Si);
+            assert_eq!(bollo.content.importo_bollo, Some(amount("2.00")));
+        }
     }
 }
 
