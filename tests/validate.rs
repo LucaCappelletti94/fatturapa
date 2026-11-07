@@ -126,6 +126,18 @@ fn riep(doc: &mut FatturaElettronica) -> &mut g::DatiRiepilogoTypeContent {
         .content
 }
 
+/// 00424, shared by the line and the riepilogo rate checks. Applies
+/// `change` to the base document and checks the code, then checks that
+/// the base document passes.
+fn rate_not_a_percentage(change: impl FnOnce(&mut FatturaElettronica)) {
+    let mut doc = base();
+    change(&mut doc);
+    assert_has(&validate(&doc), "00424");
+
+    let doc = base();
+    assert_absent(&validate(&doc), "00424");
+}
+
 fn cassa(
     aliquota: &str,
     natura: Option<g::NaturaType>,
@@ -541,24 +553,18 @@ fn code_00423_prezzo_totale_mismatch() {
 /// passes.
 #[test]
 fn code_00424_rate_not_a_percentage() {
-    let mut doc = base();
-    line(&mut doc).aliquota_iva = amount("0.50");
-    assert_has(&validate(&doc), "00424");
-
-    let doc = base();
-    assert_absent(&validate(&doc), "00424");
+    rate_not_a_percentage(|doc| {
+        line(doc).aliquota_iva = amount("0.50");
+    });
 }
 
 /// 00424: a `DatiRiepilogo` rate of 0.50 is not a percentage; the base
 /// rate passes.
 #[test]
 fn code_00424_riepilogo_rate_not_a_percentage() {
-    let mut doc = base();
-    riep(&mut doc).aliquota_iva = amount("0.50");
-    assert_has(&validate(&doc), "00424");
-
-    let doc = base();
-    assert_absent(&validate(&doc), "00424");
+    rate_not_a_percentage(|doc| {
+        riep(doc).aliquota_iva = amount("0.50");
+    });
 }
 
 /// 00425: a `Numero` without any digit triggers it; the base number passes.

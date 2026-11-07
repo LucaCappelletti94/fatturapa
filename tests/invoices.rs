@@ -15,12 +15,11 @@ mod support;
 use std::path::Path;
 
 use fatturapa::generated::fpr12 as g;
-use fatturapa::ids::{EuCountry, Natura, Provincia, RegimeFiscale};
+use fatturapa::ids::{Natura, Provincia, RegimeFiscale};
 use fatturapa::invoice::{Invoice, InvoiceCurrency, Line, Recipient, SevenTerLine, VatTreatment};
-use fatturapa::party::{Address, Business, Buyer, Company, Seller};
+use fatturapa::party::{Address, Business, Company, Seller};
 use fatturapa::validate::{Violation, validate};
 use fatturapa::{Amount, Document, FatturaElettronica};
-use iso_country::Country;
 use iso_currency::Currency;
 
 fn amount(text: &str) -> Amount {
@@ -50,85 +49,6 @@ fn fixture_round_trips(file: &str) -> FatturaElettronica {
     let reread = FatturaElettronica::from_xml_slice(&written).expect("the fixture re-reads");
     assert_eq!(reread, doc, "the fixture round-trips equal");
     doc
-}
-
-fn seller() -> Seller {
-    Seller::denomination(
-        "ALPHA SRL".parse().expect("a valid denomination"),
-        "02222222222".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA ROMA 1".parse().expect("a valid address"),
-            "00100".parse().expect("a valid CAP"),
-            "ROMA".parse().expect("a valid comune"),
-            Provincia::Rm,
-        ),
-        RegimeFiscale::Rf01,
-    )
-}
-
-/// The US business client of the art. 7-ter fixtures, without an Italian
-/// VAT number, so its `IdFiscaleIVA` carries the country of residence and
-/// the fiscal identifier assigned there.
-fn buyer_us() -> Business {
-    Business::foreign(
-        Country::US,
-        "ACME INC".parse().expect("a valid denomination"),
-        "US123456789".parse().expect("a valid identifier"),
-        Address::foreign(
-            "FIFTH AVENUE 1".parse().expect("a valid address"),
-            Some("10001".parse().expect("a valid postal code")),
-            "NEW YORK".parse().expect("a valid comune"),
-            Country::US,
-        )
-        .expect("a valid foreign seat"),
-    )
-}
-
-/// The German business client of the art. 7-ter fixture.
-fn buyer_de() -> Business {
-    Business::eu(
-        EuCountry::De,
-        "MUSTER GMBH".parse().expect("a valid denomination"),
-        "DE998877665".parse().expect("a valid identifier"),
-        Address::foreign(
-            "BEISPIELSTRASSE 1".parse().expect("a valid address"),
-            Some("10115".parse().expect("a valid postal code")),
-            "BERLIN".parse().expect("a valid comune"),
-            Country::DE,
-        )
-        .expect("a valid foreign seat"),
-    )
-}
-
-/// The German supplier of the `TD17` fixture.
-fn supplier_de() -> Business {
-    Business::eu(
-        EuCountry::De,
-        "MUSTER GMBH".parse().expect("a valid denomination"),
-        "DE998877665".parse().expect("a valid identifier"),
-        Address::foreign(
-            "BEISPIELSTRASSE 1".parse().expect("a valid address"),
-            Some("10115".parse().expect("a valid postal code")),
-            "BERLIN".parse().expect("a valid comune"),
-            Country::DE,
-        )
-        .expect("a valid foreign seat"),
-    )
-}
-
-/// The non-Italian buyer of the `TD17` fixtures, whose `partita IVA`
-/// transmits the self-invoice.
-fn buyer_company() -> Company {
-    Company::denomination(
-        "BETA SRL".parse().expect("a valid denomination"),
-        "04444444444".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA MILANO 2".parse().expect("a valid address"),
-            "20100".parse().expect("a valid CAP"),
-            "MILANO".parse().expect("a valid comune"),
-            Provincia::Mi,
-        ),
-    )
 }
 
 fn seven_ter_line(description: &str, price: &str) -> SevenTerLine {
@@ -232,8 +152,8 @@ fn td01_services_to_a_non_eu_us_client() {
 fn td01_non_eu_us_client_matches_the_constructor() {
     let fixture = fixture_round_trips("td01-7ter-non-eu-us.xml");
     let doc = Invoice::cross_border_services(
-        &seller(),
-        &buyer_us(),
+        &support::seller(),
+        &support::business_us(),
         seven_ter_line("SERVIZIO DI CONSULENZA", "150.00"),
     )
     .progressivo("00001")
@@ -365,8 +285,8 @@ fn td01_services_to_an_eu_de_client() {
 fn td01_eu_de_client_matches_the_constructor() {
     let fixture = fixture_round_trips("td01-7ter-eu-de.xml");
     let doc = Invoice::cross_border_services(
-        &seller(),
-        &buyer_de(),
+        &support::seller(),
+        &support::business_de(),
         seven_ter_line("SERVIZIO DI CONSULENZA", "50.00"),
     )
     .progressivo("00002")
@@ -482,8 +402,8 @@ fn td01_services_to_a_non_eu_us_client_priced_in_usd() {
 fn td01_non_eu_us_client_priced_in_usd_matches_the_constructor() {
     let fixture = fixture_round_trips("td01-7ter-non-eu-usd.xml");
     let doc = Invoice::cross_border_services(
-        &seller(),
-        &buyer_us(),
+        &support::seller(),
+        &support::business_us(),
         seven_ter_line("SERVIZIO DI CONSULENZA", "150.00"),
     )
     .progressivo("00003")
@@ -591,8 +511,8 @@ fn td17_service_from_an_eu_supplier() {
 fn td17_eu_supplier_matches_the_constructor() {
     let fixture = fixture_round_trips("td17-eu-supplier.xml");
     let doc = td17_build(
-        &supplier_de(),
-        &buyer_company(),
+        &support::business_de(),
+        &support::buyer_company(),
         taxed_line("CONSULENZA COMMERCIALE PRESTATO IN GERMANIA", "100.00"),
         "00001",
         "2026-11-05",
@@ -750,8 +670,8 @@ fn td17_service_from_a_non_eu_supplier() {
 fn td17_non_eu_supplier_matches_the_constructor() {
     let fixture = fixture_round_trips("td17-non-eu-supplier.xml");
     let doc = td17_build(
-        &supplier_us(),
-        &buyer_company(),
+        &support::business_us(),
+        &support::buyer_company(),
         taxed_line("CONSULENZA INFORMATIVA PRESTATO OLTRE OCEANO", "200.00"),
         "00002",
         "2026-11-06",
@@ -821,22 +741,6 @@ fn td17_non_eu_supplier_identical_parties() {
     assert_has(&validate(&doc), "00471");
 }
 
-/// The non-EU supplier of the `TD17` fixture.
-fn supplier_us() -> Business {
-    Business::foreign(
-        Country::US,
-        "ACME INC".parse().expect("a valid denomination"),
-        "US123456789".parse().expect("a valid identifier"),
-        Address::foreign(
-            "FIFTH AVENUE 1".parse().expect("a valid address"),
-            Some("10001".parse().expect("a valid postal code")),
-            "NEW YORK".parse().expect("a valid comune"),
-            Country::US,
-        )
-        .expect("a valid foreign seat"),
-    )
-}
-
 /// The `SelfInvoice::td17` form shared by the two reconstruction tests,
 /// with the scenario progressivo, date and numero.
 fn td17_build(
@@ -865,27 +769,12 @@ fn td17_build(
     .expect("the self-invoice passes every check")
 }
 
-/// The domestic business client of the `Natura` and `RegimeFiscale`
-/// tests.
-fn buyer_domestic() -> Buyer {
-    Buyer::denomination(
-        "BETA SRL".parse().expect("a valid denomination"),
-        "04444444444".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA MILANO 2".parse().expect("a valid address"),
-            "20100".parse().expect("a valid CAP"),
-            "MILANO".parse().expect("a valid comune"),
-            Provincia::Mi,
-        ),
-    )
-}
-
 /// The domestic invoice with one line, its scenario progressivo, date
 /// and numero.
 fn domestic_invoice(line: Line) -> FatturaElettronica {
     Invoice::domestic(
-        &seller(),
-        &buyer_domestic(),
+        &support::seller(),
+        &support::buyer(),
         Recipient::Codice("ABC1234".parse().expect("a valid code")),
         line,
     )
@@ -958,7 +847,7 @@ fn every_regime_fiscale_writes_its_code_in_the_document() {
         );
         let written = Invoice::domestic(
             &seller,
-            &buyer_domestic(),
+            &support::buyer(),
             Recipient::Codice("ABC1234".parse().expect("a valid code")),
             taxed_line("SERVIZIO DI CONSULENZA", "100.00"),
         )

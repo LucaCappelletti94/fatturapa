@@ -12,98 +12,18 @@
 #[path = "support/mod.rs"]
 mod support;
 
-use fatturapa::ids::{Natura, Numero, ProgressivoInvio, Provincia, RegimeFiscale};
+use fatturapa::ids::{Natura, Numero, ProgressivoInvio};
 use fatturapa::invoice::{
     Invoice, InvoiceCurrency, Line, Recipient, Sconto, SelfInvoice, SevenTerLine, VatTreatment,
 };
-use fatturapa::party::{Address, Business, Buyer, Company, Seller};
 use fatturapa::validate;
 use fatturapa::{Date, Document, FatturaElettronica};
-use iso_country::Country;
 use iso_currency::Currency;
 use proptest::prelude::*;
 
 /// The text of a value in cents, with its two decimals.
 fn cents(value: u32) -> String {
     format!("{}.{:02}", value / 100, value % 100)
-}
-
-fn seller() -> Seller {
-    Seller::denomination(
-        "ALPHA SRL".parse().expect("a valid denomination"),
-        "02222222222".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA ROMA 1".parse().expect("a valid address"),
-            "00100".parse().expect("a valid CAP"),
-            "ROMA".parse().expect("a valid comune"),
-            Provincia::Rm,
-        ),
-        RegimeFiscale::Rf01,
-    )
-}
-
-fn buyer() -> Buyer {
-    Buyer::denomination(
-        "BETA SRL".parse().expect("a valid denomination"),
-        "04444444444".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA MILANO 2".parse().expect("a valid address"),
-            "20100".parse().expect("a valid CAP"),
-            "MILANO".parse().expect("a valid comune"),
-            Provincia::Mi,
-        ),
-    )
-}
-
-fn buyer_us() -> Business {
-    Business::foreign(
-        Country::US,
-        "ACME INC".parse().expect("a valid denomination"),
-        "US123456789".parse().expect("a valid identifier"),
-        Address::foreign(
-            "FIFTH AVENUE 1".parse().expect("a valid address"),
-            Some("10001".parse().expect("a valid postal code")),
-            "NEW YORK".parse().expect("a valid comune"),
-            Country::US,
-        )
-        .expect("a valid foreign seat"),
-    )
-}
-
-fn buyer_de() -> Business {
-    Business::eu(
-        fatturapa::ids::EuCountry::De,
-        "MUSTER GMBH".parse().expect("a valid denomination"),
-        "DE998877665".parse().expect("a valid identifier"),
-        Address::foreign(
-            "BEISPIELSTRASSE 1".parse().expect("a valid address"),
-            Some("10115".parse().expect("a valid postal code")),
-            "BERLIN".parse().expect("a valid comune"),
-            Country::DE,
-        )
-        .expect("a valid foreign seat"),
-    )
-}
-
-fn buyer_company() -> Company {
-    Company::denomination(
-        "BETA SRL".parse().expect("a valid denomination"),
-        "04444444444".parse().expect("a valid partita IVA"),
-        Address::italian(
-            "VIA MILANO 2".parse().expect("a valid address"),
-            "20100".parse().expect("a valid CAP"),
-            "MILANO".parse().expect("a valid comune"),
-            Provincia::Mi,
-        ),
-    )
-}
-
-fn supplier_de() -> Business {
-    buyer_de()
-}
-
-fn supplier_us() -> Business {
-    buyer_us()
 }
 
 /// The rate of a line, the two bits choosing among the three rates.
@@ -203,7 +123,7 @@ proptest! {
         progressivo in prop::sample::select(&["00001", "A2B3C", "00002"]),
         numero in prop::sample::select(&["00001", "FAT-2026", "042"]),
     ) {
-        let seller = seller();
+        let seller = support::seller();
         let currency = if currency == 3 {
             InvoiceCurrency::Foreign {
                 currency: Currency::USD,
@@ -247,7 +167,7 @@ proptest! {
                         )
                     })
                     .collect::<Vec<_>>();
-                let buyer = buyer();
+                let buyer = support::buyer();
                 let invoice = Invoice::domestic(
                     &seller,
                     &buyer,
@@ -269,9 +189,9 @@ proptest! {
             }
             1 => {
                 let client = if recipient == 0 {
-                    buyer_us()
+                    support::business_us()
                 } else {
-                    buyer_de()
+                    support::business_de()
                 };
                 let first = seven_ter_line(
                     descriptions[0 % descriptions.len()],
@@ -311,8 +231,8 @@ proptest! {
                     lines[0].5,
                 );
                 let doc = SelfInvoice::td17(
-                    &supplier_de(),
-                    &buyer_company(),
+                    &support::business_de(),
+                    &support::buyer_company(),
                     Recipient::Codice("ABC1234".parse().expect("a valid code")),
                     line,
                 )
@@ -334,8 +254,8 @@ proptest! {
                     lines[0].5,
                 );
                 let doc = SelfInvoice::td19(
-                    &supplier_us(),
-                    &buyer_company(),
+                    &support::business_us(),
+                    &support::buyer_company(),
                     Recipient::Codice("ABC1234".parse().expect("a valid code")),
                     line,
                 )
