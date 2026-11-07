@@ -2003,3 +2003,124 @@ fn code_00471_simplified() {
     let doc = doc_simplified();
     assert_absent(&validate_simplified(&doc), "00471");
 }
+
+/// 00460: the sum of the `DatiBeniServizi` `Importo` of a simplified body
+/// above 400.00 euros triggers it. A total of exactly 400.00 passes. The cap
+/// is the 400.00 euros of art. 21 bis DPR 633/72, raised from 100 by the DM
+/// MEF 10/5/2019, and it is read per `FatturaElettronicaBody`, the field
+/// 2.2.2 `<Importo>` of the Rappresentazione tabellare.
+#[test]
+fn code_00460_simplified() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .importo = amount("400.01");
+    assert_has(&validate_simplified(&doc), "00460");
+
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .importo = amount("400.00");
+    assert_absent(&validate_simplified(&doc), "00460");
+}
+
+/// 00460: the check sums the `Importo` over the `DatiBeniServizi` of the body
+/// when the element is present more than once. Two blocks of 250.00 exceed
+/// the limit, two of 200.00 are exactly at it.
+#[test]
+fn code_00460_simplified_sum_over_blocks() {
+    let mut doc = doc_simplified();
+    let beni = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi;
+    beni[0].content.importo = amount("250.00");
+    let second = beni[0].clone();
+    beni.push(second);
+    assert_has(&validate_simplified(&doc), "00460");
+
+    let mut doc = doc_simplified();
+    let beni = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi;
+    beni[0].content.importo = amount("200.00");
+    let second = beni[0].clone();
+    beni.push(second);
+    assert_absent(&validate_simplified(&doc), "00460");
+}
+
+/// 00460: the cap is waived when the body carries a `DatiFatturaRettificata`,
+/// the correction of an already-issued invoice.
+#[test]
+fn code_00460_simplified_rettificata() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .importo = amount("500.00");
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_fattura_rettificata = Some(sg::DatiFatturaRettificataType {
+        content: sg::DatiFatturaRettificataTypeContent {
+            numero_fr: "41".to_string(),
+            data_fr: date(2026, 11, 3),
+            elementi_rettificati: "importo".to_string(),
+        },
+    });
+    assert_absent(&validate_simplified(&doc), "00460");
+}
+
+/// 00460: the cap is waived when the seller is in the forfettario regime RF19.
+#[test]
+fn code_00460_simplified_regime_rf19() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .importo = amount("500.00");
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cedente_prestatore
+        .content
+        .regime_fiscale = sg::RegimeFiscaleType::Rf19;
+    assert_absent(&validate_simplified(&doc), "00460");
+}
+
+/// 00460: the cap is waived when the seller is in the transfrontaliero
+/// franchigia IVA regime RF20.
+#[test]
+fn code_00460_simplified_regime_rf20() {
+    let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .importo = amount("500.00");
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cedente_prestatore
+        .content
+        .regime_fiscale = sg::RegimeFiscaleType::Rf20;
+    assert_absent(&validate_simplified(&doc), "00460");
+}
+
+/// 00460: the cap is per `FatturaElettronicaBody`. Two bodies of 300.00 each
+/// stay under it although their combined total exceeds it.
+#[test]
+fn code_00460_simplified_per_body() {
+    let mut doc = doc_simplified();
+    let mut first = doc.content.fattura_elettronica_body[0].clone();
+    first.content.dati_beni_servizi[0].content.importo = amount("300.00");
+    let second = first.clone();
+    doc.content.fattura_elettronica_body = vec![first, second];
+    assert_absent(&validate_simplified(&doc), "00460");
+}
