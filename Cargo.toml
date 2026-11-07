@@ -11,13 +11,16 @@ documentation = "https://docs.rs/fatturapa"
 authors = ["Luca Cappelletti <cappelletti.luca94@gmail.com>"]
 keywords = ["fatturapa", "e-invoicing", "italy", "sdi", "xml"]
 categories = ["finance", "parser"]
-# The third-party corpus in tests/corpus stays in the repository only, under its own licences.
+# The third-party corpus in tests/corpus stays in the repository only, under its own licences. The external
+# signature and trusted list material in tests/fixtures/external, from the DSS, AgID and EU sources, is
+# excluded the same way.
 include = [
     "/src",
     "/spec",
     "/tests/compile_fail",
     "/tests/filename.rs",
     "/tests/fixtures",
+    "!/tests/fixtures/external",
     "/tests/generator",
     "/tests/invoices.rs",
     "/tests/property.rs",

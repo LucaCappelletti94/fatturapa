@@ -100,3 +100,57 @@ fn synthetic_list_keeps_only_the_granted_qc_ca() {
         ca.tbs_certificate.subject
     );
 }
+
+/// The historical `AgID` snapshots of `tests/fixtures/external`, one per
+/// year from 2017 to 2024, with the anchor count each one parses to.
+const EXTERNAL_TSL_SNAPSHOTS: &[(&str, usize)] = &[
+    (
+        "tests/fixtures/external/tsl-it/TSL-IT-20170610215159.xml",
+        113,
+    ),
+    (
+        "tests/fixtures/external/tsl-it/TSL-IT-20211021145639.xml",
+        145,
+    ),
+    (
+        "tests/fixtures/external/tsl-it/TSL-IT-20220121051644.xml",
+        143,
+    ),
+    (
+        "tests/fixtures/external/tsl-it/TSL-IT-20231230095405.xml",
+        143,
+    ),
+    (
+        "tests/fixtures/external/tsl-it/TSL-IT-20241224070933.xml",
+        138,
+    ),
+];
+
+/// Every historical snapshot parses to the recorded anchor count.
+#[test]
+fn historical_snapshots_parse_to_the_recorded_anchors() {
+    for (path, expected) in EXTERNAL_TSL_SNAPSHOTS {
+        let bytes = fs::read(path).expect("the snapshot is readable");
+        let anchors = trust_anchors(&bytes).expect("the snapshot parses");
+        assert_eq!(anchors.len(), *expected, "{path}");
+    }
+}
+
+/// The truncated 2019 snapshot is a list cut off before the root element
+/// closes, which must fail.
+#[test]
+fn truncated_snapshot_is_rejected() {
+    let bytes = fs::read("tests/fixtures/external/tsl-it/TSL-IT-20190824181858-truncated.xml")
+        .expect("the snapshot is readable");
+    let err = trust_anchors(&bytes).expect_err("the root element is unclosed");
+    assert!(matches!(err, TrustListError::NotTrustedList), "{err:?}");
+}
+
+/// The `EU` list of trusted lists parses to zero trust anchors, because it
+/// lists trusted lists rather than qualified certificate authorities.
+#[test]
+fn eu_lotl_parses_to_zero_anchors() {
+    let bytes = fs::read("tests/fixtures/external/lotl/eu-lotl.xml").expect("the list is readable");
+    let anchors = trust_anchors(&bytes).expect("the list parses");
+    assert!(anchors.is_empty(), "the LOTL carries no trust anchors");
+}
