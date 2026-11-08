@@ -12,43 +12,18 @@
 #[path = "support/mod.rs"]
 mod support;
 
-use std::path::Path;
+use support::{assert_has, fixture_round_trips};
 
 use fatturapa::generated::fpr12 as g;
 use fatturapa::ids::{Natura, Provincia, RegimeFiscale};
 use fatturapa::invoice::{Invoice, InvoiceCurrency, Line, Recipient, SevenTerLine, VatTreatment};
 use fatturapa::party::{Address, Business, Company, Seller};
-use fatturapa::validate::{Violation, validate};
+use fatturapa::validate::validate;
 use fatturapa::{Amount, Document, FatturaElettronica};
 use iso_currency::Currency;
 
 fn amount(text: &str) -> Amount {
     text.parse().expect("a valid decimal")
-}
-
-fn assert_has(violations: &[Violation], code: &str) {
-    assert!(
-        violations.iter().any(|v| v.code == code),
-        "expected {code}, got {violations:?}"
-    );
-}
-
-/// Reads the fixture `file` from `tests/fixtures/invoices`, validates the
-/// checked-in bytes against the ordinary invoice schema, reads them,
-/// writes them back, validates the written bytes and compares the re-read
-/// with the first read.
-fn fixture_round_trips(file: &str) -> FatturaElettronica {
-    let path = Path::new("tests/fixtures/invoices").join(file);
-    let bytes = std::fs::read(&path).expect("the fixture is checked in");
-    support::validate(&support::fpr12_schema(), &bytes)
-        .expect("the fixture validates against the schema");
-    let doc = FatturaElettronica::from_xml_slice(&bytes).expect("the fixture reads");
-    let written = doc.to_xml_vec().expect("the fixture serialises");
-    support::validate(&support::fpr12_schema(), &written)
-        .expect("the written fixture validates against the schema");
-    let reread = FatturaElettronica::from_xml_slice(&written).expect("the fixture re-reads");
-    assert_eq!(reread, doc, "the fixture round-trips equal");
-    doc
 }
 
 fn seven_ter_line(description: &str, price: &str) -> SevenTerLine {
