@@ -13,12 +13,14 @@ keywords = ["fatturapa", "e-invoicing", "italy", "sdi", "xml"]
 categories = ["finance", "parser"]
 # The third-party corpus in tests/corpus stays in the repository only, under its own licences. The external
 # signature and trusted list material in tests/fixtures/external, from the DSS, AgID and EU sources, is
-# excluded the same way.
+# excluded the same way. The specification PDFs are reference documents that no build or test reads.
 include = [
     "/src",
     "/spec",
+    "!/spec/*.pdf",
     "/tests/compile_fail",
     "/tests/document_types.rs",
+    "/tests/encoding.rs",
     "/tests/field_tables.rs",
     "/tests/filename.rs",
     "/tests/fixtures",
@@ -26,6 +28,7 @@ include = [
     "/tests/generator",
     "/tests/invoices.rs",
     "/tests/property.rs",
+    "/tests/reader_xpath.rs",
     "/tests/roundtrip.proptest-regressions",
     "/tests/roundtrip.rs",
     "/tests/samples.rs",
