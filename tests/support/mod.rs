@@ -311,6 +311,22 @@ pub(crate) fn business_de() -> Business {
     )
 }
 
+/// The French business party of the intracommunity self-invoice fixtures.
+pub(crate) fn business_fr() -> Business {
+    Business::eu(
+        EuCountry::Fr,
+        "FICTIF SAS".parse().expect("a valid denomination"),
+        "FR93456789012".parse().expect("a valid identifier"),
+        Address::foreign(
+            "12 RUE DES LILAS".parse().expect("a valid address"),
+            Some("75008".parse().expect("a valid postal code")),
+            "PARIS".parse().expect("a valid comune"),
+            Country::FR,
+        )
+        .expect("a valid foreign seat"),
+    )
+}
+
 /// Validates `doc` against `schema` with `xmllint`, offline, using the
 /// catalog in `spec/catalog.xml`.
 ///

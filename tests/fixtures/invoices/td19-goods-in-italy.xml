@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>04444444444</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>FR</IdPaese>
+          <IdCodice>FR93456789012</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>FICTIF SAS</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>12 RUE DES LILAS 75008</Indirizzo>
+        <CAP>00000</CAP>
+        <Comune>PARIS</Comune>
+        <Nazione>FR</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>04444444444</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>BETA SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MILANO 2</Indirizzo>
+        <CAP>20100</CAP>
+        <Comune>MILANO</Comune>
+        <Provincia>MI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD19</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-11-05</Data>
+        <Numero>001</Numero>
+        <ImportoTotaleDocumento>1392.49</ImportoTotaleDocumento>
+        <Causale>AUTOFATTURA PER ACQUISTO DI BENI GIA PRESENTI IN ITALIA, AI SENSI DELL'ART. 17, COMMA 2, DPR 633/72</Causale>
+      </DatiGeneraliDocumento>
+      <DatiFattureCollegate>
+        <IdDocumento>778/2025</IdDocumento>
+        <Data>2025-10-28</Data>
+      </DatiFattureCollegate>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>BENI GIA PRESENTI IN ITALIA</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>800.40</PrezzoUnitario>
+        <PrezzoTotale>800.40</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>BENI A ALIQUOTA RIDOTTA GIA PRESENTI IN ITALIA</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>400.00</PrezzoUnitario>
+        <PrezzoTotale>400.00</PrezzoTotale>
+        <AliquotaIVA>4.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>800.40</ImponibileImporto>
+        <Imposta>176.09</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>4.00</AliquotaIVA>
+        <ImponibileImporto>400.00</ImponibileImporto>
+        <Imposta>16.00</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP01</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP01</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-12-05</DataScadenzaPagamento>
+        <ImportoPagamento>1392.49</ImportoPagamento>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

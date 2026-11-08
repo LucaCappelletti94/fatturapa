@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>04444444444</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00015</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>SM</IdPaese>
+          <IdCodice>1234</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>MUSTER S.A.S.</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF18</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA TITO ANTONELLI 10 47893</Indirizzo>
+        <CAP>00000</CAP>
+        <Comune>CITTA' DI SAN MARINO</Comune>
+        <Nazione>SM</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>04444444444</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>BETA SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MILANO 2</Indirizzo>
+        <CAP>20100</CAP>
+        <Comune>MILANO</Comune>
+        <Provincia>MI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD28</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-04-01</Data>
+        <Numero>00012</Numero>
+        <ImportoTotaleDocumento>1808.91</ImportoTotaleDocumento>
+        <Causale>ACQUISTO DA OPERATORE DI SAN MARINO, FATTURA CARTACEA CON ADDEBITO DELL'IMPOSTA</Causale>
+      </DatiGeneraliDocumento>
+      <DatiFattureCollegate>
+        <IdDocumento>FT-77/2025</IdDocumento>
+        <Data>2025-03-20</Data>
+      </DatiFattureCollegate>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>BENI FORNITI DA OPERATORE DI SAN MARINO</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>800.40</PrezzoUnitario>
+        <PrezzoTotale>800.40</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DettaglioLinee>
+        <NumeroLinea>2</NumeroLinea>
+        <Descrizione>BENI FORNITI DA OPERATORE DI SAN MARINO A ALIQUOTA RIDOTTA</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>800.40</PrezzoUnitario>
+        <PrezzoTotale>800.40</PrezzoTotale>
+        <AliquotaIVA>4.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>800.40</ImponibileImporto>
+        <Imposta>176.09</Imposta>
+      </DatiRiepilogo>
+      <DatiRiepilogo>
+        <AliquotaIVA>4.00</AliquotaIVA>
+        <ImponibileImporto>800.40</ImponibileImporto>
+        <Imposta>32.02</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP02</ModalitaPagamento>
+        <DataScadenzaPagamento>2025-04-30</DataScadenzaPagamento>
+        <ImportoPagamento>1808.91</ImportoPagamento>
+        <IBAN>IT60X0542811101000000123456</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
