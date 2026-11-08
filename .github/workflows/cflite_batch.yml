@@ -5,6 +5,10 @@ on:
     - cron: "0 6 * * 0" # 06:00 UTC every Sunday
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 permissions:
   contents: read
   actions: read

@@ -6,6 +6,10 @@ name: refquiem-post
     workflows: [refquiem]
     types: [completed]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 permissions: {}
 
 # This job holds a write token, so it never checks out or runs pull request
