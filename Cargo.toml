@@ -18,6 +18,7 @@ include = [
     "/src",
     "/spec",
     "/tests/compile_fail",
+    "/tests/document_types.rs",
     "/tests/field_tables.rs",
     "/tests/filename.rs",
     "/tests/fixtures",
