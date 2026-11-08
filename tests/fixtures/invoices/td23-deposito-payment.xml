@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02222222222</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00011</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02222222222</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>ALFA SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA ROMA 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>04444444444</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>BETA SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MILANO 2</Indirizzo>
+        <CAP>20100</CAP>
+        <Comune>MILANO</Comune>
+        <Provincia>MI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD23</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-07-10</Data>
+        <Numero>00008</Numero>
+        <ImportoTotaleDocumento>4880.00</ImportoTotaleDocumento>
+        <Causale>FATTURA PER DEPOSITO, EMISSIONE IN ITALIA</Causale>
+      </DatiGeneraliDocumento>
+      <DatiFattureCollegate>
+        <IdDocumento>034/2025</IdDocumento>
+        <Data>2025-05-05</Data>
+      </DatiFattureCollegate>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>PAGAMENTO PER DEPOSITO</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>4000.00</PrezzoUnitario>
+        <PrezzoTotale>4000.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <AltriDatiGestionali>
+          <TipoDato>NellAnno</TipoDato>
+        </AltriDatiGestionali>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>4000.00</ImponibileImporto>
+        <Imposta>880.00</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

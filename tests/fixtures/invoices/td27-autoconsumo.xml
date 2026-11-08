@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02222222222</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00014</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02222222222</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>ALFA SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA ROMA 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>02222222222</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>ALFA SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA ROMA 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD27</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-08-15</Data>
+        <Numero>00011</Numero>
+        <ImportoTotaleDocumento>976.00</ImportoTotaleDocumento>
+        <Causale>FATTURA PER AUTOCONSUMO DI BENI DESTINATI ALL'USO PERSONALE</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>DESTINAZIONE DI BENI ALL'USO PERSONALE O FAMILIARE</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>800.00</PrezzoUnitario>
+        <PrezzoTotale>800.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>800.00</ImponibileImporto>
+        <Imposta>176.00</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

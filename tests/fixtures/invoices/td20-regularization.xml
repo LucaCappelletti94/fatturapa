@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>04444444444</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00008</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567897</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>MRALNE80E05H501C</CodiceFiscale>
+        <Anagrafica>
+          <Nome>MARIO</Nome>
+          <Cognome>PROVA</Cognome>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA VERDI 7</Indirizzo>
+        <CAP>10100</CAP>
+        <Comune>TORINO</Comune>
+        <Provincia>TO</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>04444444444</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>BETA SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MILANO 2</Indirizzo>
+        <CAP>20100</CAP>
+        <Comune>MILANO</Comune>
+        <Provincia>MI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <SoggettoEmittente>CC</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD20</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-03-10</Data>
+        <Numero>00003</Numero>
+        <ImportoTotaleDocumento>100.00</ImportoTotaleDocumento>
+        <Causale>AUTOFATTURA AI SENSI DELL'ART. 6, COMMA 9-BIS, D.LGS. 471/97</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>SERVIZIO IN SCISONE DEI PAGAMENTI, FATTURA NON RICEVUTA</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>100.00</PrezzoUnitario>
+        <PrezzoTotale>100.00</PrezzoTotale>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N6.4</Natura>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>0.00</AliquotaIVA>
+        <Natura>N6.4</Natura>
+        <ImponibileImporto>100.00</ImponibileImporto>
+        <Imposta>0.00</Imposta>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

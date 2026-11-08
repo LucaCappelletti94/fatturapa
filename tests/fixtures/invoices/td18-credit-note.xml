@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                     xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>04444444444</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00007</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>FR</IdPaese>
+          <IdCodice>FR93456789012</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>FICTIF SAS</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF18</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>12 RUE DES LILAS 75008</Indirizzo>
+        <CAP>00000</CAP>
+        <Comune>PARIS</Comune>
+        <Nazione>FR</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>04444444444</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>BETA SRL</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA MILANO 2</Indirizzo>
+        <CAP>20100</CAP>
+        <Comune>MILANO</Comune>
+        <Provincia>MI</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD18</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2025-11-03</Data>
+        <Numero>00002</Numero>
+        <ImportoTotaleDocumento>-832.42</ImportoTotaleDocumento>
+        <Causale>NOTA DI CREDITO DEL CEDENTE ESTERO, INTEGRAZIONE RETTIFICATIVA</Causale>
+      </DatiGeneraliDocumento>
+      <DatiFattureCollegate>
+        <IdDocumento>00001</IdDocumento>
+        <Data>2025-10-06</Data>
+      </DatiFattureCollegate>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>STORNO TOTALE PRODOTTI ALIMENTARI A ALIQUOTA RIDOTTA</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>-800.40</PrezzoUnitario>
+        <PrezzoTotale>-800.40</PrezzoTotale>
+        <AliquotaIVA>4.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>4.00</AliquotaIVA>
+        <ImponibileImporto>-800.40</ImponibileImporto>
+        <Imposta>-32.02</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
