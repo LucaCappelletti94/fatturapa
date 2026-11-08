@@ -82,7 +82,7 @@
 //! | 00414 | cassa `Natura` present at a non-zero `AliquotaIVA` | implemented | out of reach |
 //! | 00415 | `DatiRitenuta` missing for a cassa with `Ritenuta SI` | implemented | out of reach |
 //! | 00417 | buyer `IdFiscaleIVA` and `CodiceFiscale` both absent | implemented | implemented |
-//! | 00418 | linked invoice dated after the document | implemented | implemented, the `Data` before the `DataFR` |
+//! | 00418 | linked invoice dated after the document | implemented, only for the `TD04` | implemented, only for the `TD08`, the `Data` before the `DataFR` |
 //! | 00419 | `DatiRiepilogo` missing for a rate value | implemented | out of reach, no `DatiRiepilogo` |
 //! | 00420 | `Natura N6` with `EsigibilitaIVA S` | implemented | out of reach, no `EsigibilitaIVA` |
 //! | 00421 | `Imposta` not computed per the specification | implemented | out of reach, no `ImponibileImporto` |
@@ -325,7 +325,9 @@ fn check_simplified_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) 
 }
 
 /// The body-level checks of the simplified invoice, 00400, 00401, 00418,
-/// 00424, 00425, 00445, 00460 and 00471.
+/// 00424, 00425, 00445, 00460 and 00471. The 00418 applies to the `TD08`
+/// only, per the simplified field table 2.1.1.3, and the `DataFR` row
+/// 2.1.2.2 states the same comparison from the other side.
 fn check_simplified_body(
     bi: usize,
     body: &BodySemplificato,
@@ -365,10 +367,11 @@ fn check_simplified_body(
         ));
     }
     let generali = &body.content.dati_generali.content;
-    if generali
-        .dati_fattura_rettificata
-        .as_ref()
-        .is_some_and(|rettificata| doc_data.data < rettificata.content.data_fr)
+    if doc_data.tipo_documento == crate::generated::fsm10::TipoDocumentoType::Td08
+        && generali
+            .dati_fattura_rettificata
+            .as_ref()
+            .is_some_and(|rettificata| doc_data.data < rettificata.content.data_fr)
     {
         v.push(Violation::new(
             "00418",
@@ -565,7 +568,13 @@ fn check_body(
         v,
     );
     check_sconti(&doc_data.sconto_maggiorazione, &bpath, v);
-    check_linked_invoice_dates(&generali.dati_fatture_collegate, doc_data.data, &bpath, v);
+    check_linked_invoice_dates(
+        &generali.dati_fatture_collegate,
+        &doc_data.tipo_documento,
+        doc_data.data,
+        &bpath,
+        v,
+    );
     check_parties(bi, &doc_data.tipo_documento, header, v);
 }
 
@@ -938,14 +947,22 @@ fn check_sconti(sconti: &[ScontoMaggiorazioneType], bpath: &str, v: &mut Vec<Vio
     }
 }
 
-/// The 00418 check: the `Data` of every linked invoice must not be after
-/// the document `Data`, of every `TipoDocumento`.
+/// The 00418 check: the document `Data` of a `TD04` must not be before the
+/// `Data` of any linked invoice. The ordinary field table, row 2.1.1.3
+/// `<Data>`, scopes the check to the `TD04`, and the Elenco Controlli 2.0
+/// states `IF ( TipoDoc == "TD04" ) IF ( DataNC < DataFattColl ) ERRORE
+/// (00418)`. The *Allegato A* 1.9.1 prose on the `DatiFattureCollegate`
+/// `<Data>` reads wider, for every `TipoDocumento`.
 fn check_linked_invoice_dates(
     collegate: &[DatiDocumentiCorrelatiType],
+    tipo: &TipoDocumentoType,
     data: Date,
     bpath: &str,
     v: &mut Vec<Violation>,
 ) {
+    if *tipo != TipoDocumentoType::Td04 {
+        return;
+    }
     for (ci, correlato) in collegate.iter().enumerate() {
         if correlato.content.data.as_ref().is_some_and(|d| data < *d) {
             v.push(Violation::new(
