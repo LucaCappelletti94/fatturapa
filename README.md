@@ -6,15 +6,13 @@
 [![docs.rs](https://docs.rs/fatturapa/badge.svg)](https://docs.rs/fatturapa)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/LucaCappelletti94/fatturapa/blob/main/LICENSE)
 
-Reading and writing of every `FatturaPA` invoice and SDI message, in Rust. Unofficial.
+Reading and writing of every `FatturaPA` invoice and SDI message, in Rust.
 
-- the ordinary invoice, `FPR12` and `FPA12`
-- the simplified invoice, `FSM10`
-- the nine SDI messages, from the delivery receipt to the deadline notice
-- signed files: a `CAdES` `.xml.p7m` (raw `DER` or `base64`) is unwrapped to its `XML` and its signature verified, with the `trust-list` feature parsing the `AgID` trusted services list into trust anchors
-- an optional `serde` feature that reads and writes the typed identifiers and domain types as JSON, validating every value on the way in
-
-The types are generated from the official XSD schemas in `spec/`, so a document round-trips through the schema it was written for. Amounts keep their exact decimal scale and dates keep their lexical form.
+- the ordinary invoice (`FPR12`, `FPA12`), the simplified invoice (`FSM10`) and the nine SDI messages
+- types generated from the official XSD schemas, so a document round-trips through the schema it was written for
+- a typed construction API whose `build` runs the official SDI checks
+- signed `.xml.p7m` files unwrapped and verified, with the `trust-list` feature reading the `AgID` trust anchors
+- an optional `serde` feature
 
 ```rust
 # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -76,5 +74,3 @@ assert!(xml.contains("<CodiceDestinatario>XXXXXXX</CodiceDestinatario>"));
 # Ok(())
 # }
 ```
-
-The construction API is typed. The identifiers validate on construction, the scenario constructors fill what the specification dictates, and the lines of the art. 7-ter invoice carry no VAT treatment, the scenario writing the `N2.1` nature and its reference. Every setter accepts any value convertible into the typed one through `TryFrom`, so the strings above go straight into the API and `build` returns the first conversion error before any other check. A document priced in a foreign currency keeps the `Divisa` `EUR` and every amount in euros, the art. 13 convention, the original amount and the rate carried as management data. `build` runs the official SDI checks of `spec/Elenco-Controlli` before it returns. Signed files read through `fatturapa::signed::unwrap` and `fatturapa::signed::verify`, and the transmission file name builds through `fatturapa::InvoiceName`.
