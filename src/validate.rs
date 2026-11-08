@@ -51,13 +51,13 @@
 //! | 00107 | signature certificate not valid | out of reach | out of reach |
 //! | 00200 | file not conforming to the format | the generated reader rejects it | the generated reader rejects it |
 //! | 00201 | more than 50 format errors | out of reach, SDI context | out of reach |
-//! | 00300 | seller `IdCodice` not valid | out of reach, needs the tax registry; the XSD pattern is enforced by the reader | out of reach |
-//! | 00301 | buyer `IdCodice` not valid | out of reach, tax registry | out of reach |
-//! | 00302 | buyer `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
-//! | 00303 | fiscal representative or third party `IdCodice` not valid | out of reach, tax registry | out of reach |
-//! | 00304 | fiscal representative `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
-//! | 00305 | third party `IdCodice` not valid | out of reach, tax registry | out of reach |
-//! | 00306 | third party `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
+//! | 00300 | transmitter `IdCodice` not valid | out of reach, needs the tax registry; the XSD pattern is enforced by the reader | out of reach |
+//! | 00301 | seller `IdCodice` not valid | out of reach, tax registry | out of reach |
+//! | 00302 | seller `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
+//! | 00303 | seller or buyer fiscal representative `IdCodice` not valid | out of reach, tax registry | out of reach |
+//! | 00304 | seller fiscal representative `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
+//! | 00305 | buyer `IdCodice` not valid | out of reach, tax registry | out of reach |
+//! | 00306 | buyer `CodiceFiscale` not valid | out of reach, tax registry | out of reach |
 //! | 00311 | `CodiceDestinatario` not valid | out of reach, needs the IPA registry | out of reach |
 //! | 00312 | `CodiceDestinatario` not active | out of reach, IPA registry | out of reach |
 //! | 00313 | the `XXXXXXX` `CodiceDestinatario` for a buyer established in `IT` | implemented | implemented |
@@ -70,8 +70,8 @@
 //! | 00326 | buyer tax code missing for a buyer IVA group | out of reach, IVA group registry | out of reach |
 //! | 00327 | buyer group tax code without the group VAT number | out of reach, IVA group registry | out of reach |
 //! | 00330 | `PECDestinatario` is an SDI operational PEC mailbox | implemented | implemented |
-//! | 00398 | IPA office not identified for a Centrale code | out of reach, IPA registry | out of reach |
-//! | 00399 | buyer missing from the IPA registry | out of reach, IPA registry | out of reach |
+//! | 00398 | a `Centrale` office code although IPA identifies the specific office | out of reach, IPA registry | out of reach |
+//! | 00399 | `FPR12` to a buyer registered in IPA | out of reach, IPA registry | out of reach |
 //! | 00400 | the `Natura` missing at a zero rate | implemented | implemented, the `DatiBeniServizi` `Natura` |
 //! | 00401 | the `Natura` present at a non-zero rate, the `TD16` is exempt | implemented | implemented, the `DatiBeniServizi` `Natura` |
 //! | 00403 | invoice date after the reception date | out of reach, needs the SDI reception date | out of reach |
