@@ -12,29 +12,21 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use fatturapa::generated::{fpr12, fsm10, sdi};
+use fatturapa::generated::{fpr12, fsm10};
 use fatturapa::ids::{EuCountry, Provincia, RegimeFiscale};
 use fatturapa::party::{Address, Business, Buyer, Company, Seller};
 use fatturapa::validate::Violation;
 use fatturapa::{Document, FatturaElettronica, FatturaElettronicaSemplificata};
 use iso_country::Country;
-use xsd_parser_types::xml::{AnyElement, Attributes, Element, Value};
+use xsd_parser_types::xml::{AnyElement, Element, Value};
 
-/// The `xsd-parser` serializer re-emits the namespace declarations that
-/// were in scope when a parsed `xs:any` element was read, as `xmlns`
-/// attributes on that element and on every element inside it. Those
-/// declarations and the namespace maps are the only part of the element
-/// that varies across a read-modify-write cycle, so the normalizer drops
-/// the `xmlns` and `xmlns:*` attributes and the namespace maps of the
-/// element and of every element inside it, and keeps the name, every other
-/// attribute and the content.
+/// The in-scope namespace declarations of a parsed `xs:any` element, on
+/// it and on every element inside it, are the only part that varies across
+/// a read-modify-write cycle, when the source prefix differs from the one
+/// the writer picks. The normalizer clears them and keeps the name, the
+/// attributes and the content.
 fn normalize_element(element: Element<'static>) -> Element<'static> {
-    let Element {
-        name,
-        values,
-        attributes,
-        ..
-    } = element;
+    let Element { name, values, .. } = element;
     Element {
         name,
         values: values
@@ -44,25 +36,12 @@ fn normalize_element(element: Element<'static>) -> Element<'static> {
                 other => other,
             })
             .collect(),
-        attributes: Attributes(
-            attributes
-                .0
-                .into_iter()
-                .filter(|(key, _)| !is_namespace_declaration(&key.0))
-                .collect(),
-        ),
         ..Element::default()
     }
 }
 
-/// Whether the attribute name `key` is a namespace declaration, `xmlns` or
-/// `xmlns:prefix`.
-fn is_namespace_declaration(key: &[u8]) -> bool {
-    key == b"xmlns" || key.starts_with(b"xmlns:")
-}
-
-/// Normalise a parsed `xs:any` element, keeping the name, the attributes
-/// and the content and dropping the namespace declarations at every level.
+/// Normalise a parsed `xs:any` element, clearing the in-scope namespaces
+/// at every level and keeping the name, the attributes and the content.
 fn normalize_any(any: AnyElement) -> AnyElement {
     normalize_element(any)
 }
@@ -156,7 +135,6 @@ macro_rules! normalize_signature_impl {
 
 normalize_signature_impl!(fpr12, normalize_fpr12_signature);
 normalize_signature_impl!(fsm10, normalize_fsm10_signature);
-normalize_signature_impl!(sdi, normalize_sdi_signature);
 
 /// The XML catalog that maps the W3C XML-DSig address onto the local copy.
 pub(crate) fn catalog() -> PathBuf {

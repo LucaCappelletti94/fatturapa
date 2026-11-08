@@ -1,13 +1,7 @@
 //! Round-trip property tests: an arbitrary document of every root type is
-//! written, XSD-validated where the upstream `xsd-parser` `ds:Signature`
-//! defect does not block it, re-read, and compared with the original. The
+//! written, XSD-validated, re-read, and compared with the original. The
 //! generators live in the `generator` module, which the fuzz round-trip
 //! target shares.
-//!
-//! The seven SDI message types that require a `ds:Signature` in the schema
-//! cannot be XSD-validated after writing until the upstream fix lands, so
-//! their properties write, re-read and compare, mirroring the `read_stable`
-//! sample tests.
 
 #![expect(
     clippy::expect_used,
@@ -85,9 +79,8 @@ fn round_trip_notifica_esito_committente(seed: u64) {
     assert_eq!(doc, reread);
 }
 
-/// A random `AT` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `AT` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -95,14 +88,14 @@ fn round_trip_notifica_esito_committente(seed: u64) {
 fn round_trip_attestazione_trasmissione_fattura(seed: u64) {
     let doc = generator::at_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread =
         AttestazioneTrasmissioneFattura::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }
 
-/// A random `DT` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `DT` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -110,13 +103,13 @@ fn round_trip_attestazione_trasmissione_fattura(seed: u64) {
 fn round_trip_notifica_decorrenza_termini(seed: u64) {
     let doc = generator::dt_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread = NotificaDecorrenzaTermini::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }
 
-/// A random `MC` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `MC` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -124,13 +117,13 @@ fn round_trip_notifica_decorrenza_termini(seed: u64) {
 fn round_trip_notifica_mancata_consegna(seed: u64) {
     let doc = generator::mc_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread = NotificaMancataConsegna::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }
 
-/// A random `NE` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `NE` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -138,13 +131,13 @@ fn round_trip_notifica_mancata_consegna(seed: u64) {
 fn round_trip_notifica_esito(seed: u64) {
     let doc = generator::ne_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread = NotificaEsito::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }
 
-/// A random `NS` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `NS` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -152,13 +145,13 @@ fn round_trip_notifica_esito(seed: u64) {
 fn round_trip_notifica_scarto(seed: u64) {
     let doc = generator::ns_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread = NotificaScarto::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }
 
-/// A random `RC` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `RC` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -166,13 +159,13 @@ fn round_trip_notifica_scarto(seed: u64) {
 fn round_trip_ricevuta_consegna(seed: u64) {
     let doc = generator::rc_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread = RicevutaConsegna::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }
 
-/// A random `SE` message writes, re-reads and compares equal. The XSD
-/// validation of the written bytes waits for the upstream `xsd-parser`
-/// `ds:Signature` namespace fix.
+/// A random `SE` message with a mandatory signature writes, validates
+/// against `MessaggiTypes_v1.1.xsd`, re-reads and compares equal.
 #[property_test(config = ProptestConfig {
     cases: 64,
     ..ProptestConfig::default()
@@ -180,6 +173,7 @@ fn round_trip_ricevuta_consegna(seed: u64) {
 fn round_trip_scarto_esito_committente(seed: u64) {
     let doc = generator::se_from_seed(seed);
     let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::sdi_schema(), &bytes).expect("the message validates");
     let reread = ScartoEsitoCommittente::from_xml_slice(&bytes).expect("the message reads");
     assert_eq!(doc, reread);
 }

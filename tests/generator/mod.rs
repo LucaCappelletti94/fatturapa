@@ -878,7 +878,7 @@ pub(crate) fn ns_from_seed(seed: u64) -> NotificaScarto {
                 content: sdi::ListaErroriTypeContent {
                     errore: vec![sdi::ErroreType {
                         content: sdi::ErroreTypeContent {
-                            codice: "010101".to_string(),
+                            codice: "00305".to_string(),
                             descrizione: "Il file non e conforme al formato".to_string(),
                         },
                     }],

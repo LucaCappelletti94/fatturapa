@@ -49,14 +49,12 @@ fn truncated_inside_signed_info_is_refused() {
 
 /// Input that ends inside `ds:KeyInfo`, a mixed choice.
 #[test]
-#[ignore = "waits for the upstream xsd-parser fix for end of input inside mixed content, see upstream/xsd-parser-mixed-content-eof-hang.md"]
 fn truncated_inside_key_info_is_refused() {
     refused_in_time(dt_cut_after("<ds:KeyInfo Id=\"KeyInfoId\">"));
 }
 
 /// Input that ends inside `ds:Object`, a mixed sequence of `xs:any`.
 #[test]
-#[ignore = "waits for the upstream xsd-parser fix for end of input inside mixed content, see upstream/xsd-parser-mixed-content-eof-hang.md"]
 fn truncated_inside_object_is_refused() {
     refused_in_time(dt_cut_after("<ds:Object>"));
 }

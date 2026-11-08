@@ -91,13 +91,12 @@ their upstream suite exercises them for.
 
 Forty of the round-tripped invoices carry a `Signature` element. Their
 `xs:any` content, the filter-2 `XPath` transform and the XAdES object, is
-preserved through the round-trip, up to the namespace declarations of that
-content, which the `xsd-parser` does not keep stable on serialisation. The
-round-trip test therefore checks equality outside the signature and compares
-the two signatures with the `xs:any` content normalised. The written bytes of
-the signed documents are not `XSD`-validated, because the `xsd-parser` writes
-the `ds:Signature` reference without its namespace
-(Bergmann89/xsd-parser#308).
+preserved through the round-trip, up to the in-scope namespaces of that
+content, which differ when the source prefix differs from the one the writer
+picks, an `XML 1.0` limit. The round-trip test therefore checks equality
+outside the signature and compares the two signatures with the in-scope
+namespaces of the `xs:any` content cleared. The written bytes of the signed
+documents are `XSD`-validated like the ones of the unsigned ones.
 
 ### Files that fail the `XSD` validation
 
