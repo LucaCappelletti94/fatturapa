@@ -7,6 +7,7 @@
     reason = "the shared helpers are used by different test binaries"
 )]
 
+use std::fmt::Debug;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -14,6 +15,8 @@ use std::process::{Command, Stdio};
 use fatturapa::generated::{fpr12, fsm10, sdi};
 use fatturapa::ids::{EuCountry, Provincia, RegimeFiscale};
 use fatturapa::party::{Address, Business, Buyer, Company, Seller};
+use fatturapa::validate::Violation;
+use fatturapa::{Document, FatturaElettronica, FatturaElettronicaSemplificata};
 use iso_country::Country;
 use xsd_parser_types::xml::{AnyElement, Attributes, Element, Value};
 
@@ -193,6 +196,41 @@ pub(crate) fn fixture(file: &str) -> PathBuf {
 /// The bytes of the test fixture with file name `file`, in `tests/fixtures`.
 pub(crate) fn fixture_bytes(file: &str) -> Vec<u8> {
     std::fs::read(fixture(file)).expect("the fixture is checked in")
+}
+
+/// Asserts that `violations` carries the SDI error `code`.
+pub(crate) fn assert_has(violations: &[Violation], code: &str) {
+    assert!(
+        violations.iter().any(|v| v.code == code),
+        "expected {code}, got {violations:?}"
+    );
+}
+
+/// Reads the invoice fixture `file` from `tests/fixtures/invoices`, validates
+/// the checked-in bytes against `schema`, reads them, writes them back,
+/// validates the written bytes and compares the re-read with the first read.
+fn invoice_round_trips<T>(file: &str, schema: &Path) -> T
+where
+    T: Document + PartialEq + Debug,
+{
+    let bytes = fixture_bytes(&format!("invoices/{file}"));
+    validate(schema, &bytes).expect("the fixture validates against the schema");
+    let doc = T::from_xml_slice(&bytes).expect("the fixture reads");
+    let written = doc.to_xml_vec().expect("the fixture serialises");
+    validate(schema, &written).expect("the written fixture validates against the schema");
+    let reread = T::from_xml_slice(&written).expect("the fixture re-reads");
+    assert_eq!(reread, doc, "the fixture round-trips equal");
+    doc
+}
+
+/// The round trip of an ordinary invoice fixture, against the FPR12 schema.
+pub(crate) fn fixture_round_trips(file: &str) -> FatturaElettronica {
+    invoice_round_trips(file, &fpr12_schema())
+}
+
+/// The round trip of a simplified invoice fixture, against the FSM10 schema.
+pub(crate) fn fsm10_round_trips(file: &str) -> FatturaElettronicaSemplificata {
+    invoice_round_trips(file, &fsm10_schema())
 }
 
 /// The Italian seller of the fixture invoices.

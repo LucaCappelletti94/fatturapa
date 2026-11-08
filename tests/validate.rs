@@ -9,6 +9,8 @@
 #[path = "support/mod.rs"]
 mod support;
 
+use support::assert_has;
+
 use fatturapa::generated::fpr12 as g;
 use fatturapa::generated::fsm10 as sg;
 use fatturapa::ids::{Provincia, RegimeFiscale};
@@ -25,13 +27,6 @@ fn date(year: i32, month: u32, day: u32) -> Date {
     format!("{year:04}-{month:02}-{day:02}")
         .parse()
         .expect("a valid date")
-}
-
-fn assert_has(violations: &[Violation], code: &str) {
-    assert!(
-        violations.iter().any(|v| v.code == code),
-        "expected {code}, got {violations:?}"
-    );
 }
 
 fn assert_absent(violations: &[Violation], code: &str) {
