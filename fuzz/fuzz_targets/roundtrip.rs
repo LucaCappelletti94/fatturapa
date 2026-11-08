@@ -3,9 +3,7 @@
 //! the property tests share, which keeps every value inside the facets of
 //! the schemas. The document is written, validated against its official
 //! `XSD` with `xmllint` when the tool is on `PATH`, re-read and compared
-//! with the original. The seven `SDI` message types that require a
-//! `ds:Signature` skip the validation until the upstream `xsd-parser` fix
-//! lands.
+//! with the original.
 
 #![no_main]
 
@@ -19,11 +17,6 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use fatturapa::Document;
-use fatturapa::{
-    AttestazioneTrasmissioneFattura, NotificaDecorrenzaTermini, NotificaEsito,
-    NotificaEsitoCommittente, NotificaMancataConsegna, NotificaScarto, RicevutaConsegna,
-    ScartoEsitoCommittente,
-};
 use libfuzzer_sys::fuzz_target;
 
 /// The schemas, anchored to the crate root that contains this fuzz crate.
@@ -54,31 +47,26 @@ fuzz_target!(|seed: u64| {
             "the simplified invoice",
         ),
         2 => round_trip(generator::mt_from_seed(seed), SDI_SCHEMA, "the MT message"),
-        3 => without_validation::<NotificaEsitoCommittente>(
-            generator::ec_from_seed(seed),
-            "the EC message",
-        ),
-        4 => without_validation::<AttestazioneTrasmissioneFattura>(
+        3 => round_trip(generator::ec_from_seed(seed), SDI_SCHEMA, "the EC message"),
+        4 => round_trip(
             generator::at_from_seed(seed),
+            SDI_SCHEMA,
             "the AT message",
         ),
-        5 => without_validation::<NotificaDecorrenzaTermini>(
+        5 => round_trip(
             generator::dt_from_seed(seed),
+            SDI_SCHEMA,
             "the DT message",
         ),
-        6 => without_validation::<NotificaMancataConsegna>(
+        6 => round_trip(
             generator::mc_from_seed(seed),
+            SDI_SCHEMA,
             "the MC message",
         ),
-        7 => without_validation::<NotificaEsito>(generator::ne_from_seed(seed), "the NE message"),
-        8 => without_validation::<NotificaScarto>(generator::ns_from_seed(seed), "the NS message"),
-        9 => {
-            without_validation::<RicevutaConsegna>(generator::rc_from_seed(seed), "the RC message")
-        }
-        _ => without_validation::<ScartoEsitoCommittente>(
-            generator::se_from_seed(seed),
-            "the SE message",
-        ),
+        7 => round_trip(generator::ne_from_seed(seed), SDI_SCHEMA, "the NE message"),
+        8 => round_trip(generator::ns_from_seed(seed), SDI_SCHEMA, "the NS message"),
+        9 => round_trip(generator::rc_from_seed(seed), SDI_SCHEMA, "the RC message"),
+        _ => round_trip(generator::se_from_seed(seed), SDI_SCHEMA, "the SE message"),
     };
 });
 
@@ -89,27 +77,6 @@ fn round_trip<D: Document + Debug + PartialEq>(doc: D, schema: &str, what: &str)
         .to_xml_vec()
         .unwrap_or_else(|error| panic!("{what} does not serialise: {error}"));
     validate(schema, &bytes, what);
-    let reread = D::from_xml_slice(&bytes).unwrap_or_else(|error| {
-        panic!(
-            "{what} does not re-read: {error}\n{}",
-            String::from_utf8_lossy(&bytes)
-        )
-    });
-    assert_eq!(
-        reread,
-        doc,
-        "{what} does not round-trip\n{}",
-        String::from_utf8_lossy(&bytes)
-    );
-}
-
-/// Writes the document, re-reads the bytes and compares the read with the
-/// original, without the `XSD` validation that waits for the upstream
-/// `xsd-parser` `ds:Signature` namespace fix.
-fn without_validation<D: Document + Debug + PartialEq>(doc: D, what: &str) {
-    let bytes = doc
-        .to_xml_vec()
-        .unwrap_or_else(|error| panic!("{what} does not serialise: {error}"));
     let reread = D::from_xml_slice(&bytes).unwrap_or_else(|error| {
         panic!(
             "{what} does not re-read: {error}\n{}",

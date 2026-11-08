@@ -24,14 +24,13 @@
 //! the `validate` doc table are listed in the test with their reason.
 //!
 //! The invoices that carry a `Signature` element preserve the `xs:any`
-//! content of the signature through the round-trip, up to the namespace
-//! declarations of that content, which the `xsd-parser` does not keep
-//! stable on serialisation. The round-trip test
+//! content of the signature through the round-trip, up to the in-scope
+//! namespaces of that content, which differ when the source prefix differs
+//! from the one the writer picks, an `XML 1.0` limit. The round-trip test
 //! therefore checks equality outside the signature and compares the two
-//! signatures with the `xs:any` content normalised. The written bytes of
-//! the signed documents are not XSD-validated, because the `xsd-parser`
-//! writes the `ds:Signature` reference without its namespace
-//! (Bergmann89/xsd-parser#308).
+//! signatures with the in-scope namespaces of the `xs:any` content
+//! cleared. The written bytes of the signed documents are XSD-validated
+//! like the ones of the unsigned ones.
 
 #![expect(
     clippy::expect_used,
@@ -1036,7 +1035,6 @@ fn corpus_round_trips() {
     let mut failures: Vec<(String, String)> = Vec::new();
     let mut findings: Vec<(String, Vec<(String, String)>)> = Vec::new();
     let mut valid = 0;
-    let mut signed_docs = 0;
     for path in files {
         let relative = path
             .strip_prefix(CORPUS_DIR)
@@ -1070,20 +1068,12 @@ fn corpus_round_trips() {
         match support::validate(Path::new(schema), &content) {
             Ok(()) => {
                 match family {
-                    Family::Ordinary => round_trip_ordinary(
-                        &content,
-                        schema,
-                        &relative,
-                        &mut findings,
-                        &mut signed_docs,
-                    ),
-                    Family::Simplified => round_trip_simplified(
-                        &content,
-                        schema,
-                        &relative,
-                        &mut findings,
-                        &mut signed_docs,
-                    ),
+                    Family::Ordinary => {
+                        round_trip_ordinary(&content, schema, &relative, &mut findings);
+                    }
+                    Family::Simplified => {
+                        round_trip_simplified(&content, schema, &relative, &mut findings);
+                    }
                     Family::Sdi => match root.as_str() {
                         "RicevutaConsegna" => round_trip_sdi::<RicevutaConsegna>(&content, schema),
                         "NotificaScarto" => round_trip_sdi::<NotificaScarto>(&content, schema),
@@ -1119,9 +1109,8 @@ fn corpus_round_trips() {
     assert_expectations(&failures, &findings);
     assert!(valid > 0, "the valid files round-trip");
     eprintln!(
-        "{valid} corpus files round-trip, {} fail as expected, {} signed documents round-trip without the written XSD validation",
-        failures.len(),
-        signed_docs
+        "{valid} corpus files round-trip, {} fail as expected",
+        failures.len()
     );
 }
 
@@ -1228,8 +1217,8 @@ fn root_name(head: &str) -> String {
         .unwrap_or_default()
 }
 
-/// Whether `content` carries a `Signature` element, whose serialisation
-/// waits for the upstream `xsd-parser` namespace fix.
+/// Whether `content` carries a `Signature` element, whose `xs:any`
+/// namespace maps the round-trip comparison clears.
 fn carries_signature(content: &[u8]) -> bool {
     content.windows(13).any(|w| w == b"<ds:Signature")
         || content.windows(10).any(|w| w == b"<Signature")
@@ -1249,31 +1238,25 @@ where
     set
 }
 
-/// Reads `content` as an ordinary invoice, writes it, re-reads it, and
-/// records the `validate` findings. The written bytes are XSD-validated,
-/// unless the document carries a `Signature` element. Unsigned documents
-/// must round-trip exactly. Signed documents must be equal outside the
-/// signature, and the two signatures must be equal after clearing the
-/// namespace declarations of their `xs:any` content, the one part the
-/// `xsd-parser` does not keep stable on serialisation.
+/// Reads `content` as an ordinary invoice, writes it, validates the
+/// written bytes, re-reads it, and records the `validate` findings.
+/// Unsigned documents must round-trip exactly. Signed documents must be
+/// equal outside the signature, and the two signatures must be equal after
+/// clearing the in-scope namespaces of their `xs:any` content, which
+/// differ when the source prefix differs from the one the writer picks, an
+/// `XML 1.0` limit.
 fn round_trip_ordinary(
     content: &[u8],
     schema: &str,
     relative: &str,
     findings: &mut Vec<(String, Vec<(String, String)>)>,
-    signed_docs: &mut usize,
 ) {
     let mut parsed = FatturaElettronica::from_xml_slice(content).expect("the invoice reads");
     let written = parsed.to_xml_vec().expect("the invoice writes");
-    let signed = carries_signature(content);
-    if signed {
-        *signed_docs += 1;
-    } else {
-        support::validate(Path::new(schema), &written).expect("the written invoice validates");
-    }
+    support::validate(Path::new(schema), &written).expect("the written invoice validates");
     let mut reread =
         FatturaElettronica::from_xml_slice(&written).expect("the written invoice re-reads");
-    if signed {
+    if carries_signature(content) {
         let first = parsed
             .content
             .signature
@@ -1304,27 +1287,21 @@ fn round_trip_ordinary(
 }
 
 /// The simplified invoice variant of `round_trip_ordinary`, with the same
-/// exact or signature-normalised equality on the re-read.
+/// exact or namespace-cleared equality on the re-read.
 fn round_trip_simplified(
     content: &[u8],
     schema: &str,
     relative: &str,
     findings: &mut Vec<(String, Vec<(String, String)>)>,
-    signed_docs: &mut usize,
 ) {
     let mut parsed = FatturaElettronicaSemplificata::from_xml_slice(content)
         .expect("the simplified invoice reads");
     let written = parsed.to_xml_vec().expect("the simplified invoice writes");
-    let signed = carries_signature(content);
-    if signed {
-        *signed_docs += 1;
-    } else {
-        support::validate(Path::new(schema), &written)
-            .expect("the written simplified invoice validates");
-    }
+    support::validate(Path::new(schema), &written)
+        .expect("the written simplified invoice validates");
     let mut reread = FatturaElettronicaSemplificata::from_xml_slice(&written)
-        .expect("the written simplified invoice re-reads");
-    if signed {
+        .expect("the written invoice re-reads");
+    if carries_signature(content) {
         let first = parsed
             .content
             .signature
