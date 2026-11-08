@@ -10,7 +10,7 @@ repository = "https://github.com/LucaCappelletti94/fatturapa"
 documentation = "https://docs.rs/fatturapa"
 authors = ["Luca Cappelletti <cappelletti.luca94@gmail.com>"]
 keywords = ["fatturapa", "e-invoicing", "italy", "sdi", "xml"]
-categories = ["finance", "parser"]
+categories = ["finance", "parser-implementations"]
 # The third-party corpus in tests/corpus stays in the repository only, under its own licences. The external
 # signature and trusted list material in tests/fixtures/external, from the DSS, AgID and EU sources, is
 # excluded the same way. The specification PDFs are reference documents that no build or test reads.
