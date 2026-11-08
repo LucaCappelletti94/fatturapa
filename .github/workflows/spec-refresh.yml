@@ -26,13 +26,15 @@ jobs:
           curl --fail --silent --show-error --location "$base/fatturapa/v1.4/Schema_VFPR12_v1.2.3.xsd" --output downloaded/Schema_VFPR12_v1.2.3.xsd
           curl --fail --silent --show-error --location "$base/fatturapa/v1.4/Schema_VFSM10v_1.0.2.xsd" --output downloaded/Schema_VFSM10v_1.0.2.xsd
           curl --fail --silent --show-error --location "$base/messaggi/v1.1/MessaggiTypes_v1.1.xsd" --output downloaded/MessaggiTypes_v1.1.xsd
+          curl --fail --silent --show-error --location "$base/fatturapa/v1.4/RappresentazioneTabellareFattOrdinaria-1.xlsx" --output downloaded/RappresentazioneTabellareFattOrdinaria-1.xlsx
+          curl --fail --silent --show-error --location "$base/fatturapa/v1.4/RappresentazioneTabellareFattSemplificata1.xlsx" --output downloaded/RappresentazioneTabellareFattSemplificata1.xlsx
           curl --fail --silent --show-error --location "https://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd" --output downloaded/xmldsig-core-schema.xsd
           curl --fail --silent --show-error --location "https://www.agenziaentrate.gov.it/portale/documents/d/guest/allegato-a-specifiche-tecniche-vers-1-9-1" --output "downloaded/Allegato A - Specifiche tecniche vers 1.9.1 31032026.pdf"
       - name: Compare with the vendored copy
         run: |
           set -uo pipefail
           changed=0
-          for f in Schema_VFPR12_v1.2.3.xsd Schema_VFSM10v_1.0.2.xsd MessaggiTypes_v1.1.xsd xmldsig-core-schema.xsd "Allegato A - Specifiche tecniche vers 1.9.1 31032026.pdf"; do
+          for f in Schema_VFPR12_v1.2.3.xsd Schema_VFSM10v_1.0.2.xsd MessaggiTypes_v1.1.xsd xmldsig-core-schema.xsd RappresentazioneTabellareFattOrdinaria-1.xlsx RappresentazioneTabellareFattSemplificata1.xlsx "Allegato A - Specifiche tecniche vers 1.9.1 31032026.pdf"; do
             if ! cmp -s "downloaded/$f" "spec/$f"; then
               echo "::error::the published $f differs from the vendored spec/$f"
               changed=1
