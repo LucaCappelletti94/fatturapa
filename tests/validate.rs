@@ -551,8 +551,9 @@ fn code_00417_buyer_without_fiscal_identifiers() {
     assert_has(&validate(&doc), "00417");
 }
 
-/// 00418: a credit note dated before the linked invoice triggers it; the
-/// same note dated after the linked invoice passes.
+/// 00418: the `TD04` dated before the linked invoice triggers it, per the
+/// ordinary field table 2.1.1.3 and the Elenco Controlli 2.0 `TD04`
+/// condition; the same note dated after the linked invoice passes.
 #[test]
 fn code_00418_credit_note_before_the_linked_invoice() {
     let mut doc = base();
@@ -598,11 +599,11 @@ fn code_00418_credit_note_before_the_linked_invoice() {
     assert_absent(&validate(&doc), "00418");
 }
 
-/// 00418: a non-`TD04` document with a linked invoice dated after the
-/// document triggers it; the same document with an earlier linked date
-/// passes.
+/// 00418: a `TD01` with a linked invoice dated after the document does not
+/// trigger it, the check applies to the `TD04` only; the same document
+/// with an earlier linked date passes.
 #[test]
-fn code_00418_linked_invoice_after_the_document() {
+fn code_00418_not_reported_outside_the_td04() {
     let mut doc = base();
     let generali = &mut doc.content.fattura_elettronica_body[0]
         .content
@@ -621,7 +622,7 @@ fn code_00418_linked_invoice_after_the_document() {
                 codice_cig: None,
             },
         });
-    assert_has(&validate(&doc), "00418");
+    assert_absent(&validate(&doc), "00418");
 
     let mut doc = base();
     let generali = &mut doc.content.fattura_elettronica_body[0]
@@ -1904,11 +1905,19 @@ fn code_00417_simplified() {
     assert_absent(&validate_simplified(&doc), "00417");
 }
 
-/// 00418: a simplified invoice dated before its `DataFR` triggers it; a
-/// `DataFR` on the document date passes.
+/// 00418: the simplified `TD08` dated before its `DataFR` triggers it, per
+/// the simplified field table 2.1.1.3, while a `TD08` dated on its `DataFR`
+/// and a `TD07` with a later `DataFR` do not.
 #[test]
 fn code_00418_simplified() {
     let mut doc = doc_simplified();
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .tipo_documento = sg::TipoDocumentoType::Td08;
     doc.content.fattura_elettronica_body[0]
         .content
         .dati_generali
@@ -1928,6 +1937,21 @@ fn code_00418_simplified() {
         .dati_generali
         .content
         .dati_fattura_rettificata = Some(sg::DatiFatturaRettificataType {
+        content: sg::DatiFatturaRettificataTypeContent {
+            numero_fr: "00001A".to_string(),
+            data_fr: date(2026, 11, 10),
+            elementi_rettificati: "CARRELLO DELLA SPESA".to_string(),
+        },
+    });
+    assert_absent(&validate_simplified(&doc), "00418");
+
+    let mut doc = doc_simplified();
+    let generali = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content;
+    generali.dati_generali_documento.content.tipo_documento = sg::TipoDocumentoType::Td08;
+    generali.dati_fattura_rettificata = Some(sg::DatiFatturaRettificataType {
         content: sg::DatiFatturaRettificataTypeContent {
             numero_fr: "00001A".to_string(),
             data_fr: date(2026, 11, 4),

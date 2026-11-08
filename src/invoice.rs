@@ -3745,30 +3745,10 @@ mod tests {
         );
     }
 
-    /// The `build` of a self-invoice reports the 00418 of an original
-    /// invoice dated after the document; the same date passes.
+    /// The `build` of a self-invoice whose `original_invoice` postdates the
+    /// document builds, the 00418 applies to the `TD04` only.
     #[test]
-    fn the_self_invoice_reports_a_later_original_invoice_date() {
-        let failing = SelfInvoice::td17(
-            &supplier_de(),
-            &buyer_company(),
-            codice(),
-            taxed_line(10000),
-        )
-        .progressivo(progressivo())
-        .date("2026-11-04")
-        .numero("00015")
-        .original_invoice("ORIG-001", "2026-11-10")
-        .build();
-        assert!(
-            matches!(
-                &failing,
-                Err(BuildError::Violations(violations))
-                    if violations.iter().any(|violation| violation.code == "00418")
-            ),
-            "{failing:?}"
-        );
-
+    fn the_self_invoice_builds_with_a_later_original_invoice_date() {
         let doc = SelfInvoice::td17(
             &supplier_de(),
             &buyer_company(),
@@ -3778,9 +3758,9 @@ mod tests {
         .progressivo(progressivo())
         .date("2026-11-04")
         .numero("00015")
-        .original_invoice("ORIG-001", "2026-11-04")
+        .original_invoice("ORIG-001", "2026-11-10")
         .build()
-        .expect("the same-date original invoice passes");
+        .expect("the self-invoice builds");
         assert_eq!(validate::validate(&doc), Vec::new());
     }
 
