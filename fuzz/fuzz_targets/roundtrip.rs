@@ -92,9 +92,8 @@ fn round_trip<D: Document + Debug + PartialEq>(doc: D, schema: &str, what: &str)
 }
 
 /// Validates `doc` against `schema` with `xmllint`, offline, using the
-/// catalog next to the schemas. The ClusterFuzzLite runner image has no
-/// `xmllint`, so the validation is skipped there and the write and re-read
-/// checks alone run.
+/// catalog next to the schemas. Where `xmllint` is missing the validation is
+/// skipped and the write and re-read checks alone run.
 fn validate(schema: &str, doc: &[u8], what: &str) {
     let mut child = match Command::new("xmllint")
         .arg("--nonet")

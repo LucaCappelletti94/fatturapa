@@ -26,7 +26,7 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install --yes libxml2-utils
       - run: rustup toolchain install stable --profile minimal --component rustfmt,clippy && rustup default stable
       - run: cargo fmt --all --check
-      - run: shellcheck -x -S warning .clusterfuzzlite/build.sh tests/fixtures/generate.sh
+      - run: shellcheck -x -S warning tests/fixtures/generate.sh
       - run: cargo run -p codegen --locked -- --check
       - run: cargo clippy --workspace --all-targets --all-features --locked
       - run: cargo check -p fatturapa --no-default-features --locked
