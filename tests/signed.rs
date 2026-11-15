@@ -344,10 +344,8 @@ fn resign_cms(der: &[u8], scalar: &[u8], f: impl FnOnce(&mut Vec<Attribute>)) ->
     .expect("der")
 }
 
-/// `name` with every `UTF8String` attribute value re-encoded as a
-/// `PrintableString` of the same text, the form some signers copy an
-/// issuer name into.
-fn printable_name(name: &Name) -> Name {
+/// `name` with every `UTF8String` attribute value re-encoded as `tag` with the same text, the form some signers copy an issuer name into.
+fn retagged_name(name: &Name, tag: Tag) -> Name {
     RdnSequence(
         name.0
             .iter()
@@ -358,9 +356,8 @@ fn printable_name(name: &Name) -> Name {
                     .map(|attribute| {
                         let mut attribute = attribute.clone();
                         if attribute.value.tag() == Tag::Utf8String {
-                            attribute.value =
-                                Any::new(Tag::PrintableString, attribute.value.value().to_vec())
-                                    .expect("the text is printable");
+                            attribute.value = Any::new(tag, attribute.value.value().to_vec())
+                                .expect("the text fits the tag");
                         }
                         attribute
                     })
@@ -371,7 +368,7 @@ fn printable_name(name: &Name) -> Name {
     )
 }
 
-/// The `CMS` in `der` with its first `sid` issuer passed through [`printable_name`], the signature staying valid since the `sid` is unsigned.
+/// The `CMS` in `der` with its first `sid` issuer re-encoded as `PrintableString`, the signature staying valid since the `sid` is unsigned.
 fn with_printable_sid_issuer(der: &[u8]) -> Vec<u8> {
     let content_info = ContentInfo::from_der(der).expect("valid cms");
     let mut signed_data =
@@ -382,7 +379,7 @@ fn with_printable_sid_issuer(der: &[u8]) -> Vec<u8> {
     else {
         panic!("an issuer and serial number sid");
     };
-    let printable = printable_name(&sid.issuer);
+    let printable = retagged_name(&sid.issuer, Tag::PrintableString);
     assert_ne!(
         printable, sid.issuer,
         "the issuer carries UTF8String values"
@@ -1271,6 +1268,18 @@ fn intermediate_without_key_cert_sign_fails() {
     );
 }
 
+/// An intermediate without a `keyUsage` extension may issue the signer, since RFC 5280 section 6.1.4 (n) checks `keyCertSign` only when the extension is present.
+#[test]
+fn intermediate_without_key_usage_verifies() {
+    let verified = verify(
+        &support::fixture_bytes("invoice-no-key-usage.p7m"),
+        &[cert("ca.pem")],
+        None,
+    )
+    .expect("the intermediate may sign certificates");
+    assert_eq!(verified.signer(), &cert("no-key-usage-signer.pem"));
+}
+
 /// A `sid` that writes the issuer name as `PrintableString`, where the
 /// certificate uses `UTF8String`, still selects the signer.
 #[test]
@@ -1618,7 +1627,10 @@ fn ess_v2_printable_issuer_verifies() {
     let signing_certificate = ess_signing_certificate_v2_custom(
         &signer,
         Prehash::Sha256,
-        Some(printable_name(&signer.tbs_certificate.issuer)),
+        Some(retagged_name(
+            &signer.tbs_certificate.issuer,
+            Tag::PrintableString,
+        )),
         None,
     );
     let scalar = ec_signer_scalar();
@@ -1633,6 +1645,40 @@ fn ess_v2_printable_issuer_verifies() {
         vec![],
     );
     verify(&p7m, &[cert("ca.pem")], Some(time)).expect("the issuer names are the same name");
+}
+
+/// A `signing-certificate-v2` attribute that writes the issuer name as `IA5String`, outside the `DirectoryString` types RFC 5280 section 7.1 prepares, does not reference the signer.
+#[test]
+fn ess_v2_ia5_issuer_fails() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let time = signing_time(&signer);
+    let signing_certificate = ess_signing_certificate_v2_custom(
+        &signer,
+        Prehash::Sha256,
+        Some(retagged_name(
+            &signer.tbs_certificate.issuer,
+            Tag::Ia5String,
+        )),
+        None,
+    );
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(time),
+        Some(signing_certificate),
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(time))
+        .expect_err("an IA5String name is compared byte for byte");
+    assert!(
+        matches!(err, SignedError::SigningCertificateMismatch),
+        "{err:?}"
+    );
 }
 
 /// A `CMS` whose `eContent` is a constructed `OCTET STRING`, the form the

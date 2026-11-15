@@ -201,6 +201,21 @@ openssl x509 -req -in "$work/no-certsign-signer.csr" \
     -CA no-certsign-intermediate.pem -CAkey no-certsign-intermediate.key -CAcreateserial \
     -out no-certsign-signer.pem -days 3650 -not_before "$past" 2>/dev/null
 
+# An intermediate without a keyUsage extension, and a signer under it.
+openssl req -new -newkey rsa:3072 -nodes \
+    -keyout no-key-usage-intermediate.key -out "$work/no-key-usage-intermediate.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test no keyUsage CA" 2>/dev/null
+openssl x509 -req -in "$work/no-key-usage-intermediate.csr" \
+    -CA ca.pem -CAkey ca.key -CAcreateserial \
+    -out no-key-usage-intermediate.pem -days 3650 -not_before "$past" \
+    -extfile <(printf 'basicConstraints=critical,CA:TRUE\n') 2>/dev/null
+openssl ecparam -name prime256v1 -genkey -noout -out no-key-usage-signer.key
+openssl req -new -key no-key-usage-signer.key -out "$work/no-key-usage-signer.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test no keyUsage signer" 2>/dev/null
+openssl x509 -req -in "$work/no-key-usage-signer.csr" \
+    -CA no-key-usage-intermediate.pem -CAkey no-key-usage-intermediate.key -CAcreateserial \
+    -out no-key-usage-signer.pem -days 3650 -not_before "$past" 2>/dev/null
+
 # An intermediate and a signer that share the same serial number. The pool
 # exclusion must keep the intermediate in the pool, not drop it.
 openssl req -new -newkey rsa:3072 -nodes \
@@ -347,6 +362,9 @@ openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
 openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-cross.p7m -signer signer3.pem -inkey signer3.key \
     -certfile <(cat cross1.pem cross2.pem ca.pem) 2>/dev/null
+openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
+    -out invoice-no-key-usage.p7m -signer no-key-usage-signer.pem -inkey no-key-usage-signer.key \
+    -certfile <(cat no-key-usage-intermediate.pem ca.pem) 2>/dev/null
 # CMS files for the chains that must fail.
 openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-pathlen.p7m -signer signer2.pem -inkey signer2.key \
