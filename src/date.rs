@@ -31,9 +31,8 @@ impl FromStr for Date {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let date = CivilDate::from_str(s).map(Self)?;
-        // The civil parser also accepts date-time and offset forms; the
-        // exact `YYYY-MM-DD` lexical form is the only one that round-trips.
-        if date.0.to_string() != s {
+        // Only the exact `YYYY-MM-DD` form round-trips, and `xs:date` has no year `0000`.
+        if date.0.to_string() != s || date.0.year() == 0 {
             return Err(jiff::Error::from_args(format_args!(
                 "not a plain YYYY-MM-DD date: {s}"
             )));
@@ -226,10 +225,11 @@ mod tests {
         }
     }
 
-    /// Invalid date text is rejected.
+    /// Invalid date text is rejected, the year `0000` included since
+    /// `xs:date` has none.
     #[test]
     fn date_rejects_invalid_text() {
-        for text in ["2014-02-30", "2014-11-20T00:00:00", ""] {
+        for text in ["2014-02-30", "2014-11-20T00:00:00", "", "0000-01-01"] {
             assert!(text.parse::<Date>().is_err(), "{text} must be rejected");
         }
     }

@@ -108,6 +108,19 @@ fn country_code_is_two_upper_case_letters() {
 }
 
 #[test]
+fn country_code_is_an_iso_3166_code() {
+    for country in ["XX", "QQ"] {
+        let error = InvoiceName::new(country, "01234567890", "00001")
+            .expect_err("the country code is not assigned");
+        assert!(
+            matches!(error, NameError::Country(_)),
+            "{country:?} fails with the country error, got {error:?}"
+        );
+    }
+    assert!("XX01234567890_00001.xml".parse::<InvoiceName>().is_err());
+}
+
+#[test]
 fn parse_rejects_wrong_extensions() {
     for name in [
         "IT01234567890_00001",
