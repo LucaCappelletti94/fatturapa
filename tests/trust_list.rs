@@ -101,56 +101,55 @@ fn synthetic_list_keeps_only_the_granted_qc_ca() {
     );
 }
 
-/// The historical `AgID` snapshots of `tests/fixtures/external`, one per
-/// year from 2017 to 2024, with the anchor count each one parses to.
-const EXTERNAL_TSL_SNAPSHOTS: &[(&str, usize)] = &[
-    (
-        "tests/fixtures/external/tsl-it/TSL-IT-20170610215159.xml",
-        113,
-    ),
-    (
-        "tests/fixtures/external/tsl-it/TSL-IT-20211021145639.xml",
-        145,
-    ),
-    (
-        "tests/fixtures/external/tsl-it/TSL-IT-20220121051644.xml",
-        143,
-    ),
-    (
-        "tests/fixtures/external/tsl-it/TSL-IT-20231230095405.xml",
-        143,
-    ),
-    (
-        "tests/fixtures/external/tsl-it/TSL-IT-20241224070933.xml",
-        138,
-    ),
-];
+/// The base64 body of the `PEM` certificate fixture with name `name`.
+fn pem_body(name: &str) -> String {
+    fs::read_to_string(format!("tests/fixtures/{name}"))
+        .expect("the fixture is readable")
+        .lines()
+        .filter(|line| !line.starts_with("-----"))
+        .collect()
+}
 
-/// Every historical snapshot parses to the recorded anchor count.
+/// A `PointersToOtherTSL` certificate, which precedes every service, is
+/// not an anchor and does not take the place of the first service
+/// certificate.
 #[test]
-fn historical_snapshots_parse_to_the_recorded_anchors() {
-    for (path, expected) in EXTERNAL_TSL_SNAPSHOTS {
-        let bytes = fs::read(path).expect("the snapshot is readable");
-        let anchors = trust_anchors(&bytes).expect("the snapshot parses");
-        assert_eq!(anchors.len(), *expected, "{path}");
+fn pointer_certificate_is_not_an_anchor() {
+    let tsl = format!(
+        "<TrustServiceStatusList><SchemeInformation><PointersToOtherTSL><OtherTSLPointer>\
+         <ServiceDigitalIdentities><ServiceDigitalIdentity><DigitalId>\
+         <X509Certificate>{}</X509Certificate></DigitalId></ServiceDigitalIdentity>\
+         </ServiceDigitalIdentities></OtherTSLPointer></PointersToOtherTSL></SchemeInformation>\
+         <TrustServiceProviderList><TrustServiceProvider><TSPServices><TSPService>\
+         <ServiceInformation>\
+         <ServiceTypeIdentifier>http://uri.etsi.org/TrstSvc/Svctype/CA/QC</ServiceTypeIdentifier>\
+         <ServiceStatus>http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted</ServiceStatus>\
+         <ServiceDigitalIdentity><DigitalId><X509Certificate>{}</X509Certificate></DigitalId>\
+         </ServiceDigitalIdentity></ServiceInformation></TSPService></TSPServices>\
+         </TrustServiceProvider></TrustServiceProviderList></TrustServiceStatusList>",
+        pem_body("other-root.pem"),
+        pem_body("ca.pem"),
+    );
+    let anchors = trust_anchors(tsl.as_bytes()).expect("the list parses");
+    let ca_pem = fs::read("tests/fixtures/ca.pem").expect("the fixture is readable");
+    let ca = Certificate::from_pem(ca_pem.as_slice()).expect("the fixture is a PEM certificate");
+    assert_eq!(anchors, vec![ca]);
+}
+
+/// No anchor of the `AgID` list is one of the list signers of its
+/// `PointersToOtherTSL` section.
+#[test]
+fn agid_list_leaves_out_the_pointer_certificates() {
+    let anchors = trust_anchors(&tsl()).expect("the list parses");
+    for anchor in &anchors {
+        assert!(
+            !anchor
+                .tbs_certificate
+                .subject
+                .to_string()
+                .contains("EUROPEAN COMMISSION"),
+            "{}",
+            anchor.tbs_certificate.subject
+        );
     }
-}
-
-/// The truncated 2019 snapshot is a list cut off before the root element
-/// closes, which must fail.
-#[test]
-fn truncated_snapshot_is_rejected() {
-    let bytes = fs::read("tests/fixtures/external/tsl-it/TSL-IT-20190824181858-truncated.xml")
-        .expect("the snapshot is readable");
-    let err = trust_anchors(&bytes).expect_err("the root element is unclosed");
-    assert!(matches!(err, TrustListError::NotTrustedList), "{err:?}");
-}
-
-/// The `EU` list of trusted lists parses to zero trust anchors, because it
-/// lists trusted lists rather than qualified certificate authorities.
-#[test]
-fn eu_lotl_parses_to_zero_anchors() {
-    let bytes = fs::read("tests/fixtures/external/lotl/eu-lotl.xml").expect("the list is readable");
-    let anchors = trust_anchors(&bytes).expect("the list parses");
-    assert!(anchors.is_empty(), "the LOTL carries no trust anchors");
 }

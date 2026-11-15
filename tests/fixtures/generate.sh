@@ -186,6 +186,21 @@ openssl x509 -req -in "$work/no-ca-signer.csr" \
     -CA no-ca-intermediate.pem -CAkey no-ca-intermediate.key -CAcreateserial \
     -out no-ca-signer.pem -days 3650 -not_before "$past" 2>/dev/null
 
+# An intermediate whose keyUsage lacks keyCertSign, and a signer under it.
+openssl req -new -newkey rsa:3072 -nodes \
+    -keyout no-certsign-intermediate.key -out "$work/no-certsign-intermediate.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test no keyCertSign CA" 2>/dev/null
+openssl x509 -req -in "$work/no-certsign-intermediate.csr" \
+    -CA ca.pem -CAkey ca.key -CAcreateserial \
+    -out no-certsign-intermediate.pem -days 3650 -not_before "$past" \
+    -extfile <(printf 'basicConstraints=critical,CA:TRUE\nkeyUsage=critical,digitalSignature\n') 2>/dev/null
+openssl ecparam -name prime256v1 -genkey -noout -out no-certsign-signer.key
+openssl req -new -key no-certsign-signer.key -out "$work/no-certsign-signer.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test no keyCertSign signer" 2>/dev/null
+openssl x509 -req -in "$work/no-certsign-signer.csr" \
+    -CA no-certsign-intermediate.pem -CAkey no-certsign-intermediate.key -CAcreateserial \
+    -out no-certsign-signer.pem -days 3650 -not_before "$past" 2>/dev/null
+
 # An intermediate and a signer that share the same serial number. The pool
 # exclusion must keep the intermediate in the pool, not drop it.
 openssl req -new -newkey rsa:3072 -nodes \
@@ -339,6 +354,9 @@ openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
 openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-no-ca.p7m -signer no-ca-signer.pem -inkey no-ca-signer.key \
     -certfile <(cat no-ca-intermediate.pem ca.pem) 2>/dev/null
+openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
+    -out invoice-no-certsign.p7m -signer no-certsign-signer.pem -inkey no-certsign-signer.key \
+    -certfile <(cat no-certsign-intermediate.pem ca.pem) 2>/dev/null
 openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-forged.p7m -signer forged-signer.pem -inkey forged-signer.key \
     -certfile <(cat intermediate-forged.pem ca.pem) 2>/dev/null

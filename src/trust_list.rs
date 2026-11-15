@@ -134,6 +134,8 @@ pub fn trust_anchors(tsl: &[u8]) -> Result<Vec<Certificate>, TrustListError> {
                         }
                     }
                     "ServiceHistory" => in_history = false,
+                    // The `PointersToOtherTSL` certificates of the scheme belong to no service.
+                    "SchemeInformation" => service_cert = None,
                     "TSPService" => {
                         if service_type.as_deref() == Some(QC_CA_URN)
                             && status_granted
