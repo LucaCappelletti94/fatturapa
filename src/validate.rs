@@ -98,7 +98,7 @@
 //! | 00438 | line `ScontoMaggiorazione` with `Tipo` and neither value | implemented | out of reach |
 //! | 00443 | line or cassa rate missing from the `DatiRiepilogo` blocks | implemented | out of reach |
 //! | 00444 | line or cassa `Natura` missing from the `DatiRiepilogo` blocks | implemented | out of reach |
-//! | 00445 | the generic nature `N2`, `N3` or `N6` | implemented | implemented, `N6` is not a simplified nature |
+//! | 00445 | the generic nature `N2`, `N3` or `N6`, from the invoices dated 1 January 2021 | implemented | implemented, `N6` is not a simplified nature |
 //! | 00460 | total amount above the 400.00 euro limit for the simplified invoice | out of reach, the check is defined for the simplified invoice | implemented |
 //! | 00471 | seller and buyer identical for the document type | implemented | implemented, only for `TD07` |
 //! | 00472 | seller and buyer must be identical for `TD21` and `TD27` | implemented | out of reach |
@@ -168,12 +168,8 @@ pub(crate) fn round_half_2(value: Decimal) -> Decimal {
     rounded
 }
 
-/// The `PrezzoTotale` of a line per the 00423 rule of the Elenco Controlli.
-/// A discount or markup applies as an amount when one is present, which
-/// ignores any percentage of the same block, and otherwise as a cascading
-/// percentage on the progressively adjusted unit price. The result is
-/// multiplied by the quantity, 1 when the element is absent.
-pub(crate) fn line_total(line: &DettaglioLineeTypeContent) -> Amount {
+/// The 00423 `PrezzoTotale` of a line, the unit price adjusted by each discount or markup amount, or else its cascading percentage, times the quantity, `None` on decimal overflow.
+pub(crate) fn line_total(line: &DettaglioLineeTypeContent) -> Option<Amount> {
     let mut unitario = line.prezzo_unitario.0;
     for sm in &line.sconto_maggiorazione {
         let ScontoMaggiorazioneTypeContent {
@@ -183,27 +179,32 @@ pub(crate) fn line_total(line: &DettaglioLineeTypeContent) -> Amount {
         } = &sm.content;
         if let Some(importo) = importo {
             unitario = match tipo {
-                TipoScontoMaggiorazioneType::Sc => unitario - importo.0,
-                TipoScontoMaggiorazioneType::Mg => unitario + importo.0,
+                TipoScontoMaggiorazioneType::Sc => unitario.checked_sub(importo.0)?,
+                TipoScontoMaggiorazioneType::Mg => unitario.checked_add(importo.0)?,
             };
         } else if let Some(percentuale) = percentuale {
             let factor = percentuale.0 / Decimal::ONE_HUNDRED;
             unitario = match tipo {
-                TipoScontoMaggiorazioneType::Sc => unitario * (Decimal::ONE - factor),
-                TipoScontoMaggiorazioneType::Mg => unitario * (Decimal::ONE + factor),
+                TipoScontoMaggiorazioneType::Sc => unitario.checked_mul(Decimal::ONE - factor)?,
+                TipoScontoMaggiorazioneType::Mg => unitario.checked_mul(Decimal::ONE + factor)?,
             };
         }
     }
     let quantita = line.quantita.as_ref().map_or(Decimal::ONE, |q| q.0);
-    Amount(unitario * quantita)
+    unitario.checked_mul(quantita).map(Amount)
 }
 
-/// The generic nature values 00445 no longer allows.
-const fn is_generic_natura(natura: Option<&NaturaType>) -> bool {
-    matches!(
-        natura,
-        Some(NaturaType::N2 | NaturaType::N3 | NaturaType::N6)
-    )
+/// The first invoice date 00445 applies to.
+const GENERIC_NATURA_RETIRED: jiff::civil::Date = jiff::civil::date(2021, 1, 1);
+
+/// Whether `natura` is a generic nature value 00445 no longer allows on an
+/// invoice dated `data`.
+fn is_generic_natura(natura: Option<&NaturaType>, data: Date) -> bool {
+    data.0 >= GENERIC_NATURA_RETIRED
+        && matches!(
+            natura,
+            Some(NaturaType::N2 | NaturaType::N3 | NaturaType::N6)
+        )
 }
 
 /// Whether the `PECDestinatario` `pec` is one of the SDI operational
@@ -404,10 +405,12 @@ fn check_simplified_body(
                 "Aliquota is not expressed as a percentage",
             ));
         }
-        if matches!(
-            beni.natura,
-            Some(NaturaSemplificata::N2 | NaturaSemplificata::N3)
-        ) {
+        if doc_data.data.0 >= GENERIC_NATURA_RETIRED
+            && matches!(
+                beni.natura,
+                Some(NaturaSemplificata::N2 | NaturaSemplificata::N3)
+            )
+        {
             v.push(Violation::new(
                 "00445",
                 format!("{spath}/Natura"),
@@ -543,8 +546,14 @@ fn check_body(
     let doc_data = &generali.dati_generali_documento.content;
     let beni = &body.content.dati_beni_servizi.content;
     check_numero(&doc_data.numero, &bpath, v);
-    check_lines(&beni.dettaglio_linee, &doc_data.tipo_documento, &bpath, v);
-    check_cassa(&doc_data.dati_cassa_previdenziale, &bpath, v);
+    check_lines(
+        &beni.dettaglio_linee,
+        &doc_data.tipo_documento,
+        doc_data.data,
+        &bpath,
+        v,
+    );
+    check_cassa(&doc_data.dati_cassa_previdenziale, doc_data.data, &bpath, v);
     check_ritenuta(
         &beni.dettaglio_linee,
         &doc_data.dati_cassa_previdenziale,
@@ -564,6 +573,7 @@ fn check_body(
         &beni.dettaglio_linee,
         &doc_data.dati_cassa_previdenziale,
         &doc_data.tipo_documento,
+        doc_data.data,
         &bpath,
         v,
     );
@@ -596,6 +606,7 @@ fn check_numero(numero: &str, bpath: &str, v: &mut Vec<Violation>) {
 fn check_lines(
     lines: &[DettaglioLineeType],
     tipo: &TipoDocumentoType,
+    data: Date,
     bpath: &str,
     v: &mut Vec<Violation>,
 ) {
@@ -618,7 +629,10 @@ fn check_lines(
                 "Natura is present on a line whose AliquotaIVA is not zero",
             ));
         }
-        if (line.prezzo_totale.0 - line_total(line).0).abs() >= CENT {
+        if line_total(line)
+            .and_then(|total| line.prezzo_totale.0.checked_sub(total.0))
+            .is_none_or(|difference| difference.abs() > CENT)
+        {
             v.push(Violation::new(
                 "00423",
                 format!("{lpath}/PrezzoTotale"),
@@ -632,7 +646,7 @@ fn check_lines(
                 "AliquotaIVA is not expressed as a percentage",
             ));
         }
-        if is_generic_natura(line.natura.as_ref()) {
+        if is_generic_natura(line.natura.as_ref(), data) {
             v.push(Violation::new(
                 "00445",
                 format!("{lpath}/Natura"),
@@ -659,7 +673,12 @@ fn check_lines(
 }
 
 /// The cassa checks 00413, 00414, 00424 and 00445.
-fn check_cassa(cassa: &[DatiCassaPrevidenzialeType], bpath: &str, v: &mut Vec<Violation>) {
+fn check_cassa(
+    cassa: &[DatiCassaPrevidenzialeType],
+    data: Date,
+    bpath: &str,
+    v: &mut Vec<Violation>,
+) {
     for (ci, c) in cassa.iter().enumerate() {
         let cpath = format!(
             "{bpath}/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[{}]",
@@ -686,7 +705,7 @@ fn check_cassa(cassa: &[DatiCassaPrevidenzialeType], bpath: &str, v: &mut Vec<Vi
                 "AliquotaIVA is not expressed as a percentage",
             ));
         }
-        if is_generic_natura(c.natura.as_ref()) {
+        if is_generic_natura(c.natura.as_ref(), data) {
             v.push(Violation::new(
                 "00445",
                 format!("{cpath}/Natura"),
@@ -828,6 +847,7 @@ fn check_riepilogo(
     lines: &[DettaglioLineeType],
     cassa: &[DatiCassaPrevidenzialeType],
     tipo: &TipoDocumentoType,
+    data: Date,
     bpath: &str,
     v: &mut Vec<Violation>,
 ) {
@@ -857,7 +877,7 @@ fn check_riepilogo(
                 "AliquotaIVA is not expressed as a percentage",
             ));
         }
-        if is_generic_natura(r.natura.as_ref()) {
+        if is_generic_natura(r.natura.as_ref(), data) {
             v.push(Violation::new(
                 "00445",
                 format!("{rpath}/Natura"),
@@ -874,7 +894,7 @@ fn check_riepilogo(
         }
         let imposta =
             round_half_2(r.aliquota_iva.0 * r.imponibile_importo.0 / Decimal::ONE_HUNDRED);
-        if (r.imposta.0 - imposta).abs() >= CENT {
+        if (r.imposta.0 - imposta).abs() > CENT {
             v.push(Violation::new(
                 "00421",
                 format!("{rpath}/Imposta"),
@@ -921,7 +941,7 @@ fn check_riepilogo(
             .filter_map(|r| r.content.arrotondamento)
             .map(|a| a.0)
             .sum();
-        if (sum_rie - (sum_lines + sum_cassa + sum_arro)).abs() >= EURO {
+        if (sum_rie - (sum_lines + sum_cassa + sum_arro)).abs() > EURO {
             v.push(Violation::new(
                 "00422",
                 format!("{bpath}/DatiBeniServizi/DatiRiepilogo"),
@@ -1102,7 +1122,9 @@ fn check_lot(bodies: &[FatturaElettronicaBodyType], v: &mut Vec<Violation>) {
                 .content
                 .dati_generali_documento
                 .content;
-            let same = if df.art_73 == Some(crate::generated::fpr12::Art73Type::Si) {
+            let art_73 = df.art_73 == Some(crate::generated::fpr12::Art73Type::Si)
+                && dn.art_73 == Some(crate::generated::fpr12::Art73Type::Si);
+            let same = if art_73 {
                 df.numero == dn.numero && df.data == dn.data
             } else {
                 df.numero == dn.numero && df.data.0.year() == dn.data.0.year()

@@ -312,8 +312,9 @@ fn td01_eu_de_client_wrong_length_code() {
 /// Fixture 3: the art. 7-ter services invoice to a non-EU business client,
 /// priced in US dollars. The `Divisa` stays `EUR` and every amount the
 /// `SDI` reads in euros, the art. 13 convention, the 150.00 dollar line at
-/// the 1.08 rate worth 138.89 euros, the original amount and the rate
-/// carried only as management data of the line.
+/// the 1.08 rate worth 138.88888889 euros, which the riepilogo rounds to
+/// 138.89, the original amount and the rate carried only as management
+/// data of the line.
 #[test]
 fn td01_services_to_a_non_eu_us_client_priced_in_usd() {
     let doc = fixture_round_trips("td01-7ter-non-eu-usd.xml");
@@ -332,8 +333,8 @@ fn td01_services_to_a_non_eu_us_client_priced_in_usd() {
         .content
         .dettaglio_linee[0]
         .content;
-    assert_eq!(line.prezzo_unitario, amount("138.89"));
-    assert_eq!(line.prezzo_totale, amount("138.89"));
+    assert_eq!(line.prezzo_unitario, amount("138.88888889"));
+    assert_eq!(line.prezzo_totale, amount("138.88888889"));
     let gestione = &line.altri_dati_gestionali;
     assert_eq!(gestione.len(), 2);
     assert_eq!(gestione[0].content.tipo_dato, "USD AMT");
@@ -356,6 +357,7 @@ fn td01_services_to_a_non_eu_us_client_priced_in_usd() {
         .content
         .dati_riepilogo[0]
         .content;
+    assert_eq!(riep.arrotondamento, Some(amount("0.00111111")));
     assert_eq!(riep.imponibile_importo, amount("138.89"));
     assert_eq!(
         generali

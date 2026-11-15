@@ -68,8 +68,8 @@
         <NumeroLinea>1</NumeroLinea>
         <Descrizione>SERVIZIO DI CONSULENZA</Descrizione>
         <Quantita>1.00</Quantita>
-        <PrezzoUnitario>138.89</PrezzoUnitario>
-        <PrezzoTotale>138.89</PrezzoTotale>
+        <PrezzoUnitario>138.88888889</PrezzoUnitario>
+        <PrezzoTotale>138.88888889</PrezzoTotale>
         <AliquotaIVA>0.00</AliquotaIVA>
         <Natura>N2.1</Natura>
         <AltriDatiGestionali>
@@ -87,6 +87,7 @@
       <DatiRiepilogo>
         <AliquotaIVA>0.00</AliquotaIVA>
         <Natura>N2.1</Natura>
+        <Arrotondamento>0.00111111</Arrotondamento>
         <ImponibileImporto>138.89</ImponibileImporto>
         <Imposta>0.00</Imposta>
         <RiferimentoNormativo>ART. 7-TER DPR 633/72</RiferimentoNormativo>

@@ -543,14 +543,6 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
                 "00421",
                 "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[3]/Imposta",
             ),
-            (
-                "00445",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[2]/Natura",
-            ),
-            (
-                "00445",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DettaglioLinee[2]/Natura",
-            ),
         ],
     ),
     (
@@ -611,29 +603,17 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
     ),
     (
         "kamerozkan/rejected_arithmetic_fpr12.xml",
-        &[
-            (
-                "00421",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
-            ),
-            (
-                "00422",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
-            ),
-        ],
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
     ),
     (
         "marco-mastella/xmlInvoices/IT01234567890_FPR03.xml",
-        &[
-            (
-                "00421",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
-            ),
-            (
-                "00422",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
-            ),
-        ],
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
     ),
     (
         "phax-fatturapa/122/bad/IT01234567890_FPR01_TD29_RF20.xml",
@@ -644,55 +624,31 @@ const EXPECTED_VALIDATE_FINDINGS: &[(&str, &[(&str, &str)])] = &[
     ),
     (
         "phax-fatturapa/122/good/IT01234567890_FPR02.xml",
-        &[
-            (
-                "00421",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
-            ),
-            (
-                "00422",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
-            ),
-        ],
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
     ),
     (
         "siboxd-model/IT01234567890_FPR03.xml",
-        &[
-            (
-                "00421",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
-            ),
-            (
-                "00422",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
-            ),
-        ],
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
     ),
     (
         "siboxd-model/IT01234567890_FPR04.xml",
-        &[
-            (
-                "00421",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
-            ),
-            (
-                "00422",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
-            ),
-        ],
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
     ),
     (
         "simevo-json/samples/IT01234567890_FPR03.xml",
-        &[
-            (
-                "00421",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo[1]/Imposta",
-            ),
-            (
-                "00422",
-                "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
-            ),
-        ],
+        &[(
+            "00422",
+            "FatturaElettronicaBody[1]/DatiBeniServizi/DatiRiepilogo",
+        )],
     ),
     (
         "tappoz/sample_data/IT01234567890_GCE009_fail_BR_00473_GCE009.xml",

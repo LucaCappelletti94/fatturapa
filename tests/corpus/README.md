@@ -189,7 +189,7 @@ criteria of the version 2.0 list. Every other readable invoice is clean.
 
 | File | Codes | What the file does |
 | --- | --- | --- |
-| `fatturaelettronica-php/IT01234567899_000sq.xml` | 00421 twice, 00445 twice | a riepilogo `Imposta` off by exactly one cent, and the generic nature `N2` on a line and a riepilogo |
+| `fatturaelettronica-php/IT01234567899_000sq.xml` | 00421 twice | two riepilogo `Imposta` values off from the recomputed ones. The generic nature `N2` on a line and a riepilogo is allowed on this 2019 invoice |
 | `fatturaelettronica-php/semplificata/ESEMPIO NDC SEMPL.xml` | 00418 | a simplified `TD08` with a `Data` preceding the linked `DataFR` |
 | `gobl-sdi/fatturapa.gobl/invoice-b2g.xml` | 00427 | `FPA12` with a seven character `CodiceDestinatario` |
 | `gobl-sdi/gobl.fatturapa/out/invoice-b2g.xml` | 00427 | `FPA12` with a seven character `CodiceDestinatario` |
@@ -197,13 +197,13 @@ criteria of the version 2.0 list. Every other readable invoice is clean.
 | `horstoeko-invoicesuite/02_technical_xml_fatturapa.xml` | 00423 | a line `ScontoMaggiorazione` with both `Percentuale` and `Importo` |
 | `json2fatturapaxml/IT03469550986_PA001.xml` | 00471 | a `TD01` with a seller and a buyer sharing the same `IdFiscaleIVA` |
 | `json2fatturapaxml/IT03469550986_PR001.xml` | 00471 | a `TD01` with a seller and a buyer sharing the same `IdFiscaleIVA` |
-| `kamerozkan/rejected_arithmetic_fpr12.xml` | 00421, 00422 | riepilogo `Imposta` and `ImponibileImporto` off from the recomputed values |
-| `marco-mastella/xmlInvoices/IT01234567890_FPR03.xml` | 00421, 00422 | riepilogo `Imposta` off by one cent and `ImponibileImporto` off by two |
+| `kamerozkan/rejected_arithmetic_fpr12.xml` | 00422 | riepilogo `ImponibileImporto` off from the recomputed value, and an `Imposta` off by exactly one cent, within the 00421 tolerance |
+| `marco-mastella/xmlInvoices/IT01234567890_FPR03.xml` | 00422 | riepilogo `ImponibileImporto` off by two, and an `Imposta` off by exactly one cent, within the 00421 tolerance |
 | `phax-fatturapa/122/bad/IT01234567890_FPR01_TD29_RF20.xml` | 00475 | `TD29` without the buyer `IdFiscaleIVA` |
-| `phax-fatturapa/122/good/IT01234567890_FPR02.xml` | 00421, 00422 | riepilogo `Imposta` off by one cent and `ImponibileImporto` off by two |
-| `siboxd-model/IT01234567890_FPR03.xml` | 00421, 00422 | riepilogo `Imposta` off by one cent and `ImponibileImporto` off by two |
-| `siboxd-model/IT01234567890_FPR04.xml` | 00421, 00422 | riepilogo `Imposta` off by one cent and `ImponibileImporto` off by two |
-| `simevo-json/samples/IT01234567890_FPR03.xml` | 00421, 00422 | riepilogo `Imposta` off by one cent and `ImponibileImporto` off by two |
+| `phax-fatturapa/122/good/IT01234567890_FPR02.xml` | 00422 | riepilogo `ImponibileImporto` off by two, and an `Imposta` off by exactly one cent, within the 00421 tolerance |
+| `siboxd-model/IT01234567890_FPR03.xml` | 00422 | riepilogo `ImponibileImporto` off by two, and an `Imposta` off by exactly one cent, within the 00421 tolerance |
+| `siboxd-model/IT01234567890_FPR04.xml` | 00422 | riepilogo `ImponibileImporto` off by two, and an `Imposta` off by exactly one cent, within the 00421 tolerance |
+| `simevo-json/samples/IT01234567890_FPR03.xml` | 00422 | riepilogo `ImponibileImporto` off by two, and an `Imposta` off by exactly one cent, within the 00421 tolerance |
 | `zugferd-corpus/eigor/valid/A10-Licenses-CreditNote.xml` | 00476 | seller and buyer `IdPaese` both `NL` |
 | `zugferd-corpus/eigor/valid/A10-Licenses.xml` | 00476 | seller and buyer `IdPaese` both `NL` |
 | `zugferd-corpus/eigor/valid/A4-Subscription.xml` | 00476 | seller and buyer `IdPaese` both `NL` |
