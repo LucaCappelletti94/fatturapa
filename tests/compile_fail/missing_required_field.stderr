@@ -1,14 +1,11 @@
 error[E0599]: no method named `build` found for struct `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>` in the current scope
  --> tests/compile_fail/missing_required_field.rs:9:10
   |
-5 |       let _ = fatturapa::invoice::Line::builder()
-  |  _____________-
-6 | |         .description("SERVIZIO")
-7 | |         .quantity("1.00")
-8 | |         .unit_price("100.00")
-9 | |         .build();
-  | |         -^^^^^ method not found in `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>`
-  | |_________|
-  |
+5 |     let _ = fatturapa::invoice::Line::builder()
+6 |         .description("SERVIZIO")
+7 |         .quantity("1.00")
+8 |         .unit_price("100.00")
+9 |         .build();
+  |          ^^^^^ method not found in `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>`
   |
   = note: the method was found for `LineBuilder<fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set, fatturapa::invoice::typestate::Set>`
