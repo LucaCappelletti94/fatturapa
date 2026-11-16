@@ -14,7 +14,7 @@ use cms::signed_data::{
 };
 use const_oid::db;
 use der::asn1::{ObjectIdentifier, OctetString, SetOfVec};
-use der::{Any, Decode, DecodePem, Encode};
+use der::{Any, Decode, DecodePem, Encode, Tag, Tagged};
 use digest::Digest;
 use ecdsa::SigningKey;
 use ecdsa::signature::hazmat::PrehashSigner;
@@ -30,16 +30,15 @@ use std::time::UNIX_EPOCH;
 use x509_cert::Certificate;
 use x509_cert::attr::{Attribute, Attributes};
 use x509_cert::ext::pkix::SubjectKeyIdentifier as PkixSubjectKeyIdentifier;
-use x509_cert::name::Name;
+use x509_cert::ext::pkix::name::GeneralName;
+use x509_cert::name::{Name, RdnSequence, RelativeDistinguishedName};
 use x509_cert::serial_number::SerialNumber;
 
-/// The ETSI ESS `signing-certificate` attribute.
-const ESS_SIGNING_CERTIFICATE: ObjectIdentifier =
-    ObjectIdentifier::new_unwrap("1.3.6.1.4.1.41411.1.1.1");
+/// The ESS `signing-certificate` attribute of RFC 2634.
+const ESS_SIGNING_CERTIFICATE: ObjectIdentifier = db::rfc5911::ID_AA_SIGNING_CERTIFICATE;
 
-/// The ETSI ESS `signing-certificate-v2` attribute.
-const ESS_SIGNING_CERTIFICATE_V2: ObjectIdentifier =
-    ObjectIdentifier::new_unwrap("1.3.6.1.4.1.41411.1.1.3");
+/// The ESS `signing-certificate-v2` attribute of RFC 5035.
+const ESS_SIGNING_CERTIFICATE_V2: ObjectIdentifier = db::rfc5911::ID_AA_SIGNING_CERTIFICATE_V_2;
 
 /// The bytes of the official sample invoice `IT01234567890_FPR01.xml`.
 fn invoice() -> Vec<u8> {
@@ -132,6 +131,17 @@ fn sequence_of(items: Vec<Vec<u8>>) -> Vec<u8> {
     }
     out.extend_from_slice(&body);
     out
+}
+
+/// One ESS attribute under `oid` whose `certs` hold the single entry
+/// `entry_der`, the `SigningCertificate` or `SigningCertificateV2` of RFC
+/// 2634 and RFC 5035 without policies.
+fn ess_attribute(oid: ObjectIdentifier, entry_der: Vec<u8>) -> Attributes {
+    SetOfVec::try_from(vec![attr(
+        oid,
+        &sequence_of(vec![sequence_of(vec![entry_der])]),
+    )])
+    .expect("a single value")
 }
 
 /// A hash family for the in-process signatures.
@@ -256,15 +266,15 @@ fn ess_signing_certificate_v2_custom(
     let entry = EssSigningCertificate {
         hash_algorithm,
         hash: OctetString::new(hash.digest(&der)).expect("the hash encodes"),
-        issuer: issuer.unwrap_or_else(|| cert.tbs_certificate.issuer.clone()),
-        serial: serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
+        issuer_serial: Some(IssuerSerial::new(
+            issuer.unwrap_or_else(|| cert.tbs_certificate.issuer.clone()),
+            serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
+        )),
     };
-    let entry_der = entry.to_der().expect("the entry encodes");
-    SetOfVec::try_from(vec![attr(
+    ess_attribute(
         ESS_SIGNING_CERTIFICATE_V2,
-        sequence_of(vec![entry_der]).as_slice(),
-    )])
-    .expect("a single value")
+        entry.to_der().expect("the entry encodes"),
+    )
 }
 
 /// One `signing-certificate` attribute for `cert`, an `ESSCertID` with a
@@ -282,13 +292,15 @@ fn ess_signing_certificate_v1_custom(
     let der = cert.to_der().expect("the certificate encodes");
     let entry = EssSigningCertificateV1 {
         hash: OctetString::new(Sha1::digest(&der).to_vec()).expect("the hash encodes"),
-        issuer_serial: Some(IssuerAndSerialNumber {
-            issuer: cert.tbs_certificate.issuer.clone(),
-            serial_number: serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
-        }),
+        issuer_serial: Some(IssuerSerial::new(
+            cert.tbs_certificate.issuer.clone(),
+            serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
+        )),
     };
-    let entry_der = entry.to_der().expect("the entry encodes");
-    SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE, &entry_der)]).expect("a single value")
+    ess_attribute(
+        ESS_SIGNING_CERTIFICATE,
+        entry.to_der().expect("the entry encodes"),
+    )
 }
 
 /// The `CMS` in `der` with its signed attributes passed through `f`,
@@ -322,6 +334,57 @@ fn resign_cms(der: &[u8], scalar: &[u8], f: impl FnOnce(&mut Vec<Attribute>)) ->
         .sign_prehash(&Sha256::digest(&to_sign))
         .expect("the signature");
     signer.signature = OctetString::new(signature.to_vec()).expect("octets");
+    signed_data.signer_infos = SignerInfos(SetOfVec::try_from(signers).expect("the signers sort"));
+    let der = signed_data.to_der().expect("der");
+    ContentInfo {
+        content_type: db::rfc5911::ID_SIGNED_DATA,
+        content: Any::from_der(&der).expect("valid DER"),
+    }
+    .to_der()
+    .expect("der")
+}
+
+/// `name` with every `UTF8String` attribute value re-encoded as `tag` with the same text, the form some signers copy an issuer name into.
+fn retagged_name(name: &Name, tag: Tag) -> Name {
+    RdnSequence(
+        name.0
+            .iter()
+            .map(|rdn| {
+                let attributes: Vec<_> = rdn
+                    .0
+                    .iter()
+                    .map(|attribute| {
+                        let mut attribute = attribute.clone();
+                        if attribute.value.tag() == Tag::Utf8String {
+                            attribute.value = Any::new(tag, attribute.value.value().to_vec())
+                                .expect("the text fits the tag");
+                        }
+                        attribute
+                    })
+                    .collect();
+                RelativeDistinguishedName(SetOfVec::try_from(attributes).expect("the values sort"))
+            })
+            .collect(),
+    )
+}
+
+/// The `CMS` in `der` with its first `sid` issuer re-encoded as `PrintableString`, the signature staying valid since the `sid` is unsigned.
+fn with_printable_sid_issuer(der: &[u8]) -> Vec<u8> {
+    let content_info = ContentInfo::from_der(der).expect("valid cms");
+    let mut signed_data =
+        SignedData::from_der(&content_info.content.to_der().expect("der")).expect("valid cms");
+    let mut signers: Vec<SignerInfo> = signed_data.signer_infos.0.into();
+    let Some(SignerIdentifier::IssuerAndSerialNumber(sid)) =
+        signers.first_mut().map(|signer| &mut signer.sid)
+    else {
+        panic!("an issuer and serial number sid");
+    };
+    let printable = retagged_name(&sid.issuer, Tag::PrintableString);
+    assert_ne!(
+        printable, sid.issuer,
+        "the issuer carries UTF8String values"
+    );
+    sid.issuer = printable;
     signed_data.signer_infos = SignerInfos(SetOfVec::try_from(signers).expect("the signers sort"));
     let der = signed_data.to_der().expect("der");
     ContentInfo {
@@ -420,17 +483,15 @@ fn econtent_any(content: &[u8]) -> Any {
     Any::from_der(octets.as_slice()).expect("valid DER")
 }
 
-/// One `signing-certificate-v2` entry.
+/// One `signing-certificate-v2` entry, an `ESSCertIDv2`.
 #[derive(der::Sequence)]
 struct EssSigningCertificate {
     /// The hash algorithm of `hash`, `SHA-256` when absent.
     hash_algorithm: Option<AlgorithmIdentifierOwned>,
     /// The hash of the certificate `DER` encoding.
     hash: OctetString,
-    /// The issuer of the referenced certificate.
-    issuer: Name,
-    /// The serial number of the referenced certificate.
-    serial: SerialNumber,
+    /// The issuer and serial of the referenced certificate.
+    issuer_serial: Option<IssuerSerial>,
 }
 
 /// One `signing-certificate` entry, an `ESSCertID`.
@@ -439,7 +500,26 @@ struct EssSigningCertificateV1 {
     /// The hash of the certificate `DER` encoding.
     hash: OctetString,
     /// The issuer and serial of the referenced certificate.
-    issuer_serial: Option<IssuerAndSerialNumber>,
+    issuer_serial: Option<IssuerSerial>,
+}
+
+/// The `IssuerSerial` of an ESS entry.
+#[derive(der::Sequence)]
+struct IssuerSerial {
+    /// The issuer of the referenced certificate, as a directory name.
+    issuer: Vec<GeneralName>,
+    /// The serial number of the referenced certificate.
+    serial_number: SerialNumber,
+}
+
+impl IssuerSerial {
+    /// The `IssuerSerial` naming `issuer` and `serial_number`.
+    fn new(issuer: Name, serial_number: SerialNumber) -> Self {
+        Self {
+            issuer: vec![GeneralName::DirectoryName(issuer)],
+            serial_number,
+        }
+    }
 }
 
 /// `DER` and `base64`, one line and wrapped, all unwrap to the invoice.
@@ -1172,6 +1252,44 @@ fn intermediate_without_ca_constraint_fails() {
     );
 }
 
+/// An intermediate whose `keyUsage` lacks `keyCertSign` cannot issue the
+/// signer, per RFC 5280 section 6.1.4 (n).
+#[test]
+fn intermediate_without_key_cert_sign_fails() {
+    let err = verify(
+        &support::fixture_bytes("invoice-no-certsign.p7m"),
+        &[cert("ca.pem")],
+        None,
+    )
+    .expect_err("the intermediate may not sign certificates");
+    assert!(
+        matches!(err, SignedError::Chain(ChainError::NotAca)),
+        "{err:?}"
+    );
+}
+
+/// An intermediate without a `keyUsage` extension may issue the signer, since RFC 5280 section 6.1.4 (n) checks `keyCertSign` only when the extension is present.
+#[test]
+fn intermediate_without_key_usage_verifies() {
+    let verified = verify(
+        &support::fixture_bytes("invoice-no-key-usage.p7m"),
+        &[cert("ca.pem")],
+        None,
+    )
+    .expect("the intermediate may sign certificates");
+    assert_eq!(verified.signer(), &cert("no-key-usage-signer.pem"));
+}
+
+/// A `sid` that writes the issuer name as `PrintableString`, where the
+/// certificate uses `UTF8String`, still selects the signer.
+#[test]
+fn printable_sid_issuer_selects_the_signer() {
+    let p7m = with_printable_sid_issuer(&support::fixture_bytes("invoice-ec.p7m"));
+    let verified =
+        verify(&p7m, &[cert("ca.pem")], None).expect("the issuer names are the same name");
+    assert_eq!(verified.signer(), &cert("ec-signer.pem"));
+}
+
 /// A `pathLenConstraint` of the first intermediate is exceeded.
 #[test]
 fn path_length_violation_fails() {
@@ -1498,6 +1616,71 @@ fn ess_v1_wrong_serial_fails() {
     );
 }
 
+/// A `signing-certificate-v2` attribute that writes the issuer name as
+/// `PrintableString`, where the certificate uses `UTF8String`, references
+/// the signer.
+#[test]
+fn ess_v2_printable_issuer_verifies() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let time = signing_time(&signer);
+    let signing_certificate = ess_signing_certificate_v2_custom(
+        &signer,
+        Prehash::Sha256,
+        Some(retagged_name(
+            &signer.tbs_certificate.issuer,
+            Tag::PrintableString,
+        )),
+        None,
+    );
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(time),
+        Some(signing_certificate),
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    verify(&p7m, &[cert("ca.pem")], Some(time)).expect("the issuer names are the same name");
+}
+
+/// A `signing-certificate-v2` attribute that writes the issuer name as `IA5String`, outside the `DirectoryString` types RFC 5280 section 7.1 prepares, does not reference the signer.
+#[test]
+fn ess_v2_ia5_issuer_fails() {
+    let invoice = invoice();
+    let signer = cert("ec-signer.pem");
+    let time = signing_time(&signer);
+    let signing_certificate = ess_signing_certificate_v2_custom(
+        &signer,
+        Prehash::Sha256,
+        Some(retagged_name(
+            &signer.tbs_certificate.issuer,
+            Tag::Ia5String,
+        )),
+        None,
+    );
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("intermediate.pem"), cert("ca.pem")],
+        Some(time),
+        Some(signing_certificate),
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err = verify(&p7m, &[cert("ca.pem")], Some(time))
+        .expect_err("an IA5String name is compared byte for byte");
+    assert!(
+        matches!(err, SignedError::SigningCertificateMismatch),
+        "{err:?}"
+    );
+}
+
 /// A `CMS` whose `eContent` is a constructed `OCTET STRING`, the form the
 /// `.NET` signer writes, unwraps and verifies.
 #[test]
@@ -1655,15 +1838,15 @@ fn ess_v2_with_hash_algorithm(
     let entry = EssSigningCertificate {
         hash_algorithm,
         hash: OctetString::new(hash).expect("the hash encodes"),
-        issuer: cert.tbs_certificate.issuer.clone(),
-        serial: cert.tbs_certificate.serial_number.clone(),
+        issuer_serial: Some(IssuerSerial::new(
+            cert.tbs_certificate.issuer.clone(),
+            cert.tbs_certificate.serial_number.clone(),
+        )),
     };
-    let entry_der = entry.to_der().expect("the entry encodes");
-    SetOfVec::try_from(vec![attr(
+    ess_attribute(
         ESS_SIGNING_CERTIFICATE_V2,
-        sequence_of(vec![entry_der]).as_slice(),
-    )])
-    .expect("a single value")
+        entry.to_der().expect("the entry encodes"),
+    )
 }
 
 /// A `signing-certificate-v2` entry that records a `SHA-256` hash algorithm
@@ -2034,9 +2217,10 @@ fn signing_certificate_v1_without_serial_verifies() {
         hash: OctetString::new(Sha1::digest(&der).to_vec()).expect("the hash encodes"),
         issuer_serial: None,
     };
-    let entry_der = entry.to_der().expect("the entry encodes");
-    let v1 = SetOfVec::try_from(vec![attr(ESS_SIGNING_CERTIFICATE, &entry_der)])
-        .expect("a single value");
+    let v1 = ess_attribute(
+        ESS_SIGNING_CERTIFICATE,
+        entry.to_der().expect("the entry encodes"),
+    );
     let p7m = build_cms(
         &invoice,
         vec![signer, cert("intermediate.pem"), cert("ca.pem")],
@@ -2323,718 +2507,4 @@ fn invalid_cert_validity_fails() {
         matches!(err, SignedError::Chain(ChainError::Other(_))),
         "{err:?}"
     );
-}
-
-// The external `DSS` and `AgID` material of `tests/fixtures/external`,
-// copied byte-identical from their upstream commits and recorded in
-// `tests/fixtures/external/README.md`.
-//
-// The unwrap tags are 0 for the `n` bytes of encapsulated content, 1 for
-// `SignedError::DetachedContent`, 2 for `SignedError::UnsupportedContentType`
-// and 3 for `SignedError::NotCms`, whose detail carries the reason.
-//
-// The verify tags are 0 for a verified chain of the given length, 1 for
-// `SignedError::SignatureInvalid`, 2 for `SignedError::DigestMismatch`, 3
-// for `SignedError::AlgorithmMismatch`, 4 for
-// `SignedError::UnsupportedAlgorithm` with its `OID`, 5 for
-// `SignedError::UnsupportedSignerIdentifier`, 6 for
-// `SignedError::SignerCertificateNotFound`, 7 for
-// `SignedError::MissingSigningTime`, 8 for `ChainError::IssuerNotInStore`,
-// 9 for `ChainError::ExtendedKeyUsage` and 10 for
-// `ChainError::UnsupportedAlgorithm`.
-
-/// The `DER` of the `CMS` in `input`, mirroring the normalisation of the
-/// `signed` module.
-fn external_cms_der(input: &[u8]) -> Option<Vec<u8>> {
-    use base64::Engine;
-    use cms::content_info::ContentInfo;
-    use der::Decode;
-    use rasn_cms::{ContentInfo as RasnContentInfo, SignedData as RasnSignedData};
-
-    if ContentInfo::from_der(input).is_ok() {
-        return Some(input.to_vec());
-    }
-    let stripped: Vec<u8> = input
-        .iter()
-        .copied()
-        .filter(|byte| !matches!(byte, b' ' | b'\t' | b'\r' | b'\n'))
-        .collect();
-    let decoded = base64::engine::general_purpose::STANDARD
-        .decode(&stripped)
-        .or_else(|_| base64::engine::general_purpose::STANDARD_NO_PAD.decode(&stripped))
-        .ok()?;
-    if ContentInfo::from_der(&decoded).is_ok() {
-        return Some(decoded);
-    }
-    let content_info = rasn::ber::decode::<RasnContentInfo>(input).ok()?;
-    let signed_data = rasn::ber::decode::<RasnSignedData>(content_info.content.as_bytes()).ok()?;
-    let signed_data_der = rasn::der::encode(&signed_data).ok()?;
-    let fresh = RasnContentInfo {
-        content_type: content_info.content_type,
-        content: rasn::types::Any::new(signed_data_der),
-    };
-    rasn::der::encode(&fresh).ok()
-}
-
-/// The `CMS` certificates embedded in `input`, when the structure parses.
-fn external_embedded_certs(input: &[u8]) -> Vec<Certificate> {
-    use cms::cert::CertificateChoices;
-    use cms::content_info::ContentInfo;
-    use cms::signed_data::SignedData;
-    use const_oid::db;
-    use der::{Decode, Encode};
-
-    let Some(der) = external_cms_der(input) else {
-        return Vec::new();
-    };
-    let content_info = ContentInfo::from_der(&der).expect("the content info decodes");
-    if content_info.content_type != db::rfc5911::ID_SIGNED_DATA {
-        return Vec::new();
-    }
-    let signed_data_der = content_info.content.to_der().expect("the content encodes");
-    let signed_data = SignedData::from_der(&signed_data_der).expect("the signed data decodes");
-    let mut certs = Vec::new();
-    if let Some(set) = &signed_data.certificates {
-        for choice in set.0.iter() {
-            if let CertificateChoices::Certificate(cert) = choice {
-                certs.push(cert.clone());
-            }
-        }
-    }
-    certs
-}
-
-const UNWRAP_OUTCOMES: &[(&str, u8, &str)] = &[
-    (
-        "tests/fixtures/external/dss/cades/validation/CAdESDoubleLTA.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-ats-v3-rev-val-crl.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-ats-v3-wrong-cert.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-ats-v3-wrong-crl.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-b-copied-cnttst.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-bes-signeddata-detached.p7s",
-        2,
-        "1.2.840.113549.1.7.2",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-bes-signeddata-enveloping.p7m",
-        2,
-        "1.2.840.113549.1.7.2",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-broken-sig-tst-and-ats-v3.cms",
-        0,
-        "4",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-broken-sig-tst.p7m",
-        0,
-        "4",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-dss1956.p7m",
-        0,
-        "36",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-dss1997.p7m",
-        0,
-        "74827",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-a.pkcs7",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-bes.pkcs7",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-epes-sig-pol-store.pkcs7",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-epes.pkcs7",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-level-b-sig-policy-invalid-digest-algo.p7m",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-lta-copied-atst.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-lta-duplicated-atst.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-lta-en319122.cms",
-        0,
-        "4",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-lta-ts101733.cms",
-        0,
-        "4",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-t-copied-sigtst.p7m",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-t-duplicated-sigtst.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-two-sig-copied-tst.p7m",
-        0,
-        "13",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades_signeddata_extended_after_lta.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cms-no-sign-cert.p7m",
-        0,
-        "12",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cms-wrong-sign-cert-hash-algo.pkcs7",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cms-wrong-sign-cert-ref.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/counterSig.p7m",
-        0,
-        "3",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/counterSignedLTA.p7s",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpB_revoked_signingCertificate.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpLTA_modified_ats_hash_element.p7m",
-        3,
-        "the input is not a CMS structure",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpLTA_removed_ocsp.p7m",
-        3,
-        "the input is not a CMS structure",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpT_modified_ts_hash.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1344/screenshot.png.signed_qes_detached.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA256-SHA3_256withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA256-SHA3_256withRSAandMGF1.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA256-SHA512withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_224-SHA256withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_224-SHA3_224withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_256-SHA256withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_256-SHA3_256withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_384-SHA256withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_512-SHA256withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_512-SHA3_512withRSA.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1469/cadesLTAwithATv2expired.p7s",
-        0,
-        "74683",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1670/signatureExtendedTwoLTA.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-content-tst.pkcs7",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-detached.pkcs7",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-enveloping-broken.pkcs7",
-        0,
-        "74827",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-enveloping.pkcs7",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-lta-detached.pkcs7",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-tstv2-detached.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-916/test.txt.signed_Certipost-2048.detached.old.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-B-B-basic-der.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-B-B-wrong-er-attribute.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-basic-invalid-sig.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-detached-ber.p7s",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-detached-invalid.p7s",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-detached-original-not-covered.p7s",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-detached.p7s",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-detached_renewed_hashtree.p7s",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-detached_renewed_hashtree_invalid.p7s",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-parallel-ers.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-two-er-mixed.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS-two-er.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS_renewed_hashtree.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/C-E-ERS_renewed_hashtree_invalid.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/CAdES-BpT.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/CAdEs-BpT+ER-without-reducedHashTree.p7m",
-        0,
-        "20",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/Double-C-E-ERS-detached_hashtree_renewal.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/Double-C-E-ERS.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/Signature-C-LT-d233a2d9-a257-40dc-bcdb-bf4516b6d1da.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/Signature-C-LTA-d233a2d9-a257-40dc-bcdb-bf4516b6d1da.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/malformed-cades.p7m",
-        3,
-        "the input is not a CMS structure",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/no-key-info-cert.pkcs7",
-        0,
-        "11",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/wrongContentHints.p7m",
-        0,
-        "10377",
-    ),
-    (
-        "tests/fixtures/external/dss/cms/timestamp.tst",
-        2,
-        "1.2.840.113549.1.9.16.1.4",
-    ),
-    (
-        "tests/fixtures/external/dss/spi/archive_timestamp.tst",
-        2,
-        "1.2.840.113549.1.9.16.1.4",
-    ),
-    (
-        "tests/fixtures/external/dss/spi/disig.tst",
-        2,
-        "1.2.840.113549.1.9.16.1.4",
-    ),
-    (
-        "tests/fixtures/external/dss/spi/tst_with_broken_ocsp.tst",
-        3,
-        "the CMS SignedData structure is malformed",
-    ),
-    (
-        "tests/fixtures/external/dss/validation/tst-two-refs.tst",
-        2,
-        "1.2.840.113549.1.9.16.1.4",
-    ),
-];
-
-const VERIFY_OUTCOMES: &[(&str, u8, &str)] = &[
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-broken-sig-tst-and-ats-v3.cms",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-broken-sig-tst.p7m",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-dss1956.p7m",
-        10,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-dss1997.p7m",
-        8,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-bes.pkcs7",
-        7,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-epes-sig-pol-store.pkcs7",
-        7,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-extended-epes.pkcs7",
-        7,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-level-b-sig-policy-invalid-digest-algo.p7m",
-        0,
-        "2",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-lta-en319122.cms",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-lta-ts101733.cms",
-        1,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-t-copied-sigtst.p7m",
-        0,
-        "2",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cades-two-sig-copied-tst.p7m",
-        0,
-        "2",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cms-no-sign-cert.p7m",
-        5,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/cms-wrong-sign-cert-hash-algo.pkcs7",
-        4,
-        "1.3.14.3.2.26",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/counterSig.p7m",
-        5,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpB_revoked_signingCertificate.p7m",
-        8,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpT_modified_ts_hash.p7m",
-        9,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA256-SHA3_256withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.3.14",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA256-SHA3_256withRSAandMGF1.p7m",
-        4,
-        "1.2.840.113549.1.1.10",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA256-SHA512withRSA.p7m",
-        3,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_224-SHA256withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.7",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_224-SHA3_224withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.7",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_256-SHA256withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.8",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_256-SHA3_256withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.8",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_384-SHA256withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.9",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_512-SHA256withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.10",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1419/CAdES-BpB-att-SHA3_512-SHA3_512withRSA.p7m",
-        4,
-        "2.16.840.1.101.3.4.2.10",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-1469/cadesLTAwithATv2expired.p7s",
-        10,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-enveloping-broken.pkcs7",
-        2,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/dss-2011/cades-enveloping.pkcs7",
-        0,
-        "2",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/CAdES-BpT.p7m",
-        8,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/evidence-record/CAdEs-BpT+ER-without-reducedHashTree.p7m",
-        8,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/no-key-info-cert.pkcs7",
-        6,
-        "",
-    ),
-    (
-        "tests/fixtures/external/dss/cades/validation/wrongContentHints.p7m",
-        4,
-        "1.2.840.113549.1.1.10",
-    ),
-];
-
-/// Every external file `unwrap`s to the recorded content or error.
-#[test]
-fn external_unwrap_outcomes_are_pinned() {
-    for (path, expected_tag, expected_detail) in UNWRAP_OUTCOMES {
-        let bytes = std::fs::read(path).unwrap_or_else(|error| panic!("{path}: {error}"));
-        let (tag, detail) = match unwrap(&bytes) {
-            Ok(content) => (0, content.len().to_string()),
-            Err(SignedError::DetachedContent) => (1, String::new()),
-            Err(SignedError::UnsupportedContentType(oid)) => (2, oid),
-            Err(SignedError::NotCms(reason)) => (3, reason),
-            Err(other) => panic!("{path}: the unexpected error {other:?}"),
-        };
-        assert_eq!(
-            (tag, detail),
-            (*expected_tag, expected_detail.to_string()),
-            "{path}"
-        );
-    }
-}
-
-/// Every external file that `unwrap`s to content `verify`es to the recorded
-/// outcome with its embedded certificates as the anchors.
-#[test]
-fn external_verify_outcomes_are_pinned() {
-    for (path, expected_tag, expected_detail) in VERIFY_OUTCOMES {
-        let bytes = std::fs::read(path).unwrap_or_else(|error| panic!("{path}: {error}"));
-        let certs = external_embedded_certs(&bytes);
-        let (tag, detail) = match verify(&bytes, &certs, None) {
-            Ok(verified) => (0, verified.chain().len().to_string()),
-            Err(SignedError::SignatureInvalid) => (1, String::new()),
-            Err(SignedError::DigestMismatch) => (2, String::new()),
-            Err(SignedError::AlgorithmMismatch) => (3, String::new()),
-            Err(SignedError::UnsupportedAlgorithm(oid)) => (4, oid),
-            Err(SignedError::UnsupportedSignerIdentifier) => (5, String::new()),
-            Err(SignedError::SignerCertificateNotFound) => (6, String::new()),
-            Err(SignedError::MissingSigningTime) => (7, String::new()),
-            Err(SignedError::Chain(ChainError::IssuerNotInStore)) => (8, String::new()),
-            Err(SignedError::Chain(ChainError::ExtendedKeyUsage)) => (9, String::new()),
-            Err(SignedError::Chain(ChainError::UnsupportedAlgorithm(_))) => (10, String::new()),
-            Err(other) => panic!("{path}: the unexpected error {other:?}"),
-        };
-        assert_eq!(
-            (tag, detail),
-            (*expected_tag, expected_detail.to_string()),
-            "{path}"
-        );
-    }
 }

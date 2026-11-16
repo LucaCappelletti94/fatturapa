@@ -25,15 +25,16 @@
 //! The chain is verified with `rustls-webpki`. Every link is checked for the
 //! issuer/subject match, the signature of the lower certificate under the
 //! issuer's key, the validity of every certificate at the signing time, the
-//! `CA` basic constraint of every issuer, and the `pathLenConstraint`. The
-//! signer certificate is accepted for the signing purpose when its
-//! `keyUsage` extension, when present, carries `digitalSignature` or
-//! `nonRepudiation`, and when its extended key usage extension, when
-//! present, carries `id-kp-emailProtection`, `id-kp-documentSigning`, the
-//! Microsoft `document signing` purpose or `anyExtendedKeyUsage`. The trust
-//! anchors are identified by their subject and public key; their own
-//! validity is not checked. `rustls-webpki` accepts at most six intermediate
-//! certificates.
+//! `CA` basic constraint of every issuer, the `keyCertSign` key usage of
+//! every intermediate whose `keyUsage` extension is present, and the
+//! `pathLenConstraint`. The signer certificate is accepted for the signing
+//! purpose when its `keyUsage` extension, when present, carries
+//! `digitalSignature` or `nonRepudiation`, and when its extended key usage
+//! extension, when present, carries `id-kp-emailProtection`,
+//! `id-kp-documentSigning`, the Microsoft `document signing` purpose or
+//! `anyExtendedKeyUsage`. The trust anchors are identified by their subject
+//! and public key; their own validity is not checked. `rustls-webpki`
+//! accepts at most six intermediate certificates.
 //!
 //! Revocation checking (`CRL` and `OCSP`) is not implemented. A caller that
 //! needs it performs it itself, for example against the `CRL` distribution
@@ -43,12 +44,12 @@ use std::borrow::Cow;
 use std::time::Duration;
 
 use base64::Engine;
-use cms::cert::{CertificateChoices, IssuerAndSerialNumber};
+use cms::cert::CertificateChoices;
 use cms::content_info::ContentInfo;
 use cms::signed_data::{SignedData, SignerIdentifier, SignerInfo};
 use const_oid::db;
 use der::asn1::{AnyRef, ObjectIdentifier, OctetString};
-use der::{Any, Decode, DecodeValue, Encode, FixedTag, Header, Reader, Tag};
+use der::{Any, Decode, Encode, Tag, Tagged};
 use digest::Digest;
 use jiff::Timestamp;
 use rustls_pki_types::{CertificateDer, SignatureVerificationAlgorithm, TrustAnchor, UnixTime};
@@ -57,22 +58,17 @@ use sha2::{Sha256, Sha384, Sha512};
 use spki::AlgorithmIdentifierOwned;
 use webpki::{
     EndEntityCert, Error as WebpkiError, ExtendedKeyUsageValidator, KeyPurposeId, KeyPurposeIdIter,
-    KeyUsage as WebpkiKeyUsage, RequiredEkuNotFoundContext, anchor_from_trusted_cert,
+    KeyUsage as WebpkiKeyUsage, RequiredEkuNotFoundContext, VerifiedPath, anchor_from_trusted_cert,
 };
 use x509_cert::Certificate;
 use x509_cert::attr::Attributes;
 use x509_cert::ext::pkix::KeyUsage;
+use x509_cert::ext::pkix::name::{GeneralName, GeneralNames};
+use x509_cert::name::Name;
+use x509_cert::serial_number::SerialNumber;
 use x509_cert::time::Time;
 
 use crate::Document;
-
-/// The ETSI ESS `signing-certificate` attribute.
-const ESS_SIGNING_CERTIFICATE: ObjectIdentifier =
-    ObjectIdentifier::new_unwrap("1.3.6.1.4.1.41411.1.1.1");
-
-/// The ETSI ESS `signing-certificate-v2` attribute.
-const ESS_SIGNING_CERTIFICATE_V2: ObjectIdentifier =
-    ObjectIdentifier::new_unwrap("1.3.6.1.4.1.41411.1.1.3");
 
 /// The named curve `P-384`.
 const SECP_384_R_1: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.132.0.34");
@@ -200,7 +196,7 @@ pub enum SignedError {
     #[error("the signing-time attribute is not a valid time")]
     MalformedSigningTime,
 
-    /// No `SignerInfo` carries a `signing-time` attribute and no time was
+    /// A `SignerInfo` carries no `signing-time` attribute and no time was
     /// supplied.
     #[error("no signing-time attribute and no signing time was supplied")]
     MissingSigningTime,
@@ -235,8 +231,10 @@ pub enum ChainError {
     Expired,
 
     /// A certificate that issues another one has no `CA:TRUE` basic
-    /// constraint.
-    #[error("a certificate issuing another one has no CA basic constraint")]
+    /// constraint, or a `keyUsage` extension without `keyCertSign`.
+    #[error(
+        "a certificate issuing another one has no CA basic constraint or keyCertSign key usage"
+    )]
     NotAca,
 
     /// A `pathLenConstraint` is exceeded.
@@ -340,7 +338,7 @@ pub fn unwrap(input: &[u8]) -> Result<Vec<u8>, SignedError> {
 /// # Errors
 ///
 /// Fails with [`SignedError`] when the file is not a `CMS SignedData`
-/// structure, when no `SignerInfo` verifies, or when no chain reaches a
+/// structure, or when any `SignerInfo` does not verify or has no chain to a
 /// trust anchor.
 pub fn verify(
     input: &[u8],
@@ -513,7 +511,7 @@ fn verify_signer_info(
     let signer = cms_certs
         .iter()
         .find(|certificate| {
-            certificate.tbs_certificate.issuer == sid.issuer
+            names_match(&certificate.tbs_certificate.issuer, &sid.issuer)
                 && certificate.tbs_certificate.serial_number == sid.serial_number
         })
         .cloned()
@@ -765,61 +763,105 @@ fn verify_ess(signed_attrs: &Attributes, signer: &Certificate) -> Result<(), Sig
     let signer_der = signer
         .to_der()
         .map_err(|_| SignedError::SigningCertificateMismatch)?;
-    if let Some(v1) = attr_value(signed_attrs, ESS_SIGNING_CERTIFICATE)
+    if let Some(v1) = attr_value(signed_attrs, db::rfc5911::ID_AA_SIGNING_CERTIFICATE)
         && !ess_v1_references(v1, &signer_der, signer)
     {
         return Err(SignedError::SigningCertificateMismatch);
     }
-    if let Some(v2) = attr_value(signed_attrs, ESS_SIGNING_CERTIFICATE_V2) {
-        // `Any` keeps the content without the outer `TLV`; `from_der` needs it back.
-        let v2 = v2
-            .to_der()
-            .map_err(|_| SignedError::SigningCertificateMismatch)?;
-        if !ess_v2_references(&v2, &signer_der, signer) {
-            return Err(SignedError::SigningCertificateMismatch);
-        }
+    if let Some(v2) = attr_value(signed_attrs, db::rfc5911::ID_AA_SIGNING_CERTIFICATE_V_2)
+        && !ess_v2_references(v2, &signer_der, signer)
+    {
+        return Err(SignedError::SigningCertificateMismatch);
     }
     Ok(())
 }
 
-/// Whether the `signing-certificate` attribute references `signer`.
+/// Whether the `signing-certificate` attribute references `signer` in its
+/// first `ESSCertID`, the one RFC 2634 section 5.4 reserves for the signer.
 fn ess_v1_references(value: &Any, signer_der: &[u8], signer: &Certificate) -> bool {
-    // `Any` keeps the content without the outer `TLV`; `from_der` needs it back.
-    let Ok(tlv) = value.to_der() else {
-        return false;
-    };
-    let Ok(entry) = EssSigningCertificateV1::from_der(&tlv) else {
-        return false;
-    };
-    // The v1 hash is `SHA-1` by definition.
-    if entry.hash.as_bytes() != &Sha1::digest(signer_der)[..] {
-        return false;
-    }
-    match entry.issuer_serial {
-        Some(issuer_serial) => {
-            issuer_serial.issuer == signer.tbs_certificate.issuer
-                && issuer_serial.serial_number == signer.tbs_certificate.serial_number
-        }
-        None => true,
+    value
+        .decode_as::<SigningCertificate>()
+        .ok()
+        .and_then(|attribute| attribute.certs.into_iter().next())
+        .is_some_and(|entry| {
+            // The v1 hash is `SHA-1` by definition.
+            entry.cert_hash.as_bytes() == &Sha1::digest(signer_der)[..]
+                && issuer_serial_matches(entry.issuer_serial.as_ref(), signer)
+        })
+}
+
+/// Whether the `signing-certificate-v2` attribute references `signer` in its
+/// first `ESSCertIDv2`, the one RFC 5035 section 5.4.1 reserves for the
+/// signer.
+fn ess_v2_references(value: &Any, signer_der: &[u8], signer: &Certificate) -> bool {
+    value
+        .decode_as::<SigningCertificateV2>()
+        .ok()
+        .and_then(|attribute| attribute.certs.into_iter().next())
+        .is_some_and(|entry| {
+            ess_hash_matches(
+                entry
+                    .hash_algorithm
+                    .as_ref()
+                    .map(|algorithm| &algorithm.oid),
+                &entry.cert_hash,
+                signer_der,
+            ) && issuer_serial_matches(entry.issuer_serial.as_ref(), signer)
+        })
+}
+
+/// Whether the `issuerSerial` of an `ESS` entry, when present, names the
+/// issuer and serial number of `signer`.
+fn issuer_serial_matches(issuer_serial: Option<&IssuerSerial>, signer: &Certificate) -> bool {
+    issuer_serial.is_none_or(|issuer_serial| {
+        issuer_serial.serial_number == signer.tbs_certificate.serial_number
+            && matches!(
+                issuer_serial.issuer.as_slice(),
+                [GeneralName::DirectoryName(issuer)]
+                    if names_match(issuer, &signer.tbs_certificate.issuer)
+            )
+    })
+}
+
+/// Whether `left` and `right` name the same entity per RFC 5280 section 7.1, with `PrintableString` and `UTF8String` values compared without regard to case or white space runs.
+fn names_match(left: &Name, right: &Name) -> bool {
+    left == right
+        || (left.0.len() == right.0.len()
+            && left.0.iter().zip(&right.0).all(|(left_rdn, right_rdn)| {
+                left_rdn.0.len() == right_rdn.0.len()
+                    && left_rdn.0.iter().zip(right_rdn.0.iter()).all(
+                        |(left_attribute, right_attribute)| {
+                            left_attribute.oid == right_attribute.oid
+                                && (left_attribute.value == right_attribute.value
+                                    || matches!(
+                                        (
+                                            directory_text(&left_attribute.value),
+                                            directory_text(&right_attribute.value),
+                                        ),
+                                        (Some(left_text), Some(right_text))
+                                            if folded(left_text).eq(folded(right_text))
+                                    ))
+                        },
+                    )
+            }))
+}
+
+/// The text of a `PrintableString` or `UTF8String` attribute value.
+fn directory_text(value: &Any) -> Option<&str> {
+    if matches!(value.tag(), Tag::PrintableString | Tag::Utf8String) {
+        std::str::from_utf8(value.value()).ok()
+    } else {
+        None
     }
 }
 
-/// Whether the `signing-certificate-v2` attribute references `signer`.
-fn ess_v2_references(ess_v2: &[u8], signer_der: &[u8], signer: &Certificate) -> bool {
-    let entries: EssV2List = match EssV2List::from_der(ess_v2) {
-        Ok(entries) => entries,
-        Err(_) => return false,
-    };
-    entries.0.iter().any(|entry| {
-        ess_hash_matches(
-            entry
-                .hash_algorithm
-                .as_ref()
-                .map(|algorithm| &algorithm.oid),
-            &entry.hash,
-            signer_der,
-        ) && entry.issuer == signer.tbs_certificate.issuer
-            && entry.serial == signer.tbs_certificate.serial_number
+/// The characters of `text` in lower case, each word followed by one space,
+/// so that runs of white space compare equal.
+fn folded(text: &str) -> impl Iterator<Item = char> + '_ {
+    text.split_whitespace().flat_map(|word| {
+        word.chars()
+            .flat_map(char::to_lowercase)
+            .chain(std::iter::once(' '))
     })
 }
 
@@ -871,47 +913,51 @@ impl Hash {
     }
 }
 
-/// The value of a `signing-certificate-v2` attribute, a `SEQUENCE OF`
-/// `ESSCertIDv2`, which `SetOfVec` cannot read as it decodes a `SET OF`.
-#[derive(Clone, Debug)]
-struct EssV2List(Vec<EssSigningCertificate>);
-
-impl FixedTag for EssV2List {
-    const TAG: Tag = Tag::Sequence;
-}
-
-impl<'a> DecodeValue<'a> for EssV2List {
-    fn decode_value<R: Reader<'a>>(reader: &mut R, header: Header) -> der::Result<Self> {
-        reader.read_nested(header.length, |reader| {
-            let mut entries = Vec::new();
-            while !reader.is_finished() {
-                entries.push(EssSigningCertificate::decode(reader)?);
-            }
-            Ok(Self(entries))
-        })
-    }
+/// The value of a `signing-certificate` attribute, RFC 2634 section 5.4.
+#[derive(Clone, Debug, der::Sequence)]
+struct SigningCertificate {
+    /// The referenced certificates, the signer certificate first.
+    certs: Vec<EssCertId>,
+    /// The certificate policies, not read.
+    policies: Option<Any>,
 }
 
 /// One entry of a `signing-certificate` attribute, an `ESSCertID`.
 #[derive(Clone, Debug, der::Sequence)]
-struct EssSigningCertificateV1 {
-    /// The hash of the certificate `DER` encoding.
-    hash: OctetString,
+struct EssCertId {
+    /// The `SHA-1` hash of the certificate `DER` encoding.
+    cert_hash: OctetString,
     /// The issuer and serial of the referenced certificate, when present.
-    issuer_serial: Option<IssuerAndSerialNumber>,
+    issuer_serial: Option<IssuerSerial>,
 }
 
-/// One entry of a `signing-certificate-v2` attribute.
-#[derive(Clone, Debug, Eq, PartialEq, der::Sequence)]
-struct EssSigningCertificate {
-    /// The hash algorithm of `hash`, `SHA-256` when absent.
+/// The value of a `signing-certificate-v2` attribute, RFC 5035 section 3.
+#[derive(Clone, Debug, der::Sequence)]
+struct SigningCertificateV2 {
+    /// The referenced certificates, the signer certificate first.
+    certs: Vec<EssCertIdV2>,
+    /// The certificate policies, not read.
+    policies: Option<Any>,
+}
+
+/// One entry of a `signing-certificate-v2` attribute, an `ESSCertIDv2`.
+#[derive(Clone, Debug, der::Sequence)]
+struct EssCertIdV2 {
+    /// The hash algorithm of `cert_hash`, `SHA-256` when absent.
     hash_algorithm: Option<AlgorithmIdentifierOwned>,
     /// The hash of the certificate `DER` encoding.
-    hash: OctetString,
+    cert_hash: OctetString,
+    /// The issuer and serial of the referenced certificate, when present.
+    issuer_serial: Option<IssuerSerial>,
+}
+
+/// The `IssuerSerial` of an `ESS` entry.
+#[derive(Clone, Debug, der::Sequence)]
+struct IssuerSerial {
     /// The issuer of the referenced certificate.
-    issuer: x509_cert::name::Name,
+    issuer: GeneralNames,
     /// The serial number of the referenced certificate.
-    serial: x509_cert::serial_number::SerialNumber,
+    serial_number: SerialNumber,
 }
 
 /// The chain from the signer certificate to a trust anchor, verified with
@@ -964,7 +1010,7 @@ fn verify_chain(
             time,
             SigningEku,
             None,
-            None,
+            Some(&issuers_may_sign_certificates),
         )
         .map_err(chain_error)?;
     let mut chain = vec![leaf.clone()];
@@ -993,6 +1039,22 @@ fn verify_chain(
         .ok_or_else(|| ChainError::Other("the verified trust anchor is not supplied".to_owned()))?;
     chain.push(anchor_cert);
     Ok(chain)
+}
+
+/// Rejects a candidate path in which an intermediate's `keyUsage` extension,
+/// when present, lacks `keyCertSign`, per RFC 5280 section 6.1.4 (n), which
+/// `webpki` does not check.
+fn issuers_may_sign_certificates(path: &VerifiedPath<'_>) -> Result<(), WebpkiError> {
+    for certificate in path.intermediate_certificates() {
+        let certificate =
+            Certificate::from_der(certificate.der().as_ref()).map_err(|_| WebpkiError::BadDer)?;
+        match certificate.tbs_certificate.get::<KeyUsage>() {
+            Ok(None) => {}
+            Ok(Some((_, key_usage))) if key_usage.key_cert_sign() => {}
+            _ => return Err(WebpkiError::EndEntityUsedAsCa),
+        }
+    }
+    Ok(())
 }
 
 /// The content of a `DER` `TLV`, after the tag and length encoding, with the

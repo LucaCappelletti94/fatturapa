@@ -14,7 +14,7 @@ mod support;
 use fatturapa::generated::fpr12 as g;
 use fatturapa::ids::{Natura, Provincia, RegimeFiscale, RiferimentoNormativo};
 use fatturapa::invoice::{
-    Invoice, InvoiceCurrency, Line, Recipient, Sconto, SelfInvoice, VatTreatment,
+    BuildError, Invoice, InvoiceCurrency, Line, Recipient, Sconto, SelfInvoice, VatTreatment,
 };
 use fatturapa::party::{Address, Business, Buyer, Company, Party, Seller};
 use fatturapa::{Amount, Document, FatturaElettronica};
@@ -330,8 +330,9 @@ fn riepilogo_order_follows_the_lines() {
 }
 
 /// A domestic invoice priced in US dollars keeps the `Divisa` `EUR`, the
-/// 150.00 dollar line at the 1.08 rate worth 138.89 euros, the original
-/// amount and the rate carried only as management data of the line.
+/// 150.00 dollar line at the 1.08 rate worth 138.88888889 euros, the
+/// original amount and the rate carried only as management data of the
+/// line.
 #[test]
 fn domestic_invoice_priced_in_usd() {
     let doc = Invoice::domestic(
@@ -355,9 +356,9 @@ fn domestic_invoice_priced_in_usd() {
     let generali = &body.dati_generali.content.dati_generali_documento.content;
     assert_eq!(generali.divisa, "EUR");
     let line = &body.dati_beni_servizi.content.dettaglio_linee[0].content;
-    // 150.00 USD at 1.08 USD per euro, the euro value 138.89.
-    assert_eq!(line.prezzo_unitario, amount("138.89"));
-    assert_eq!(line.prezzo_totale, amount("138.89"));
+    // 150.00 USD at 1.08 USD per euro, the euro value 138.88888889.
+    assert_eq!(line.prezzo_unitario, amount("138.88888889"));
+    assert_eq!(line.prezzo_totale, amount("138.88888889"));
     let gestione = &line.altri_dati_gestionali;
     assert_eq!(gestione.len(), 2);
     assert_eq!(gestione[0].content.tipo_dato, "USD AMT");
@@ -371,6 +372,7 @@ fn domestic_invoice_priced_in_usd() {
         Some(amount("1.0800"))
     );
     let riep = &body.dati_beni_servizi.content.dati_riepilogo[0].content;
+    assert_eq!(riep.arrotondamento, Some(amount("0.00111111")));
     assert_eq!(riep.imponibile_importo, amount("138.89"));
     assert_eq!(riep.imposta, amount("30.56"));
     // 138.89 + 30.56 = 169.45.
@@ -593,4 +595,143 @@ fn td17_self_invoice_with_a_sole_trader_buyer() {
     let bytes = doc.to_xml_vec().expect("the self-invoice serialises");
     support::validate(&support::fpr12_schema(), &bytes)
         .expect("the written self-invoice validates against the schema");
+}
+
+fn exempt_line(price: &str) -> Line {
+    Line::builder()
+        .description("SERVIZIO ESENTE")
+        .quantity("1.00")
+        .unit_price(price)
+        .vat(VatTreatment::NotTaxed {
+            natura: Natura::N2_1,
+            riferimento_normativo: "ART. 7-TER DPR 633/72"
+                .parse::<RiferimentoNormativo>()
+                .expect("a valid reference"),
+        })
+        .build()
+        .expect("the line builds")
+}
+
+fn us_dollars() -> InvoiceCurrency {
+    InvoiceCurrency::Foreign {
+        currency: Currency::USD,
+        rate: "1.08".parse().expect("a valid rate"),
+        rate_date: "2026-11-04".parse().expect("a valid date"),
+    }
+}
+
+/// Builds a domestic invoice of `lines` in `currency`, with the stamp duty
+/// requested when `bollo` is set.
+fn domestic(lines: Vec<Line>, currency: InvoiceCurrency, bollo: bool) -> FatturaElettronica {
+    let mut lines = lines.into_iter();
+    let first = lines.next().expect("at least one line");
+    Invoice::domestic(&support::seller(), &support::buyer(), code(), first)
+        .progressivo("00001")
+        .date("2026-11-04")
+        .numero("00030")
+        .lines(lines.collect::<Vec<_>>())
+        .currency(currency)
+        .bollo(bollo)
+        .build()
+        .expect("the invoice passes every check")
+}
+
+/// A price of eight decimals times a quantity writes a `PrezzoTotale` of
+/// at most eight decimals, which the schema accepts.
+#[test]
+fn eight_decimal_price_times_quantity_validates_against_the_schema() {
+    let doc = domestic(
+        vec![taxed_line("SERVIZIO", "0.12345678", "1.50", "22.00")],
+        InvoiceCurrency::Eur,
+        false,
+    );
+    let bytes = doc.to_xml_vec().expect("the invoice serialises");
+    support::validate(&support::fpr12_schema(), &bytes)
+        .expect("the written invoice validates against the schema");
+}
+
+/// A foreign price given without decimals keeps the two decimals the
+/// schema reads in its original amount.
+#[test]
+fn integer_foreign_price_validates_against_the_schema() {
+    let doc = domestic(
+        vec![taxed_line("SERVIZIO IN DOLLARI", "150", "1.00", "22.00")],
+        us_dollars(),
+        false,
+    );
+    let bytes = doc.to_xml_vec().expect("the invoice serialises");
+    support::validate(&support::fpr12_schema(), &bytes)
+        .expect("the written invoice validates against the schema");
+}
+
+/// A converted unit price below the cent keeps the value of the line, 4,000
+/// USD for a million units at 0.004 USD, 3,703.70 euros at the 1.08 rate.
+#[test]
+fn sub_cent_foreign_unit_price_keeps_the_line_value() {
+    let doc = domestic(
+        vec![taxed_line("CHIAMATA API", "0.004", "1000000", "22.00")],
+        us_dollars(),
+        false,
+    );
+    let riep = &doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi
+        .content
+        .dati_riepilogo[0]
+        .content;
+    assert_eq!(riep.imponibile_importo, amount("3703.70"));
+}
+
+/// The stamp duty reads the amounts not subject to VAT, so taxed lines and
+/// their VAT neither lift them above 77.47 nor offset them below it.
+#[test]
+fn stamp_duty_reads_only_the_amounts_without_vat() {
+    // 50.00 exempt and 25.00 taxed with 5.50 VAT, a total of 80.50.
+    let below = domestic(
+        vec![
+            exempt_line("50.00"),
+            taxed_line("SERVIZIO", "25.00", "1.00", "22.00"),
+        ],
+        InvoiceCurrency::Eur,
+        true,
+    );
+    // 100.00 exempt and a 30.00 taxed credit with its 6.60 VAT, a total of 63.40.
+    let above = domestic(
+        vec![
+            exempt_line("100.00"),
+            taxed_line("STORNO", "-30.00", "1.00", "22.00"),
+        ],
+        InvoiceCurrency::Eur,
+        true,
+    );
+    for (doc, total, due) in [(below, "80.50", false), (above, "63.40", true)] {
+        let generali = &doc.content.fattura_elettronica_body[0]
+            .content
+            .dati_generali
+            .content
+            .dati_generali_documento
+            .content;
+        assert_eq!(generali.importo_totale_documento, Some(amount(total)));
+        assert_eq!(generali.dati_bollo.is_some(), due, "total {total}");
+    }
+}
+
+/// A `Data` before 1970-01-01, outside the `DataFatturaType` range, does
+/// not build.
+#[test]
+fn invoice_dated_before_1970_does_not_build() {
+    let result = Invoice::domestic(
+        &support::seller(),
+        &support::buyer(),
+        code(),
+        taxed_line("SERVIZIO", "10.00", "1.00", "22.00"),
+    )
+    .progressivo("00001")
+    .date("1969-12-31")
+    .numero("00031")
+    .build();
+    assert!(
+        matches!(result, Err(BuildError::Id { field: "date", .. })),
+        "{result:?}"
+    );
 }

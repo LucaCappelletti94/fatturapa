@@ -30,7 +30,7 @@ use std::str::FromStr;
 /// Why an `SDI` file name is invalid.
 #[derive(Clone, Debug, thiserror::Error, PartialEq, Eq)]
 pub enum NameError {
-    /// The country code is not two upper-case letters.
+    /// The country code is not an `ISO 3166-1` alpha-2 code in upper case.
     #[error("the country code {0:?} is not an ISO 3166-1 alpha-2 code in upper case")]
     Country(String),
 
@@ -430,9 +430,12 @@ impl From<MessageName> for String {
     }
 }
 
-/// Checks the two-letter country code.
+/// Checks the `ISO 3166-1` alpha-2 country code.
 fn check_country(country: &str) -> Result<(), NameError> {
-    if country.len() == 2 && country.chars().all(|c| c.is_ascii_uppercase()) {
+    if country.len() == 2
+        && country.chars().all(|c| c.is_ascii_uppercase())
+        && country.parse::<iso_country::Country>().is_ok()
+    {
         Ok(())
     } else {
         Err(NameError::Country(country.to_string()))

@@ -800,27 +800,44 @@ impl Telefono {
 
 id_newtype!(Telefono, field);
 
-/// The `PECDestinatario` of the transmission, an e-mail of at most 256
-/// characters.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+/// The `PECDestinatario` of the transmission, a bare ASCII e-mail of at
+/// most 256 characters.
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Pec(email_address::EmailAddress);
 
+impl PartialEq for Pec {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl Eq for Pec {}
+
+impl std::hash::Hash for Pec {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.as_str().hash(state);
+    }
+}
+
 impl Pec {
-    /// Builds the `Pec` when `value` is an e-mail of at most 256
-    /// characters.
+    /// Builds the `Pec` when `value` is a bare ASCII e-mail of at most 256
+    /// characters, with no display name and no quoted local part, the
+    /// address the `EmailType` of the schema reads.
     ///
     /// # Errors
     ///
-    /// Fails with [`IdError::Pec`] when the value is not an e-mail of at
-    /// most 256 characters.
+    /// Fails with [`IdError::Pec`] when the value is not such an e-mail.
     pub fn try_new(value: impl Into<String>) -> Result<Self, IdError> {
         let value = value.into();
-        if value.chars().count() <= 256 {
-            email_address::EmailAddress::from_str(value.as_str())
-                .map(Self)
-                .map_err(|_| IdError::Pec(value))
+        if value.len() <= 256 && value.is_ascii() && !value.starts_with('"') {
+            email_address::EmailAddress::parse_with_options(
+                &value,
+                email_address::Options::default().without_display_text(),
+            )
+            .map(Self)
+            .map_err(|_| IdError::Pec(value))
         } else {
             Err(IdError::Pec(value))
         }
@@ -835,26 +852,44 @@ impl Pec {
 
 id_newtype!(Pec, accessor);
 
-/// The `Email` of the party contacts, an e-mail of seven to 256 characters.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+/// The `Email` of the party contacts, an e-mail of seven to 256 characters
+/// with a dotted domain.
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Email(email_address::EmailAddress);
 
+impl PartialEq for Email {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+impl Eq for Email {}
+
+impl std::hash::Hash for Email {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.as_str().hash(state);
+    }
+}
+
 impl Email {
     /// Builds the `Email` when `value` is an e-mail of seven to 256
-    /// characters.
+    /// characters whose domain has a dot, as the `EmailContattiType`
+    /// pattern requires.
     ///
     /// # Errors
     ///
-    /// Fails with [`IdError::Email`] when the value is not an e-mail of
-    /// seven to 256 characters.
+    /// Fails with [`IdError::Email`] when the value is not such an e-mail.
     pub fn try_new(value: impl Into<String>) -> Result<Self, IdError> {
         let value = value.into();
         if (7..=256).contains(&value.chars().count()) {
-            email_address::EmailAddress::from_str(value.as_str())
-                .map(Self)
-                .map_err(|_| IdError::Email(value))
+            email_address::EmailAddress::parse_with_options(
+                &value,
+                email_address::Options::default().with_required_tld(),
+            )
+            .map(Self)
+            .map_err(|_| IdError::Email(value))
         } else {
             Err(IdError::Email(value))
         }
@@ -1614,50 +1649,49 @@ impl From<EuCountry> for String {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub enum Natura {
-    /// `N1`, the operation excluded from VAT, ex art. 15 DPR 633/72.
+    /// `N1`, excluded under art. 15 DPR 633/72.
     N1,
-    /// `N2.1`, an operation not subject to VAT, art. 7-ter DPR 633/72.
+    /// `N2.1`, not subject to VAT under articles 7 to 7-septies DPR 633/72.
     N2_1,
-    /// `N2.2`, an operation not subject to VAT, art. 7-bis DPR 633/72.
+    /// `N2.2`, not subject to VAT, other cases.
     N2_2,
-    /// `N3.1`, a non-taxable operation, art. 9-13 DPR 633/72.
+    /// `N3.1`, non-taxable, exports.
     N3_1,
-    /// `N3.2`, an export of goods or service, art. 9-13 DPR 633/72.
+    /// `N3.2`, non-taxable, intra-community supplies.
     N3_2,
-    /// `N3.3`, a sale to passengers in transit.
+    /// `N3.3`, non-taxable, supplies to San Marino.
     N3_3,
-    /// `N3.4`, an operation exempt from VAT.
+    /// `N3.4`, non-taxable, operations treated as exports.
     N3_4,
-    /// `N3.5`, a non-taxable intra-community sale.
+    /// `N3.5`, non-taxable, following a declaration of intent.
     N3_5,
-    /// `N3.6`, an operation with a specific exemption.
+    /// `N3.6`, non-taxable, other operations that do not count towards the
+    /// plafond.
     N3_6,
-    /// `N4`, an operation outside the scope of VAT.
+    /// `N4`, exempt.
     N4,
-    /// `N5`, an operation with the right to deduction.
+    /// `N5`, the margin scheme or VAT not shown on the invoice.
     N5,
-    /// `N6.1`, the VAT due at receipt or payment, goods.
+    /// `N6.1`, reverse charge, scrap and other recovered materials.
     N6_1,
-    /// `N6.2`, the VAT due at receipt or payment, goods with the right to
-    /// deduction.
+    /// `N6.2`, reverse charge, pure gold and silver.
     N6_2,
-    /// `N6.3`, the VAT due at receipt or payment, services.
+    /// `N6.3`, reverse charge, subcontracting in the construction sector.
     N6_3,
-    /// `N6.4`, the VAT due at receipt or payment, services with the right
-    /// to deduction.
+    /// `N6.4`, reverse charge, sale of buildings.
     N6_4,
-    /// `N6.5`, the VAT due at receipt or payment, an intra-community sale.
+    /// `N6.5`, reverse charge, mobile phones.
     N6_5,
-    /// `N6.6`, the VAT due at receipt or payment, an import of goods.
+    /// `N6.6`, reverse charge, electronic products.
     N6_6,
-    /// `N6.7`, the VAT due at receipt or payment, a specific regime.
+    /// `N6.7`, reverse charge, construction and related sectors.
     N6_7,
-    /// `N6.8`, the VAT due at receipt or payment, a specific regime for
-    /// services.
+    /// `N6.8`, reverse charge, energy sector.
     N6_8,
-    /// `N6.9`, an other operation with the VAT due at receipt or payment.
+    /// `N6.9`, reverse charge, other cases.
     N6_9,
-    /// `N7`, the VAT due at receipt or payment, goods.
+    /// `N7`, VAT paid in another EU state, for distance sales and for
+    /// telecommunication, broadcasting and electronic services.
     N7,
 }
 
@@ -2276,6 +2310,45 @@ mod tests {
             Email::try_new(format!("{}@example.com", "a".repeat(250))),
             Err(IdError::Email(_))
         ));
+    }
+
+    /// A `Pec` is the bare ASCII address the `EmailType` of the
+    /// `PECDestinatario` reads.
+    #[test]
+    fn pec_rejects_what_the_email_type_rejects() {
+        for bad in ["Mario Rossi <beta@pec.it>", "beta@pèc.it", "\"ab\"@pec.it"] {
+            assert!(
+                matches!(Pec::try_new(bad), Err(IdError::Pec(_))),
+                "{bad:?} fails the EmailType pattern"
+            );
+        }
+    }
+
+    /// An `Email` has the dotted domain the `EmailContattiType` pattern
+    /// requires.
+    #[test]
+    fn email_requires_a_dotted_domain() {
+        assert!(matches!(
+            Email::try_new("user@localhost"),
+            Err(IdError::Email(_))
+        ));
+    }
+
+    /// Equal addresses hash equally, so a set holds each address once.
+    #[test]
+    fn address_equality_agrees_with_hashing() {
+        let pecs = [
+            Pec::try_new("beta@PEC.IT").expect("a valid pec"),
+            Pec::try_new("beta@pec.it").expect("a valid pec"),
+        ];
+        let distinct: std::collections::HashSet<&Pec> = pecs.iter().collect();
+        assert_eq!(pecs[0] == pecs[1], distinct.len() == 1);
+        let emails = [
+            Email::try_new("info@EXAMPLE.COM").expect("a valid email"),
+            Email::try_new("info@example.com").expect("a valid email"),
+        ];
+        let distinct: std::collections::HashSet<&Email> = emails.iter().collect();
+        assert_eq!(emails[0] == emails[1], distinct.len() == 1);
     }
 
     #[test]

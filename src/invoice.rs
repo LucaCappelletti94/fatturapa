@@ -108,7 +108,7 @@ const FOREIGN_CODICE_DESTINATARIO: &str = "XXXXXXX";
 const PEC_CODICE_DESTINATARIO: &str = "0000000";
 
 /// The 77.47 EUR stamp duty threshold of the DPR 642/72, the `DatiBollo`
-/// block written only when the total exceeds it.
+/// block written only when the amounts not subject to VAT exceed it.
 const BOLLO_THRESHOLD: Decimal = Decimal::from_parts(7747, 0, 0, false, 2);
 
 /// The 2.00 EUR amount of the virtual stamp duty.
@@ -337,11 +337,11 @@ impl InvoiceCurrency {
 
 impl InvoiceCurrency {
     /// The euro value of a foreign amount, the art. 13 conversion rounded
-    /// to the cent.
+    /// to the eight decimals of the `Amount8DecimalType`.
     pub(crate) fn eur_value(&self, value: Decimal) -> Decimal {
         match self {
             Self::Eur => value,
-            Self::Foreign { rate, .. } => validate::round_half_2(value / rate.as_decimal()),
+            Self::Foreign { rate, .. } => fit8(value / rate.as_decimal()),
         }
     }
 }
@@ -880,7 +880,13 @@ impl Line {
             riferimento_amministrazione: None,
             altri_dati_gestionali: currency.altri_dati_gestionali(&self.unit_price),
         };
-        content.prezzo_totale = validate::line_total(&content);
+        content.prezzo_totale = validate::line_total(&content)
+            .map(|total| Amount(fit8(total.0)))
+            .ok_or(BuildError::Amount {
+                line: numero_linea,
+                field: AmountField::UnitPrice,
+                value: unit_price,
+            })?;
         Ok(content)
     }
 }
@@ -902,7 +908,7 @@ impl InvoiceCurrency {
                         content: AltriDatiGestionaliTypeContent {
                             tipo_dato: format!("{code} AMT"),
                             riferimento_testo: Some(format!("Original amount in {code}")),
-                            riferimento_numero: Some(*original),
+                            riferimento_numero: Some(Amount(norm2(original.0))),
                             riferimento_data: None,
                         },
                     },
@@ -1290,7 +1296,8 @@ impl<'a, 'b, P, D, N> InvoiceDomesticBuilder<'a, 'b, P, D, N> {
 
     /// Enables the virtual stamp duty, which writes the `DatiBollo` block
     /// with `BolloVirtuale SI` and the 2.00 euros `ImportoBollo` when the
-    /// computed total exceeds 77.47 euros, the exclusive threshold of the
+    /// amounts not subject to VAT, the `ImponibileImporto` of the summaries
+    /// with a `Natura`, exceed 77.47 euros, the exclusive threshold of the
     /// DPR 642/72, and omits the block at or below it.
     pub fn bollo<G>(mut self, value: G) -> Self
     where
@@ -2022,6 +2029,12 @@ fn build_invoice(
     dati_pagamento: Vec<DatiPagamentoType>,
     collegate: Vec<DatiDocumentiCorrelatiType>,
 ) -> Result<FatturaElettronica, BuildError> {
+    if date.0 < jiff::civil::date(1970, 1, 1) {
+        return Err(BuildError::Id {
+            field: "date",
+            error: IdError::Date(date.to_string()),
+        });
+    }
     let (formato, codice_destinatario, pec_destinatario) = recipient_of(scenario);
     let header = header(
         formato.clone(),
@@ -2303,7 +2316,12 @@ fn assemble_body(inputs: BodyInputs) -> Result<FatturaElettronicaBodyType, Build
     } = collect_lines(lines, &currency)?;
     let (riep, totale) = riepilogo(groups, &references);
     let importo_totale = validate::round_half_2(totale);
-    let bollo = if bollo && importo_totale > BOLLO_THRESHOLD {
+    let senza_iva: Decimal = riep
+        .iter()
+        .filter(|group| group.content.natura.is_some())
+        .map(|group| group.content.imponibile_importo.0)
+        .sum();
+    let bollo = if bollo && senza_iva > BOLLO_THRESHOLD {
         Some(DatiBolloType {
             content: DatiBolloTypeContent {
                 bollo_virtuale: BolloVirtualeType::Si,
@@ -2411,6 +2429,13 @@ fn amount_in_range(value: Decimal, field: AmountField, line: i64) -> Result<Deci
     } else {
         Ok(norm2(value))
     }
+}
+
+/// Rounds a computed amount to the eight decimals of the
+/// `Amount8DecimalType` and extends it to two decimals when it carries
+/// fewer.
+fn fit8(value: Decimal) -> Decimal {
+    norm2(value.round_dp_with_strategy(8, rust_decimal::RoundingStrategy::MidpointAwayFromZero))
 }
 
 /// Extends a decimal to two decimals when it carries fewer, the XSD
@@ -2829,8 +2854,8 @@ mod tests {
             .expect("the invoice builds");
         let body = &doc.content.fattura_elettronica_body[0].content;
         let line = &body.dati_beni_servizi.content.dettaglio_linee[0].content;
-        // 150 USD at 1.08 USD per euro, the euro value is 138.89.
-        assert_eq!(line.prezzo_unitario.0, Decimal::new(13889, 2));
+        // 150 USD at 1.08 USD per euro, the euro value is 138.88888889.
+        assert_eq!(line.prezzo_unitario.0, Decimal::new(13_888_888_889, 8));
         assert_eq!(line.altri_dati_gestionali.len(), 2);
         assert_eq!(line.altri_dati_gestionali[0].content.tipo_dato, "USD AMT");
         assert_eq!(line.altri_dati_gestionali[1].content.tipo_dato, "USD RATE");
@@ -2849,8 +2874,8 @@ mod tests {
             .content
             .importo_totale_documento
             .expect("the total is present");
-        // 138.89 euros per unit, one hundred units.
-        assert_eq!(totale.0, Decimal::new(1_388_900, 2));
+        // 100 units at 138.88888889 euros, 13888.888889 rounded to the cent.
+        assert_eq!(totale.0, Decimal::new(1_388_889, 2));
     }
 
     #[test]

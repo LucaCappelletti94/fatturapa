@@ -946,6 +946,23 @@ fn code_00445_generic_natura() {
     assert_absent(&validate(&doc), "00445");
 }
 
+/// 00445: the generic natures stay allowed on an invoice issued before
+/// 1 January 2021, in the lines, the riepilogo and the cassa alike.
+#[test]
+fn code_00445_not_reported_before_2021() {
+    let mut doc = base();
+    let body = &mut doc.content.fattura_elettronica_body[0].content;
+    let documento = &mut body.dati_generali.content.dati_generali_documento.content;
+    documento.data = date(2020, 12, 31);
+    documento
+        .dati_cassa_previdenziale
+        .push(cassa("0.00", Some(g::NaturaType::N2), false));
+    let beni = &mut body.dati_beni_servizi.content;
+    beni.dettaglio_linee[0].content.natura = Some(g::NaturaType::N2);
+    beni.dati_riepilogo[0].content.natura = Some(g::NaturaType::N2);
+    assert_absent(&validate(&doc), "00445");
+}
+
 /// 00445: the generic nature `N2` in a `DatiCassaPrevidenziale` is not
 /// allowed; a detailed nature passes.
 #[test]
@@ -1302,42 +1319,57 @@ fn code_00423_cascading_percentages() {
     assert_absent(&validate(&doc), "00423");
 }
 
-/// 00423: a `PrezzoTotale` off by exactly one cent is a violation, and one
-/// below it is not.
+/// 00423: a `PrezzoTotale` off by more than one cent is a violation, and
+/// one off by exactly one cent is not, since the *Allegato A* rejects only
+/// a difference above the cent.
 #[test]
 fn code_00423_tolerance_boundary() {
     let mut doc = base();
-    line(&mut doc).prezzo_totale = amount("200.01");
+    line(&mut doc).prezzo_totale = amount("200.011");
     assert_has(&validate(&doc), "00423");
 
     let mut doc = base();
-    line(&mut doc).prezzo_totale = amount("199.995");
+    line(&mut doc).prezzo_totale = amount("200.01");
     assert_absent(&validate(&doc), "00423");
 }
 
-/// 00421: an `Imposta` off by exactly one cent is a violation, and one below
-/// it is not.
+/// 00423: a line whose adjusted price overflows the decimal range is
+/// reported, without a panic.
+#[test]
+fn code_00423_overflowing_line_total() {
+    let mut doc = base();
+    let l = line(&mut doc);
+    l.prezzo_unitario = amount("99999999999.99");
+    l.quantita = Some(amount("999999999999.99"));
+    l.sconto_maggiorazione = (0..20)
+        .map(|_| sconto_percentuale(g::TipoScontoMaggiorazioneType::Mg, amount("100.00")))
+        .collect();
+    assert_has(&validate(&doc), "00423");
+}
+
+/// 00421: an `Imposta` off by more than one cent is a violation, and one
+/// off by exactly one cent is not.
 #[test]
 fn code_00421_tolerance_boundary() {
     let mut doc = base();
-    riep(&mut doc).imposta = amount("44.01");
+    riep(&mut doc).imposta = amount("44.02");
     assert_has(&validate(&doc), "00421");
 
     let mut doc = base();
-    riep(&mut doc).imposta = amount("44.0050");
+    riep(&mut doc).imposta = amount("44.01");
     assert_absent(&validate(&doc), "00421");
 }
 
-/// 00422: an `ImponibileImporto` off by exactly one euro is a violation, and
-/// one below it is not.
+/// 00422: an `ImponibileImporto` off by more than one euro is a violation,
+/// and one off by exactly one euro is not.
 #[test]
 fn code_00422_tolerance_boundary() {
     let mut doc = base();
-    riep(&mut doc).imponibile_importo = amount("199.00");
+    riep(&mut doc).imponibile_importo = amount("198.99");
     assert_has(&validate(&doc), "00422");
 
     let mut doc = base();
-    riep(&mut doc).imponibile_importo = amount("199.01");
+    riep(&mut doc).imponibile_importo = amount("199.00");
     assert_absent(&validate(&doc), "00422");
 }
 
@@ -1621,6 +1653,31 @@ fn code_00409_art73_same_date_duplicates() {
         .art_73 = Some(g::Art73Type::Si);
     doc.content.fattura_elettronica_body.push(body);
     assert_has(&validate(&doc), "00409");
+}
+
+/// 00409: `Art73 SI` on one body only keeps the year comparison, so the same
+/// number in the same year duplicates on different dates, in either order.
+#[test]
+fn code_00409_art73_on_one_body_only() {
+    for marked in [0, 1] {
+        let mut doc = base();
+        let mut body = doc.content.fattura_elettronica_body[0].clone();
+        body.content
+            .dati_generali
+            .content
+            .dati_generali_documento
+            .content
+            .data = date(2026, 11, 5);
+        doc.content.fattura_elettronica_body.push(body);
+        doc.content.fattura_elettronica_body[marked]
+            .content
+            .dati_generali
+            .content
+            .dati_generali_documento
+            .content
+            .art_73 = Some(g::Art73Type::Si);
+        assert_has(&validate(&doc), "00409");
+    }
 }
 
 /// 00409: without `Art73` the check compares the year, so the same number in
@@ -2136,6 +2193,21 @@ fn code_00445_simplified() {
         .dati_beni_servizi[0]
         .content
         .natura = Some(sg::NaturaType::N21);
+    assert_absent(&validate_simplified(&doc), "00445");
+}
+
+/// 00445: the generic nature `N2` stays allowed on a simplified invoice
+/// issued before 1 January 2021.
+#[test]
+fn code_00445_simplified_not_reported_before_2021() {
+    let mut doc = doc_simplified();
+    let body = &mut doc.content.fattura_elettronica_body[0].content;
+    body.dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .data = date(2020, 12, 31);
+    body.dati_beni_servizi[0].content.natura = Some(sg::NaturaType::N2);
     assert_absent(&validate_simplified(&doc), "00445");
 }
 
