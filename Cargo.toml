@@ -1,6 +1,6 @@
 [package]
 name = "fatturapa"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.88"
 description = "Reading and writing of every FatturaPA invoice and SDI message"
