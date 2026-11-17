@@ -9,61 +9,45 @@ use x509_cert::Certificate;
 
 // Outcome tags follow the match arms of the two tests below, files as recorded in `tests/fixtures/external/README.md`.
 
-/// The `DER` of the `CMS` in `input`, mirroring the normalisation of the
-/// `signed` module.
-fn external_cms_der(input: &[u8]) -> Option<Vec<u8>> {
-    use base64::Engine;
-    use cms::content_info::ContentInfo;
-    use der::Decode;
-    use rasn_cms::{ContentInfo as RasnContentInfo, SignedData as RasnSignedData};
-
-    if ContentInfo::from_der(input).is_ok() {
-        return Some(input.to_vec());
-    }
-    let stripped: Vec<u8> = input
-        .iter()
-        .copied()
-        .filter(|byte| !matches!(byte, b' ' | b'\t' | b'\r' | b'\n'))
-        .collect();
-    let decoded = base64::engine::general_purpose::STANDARD
-        .decode(&stripped)
-        .or_else(|_| base64::engine::general_purpose::STANDARD_NO_PAD.decode(&stripped))
-        .ok()?;
-    if ContentInfo::from_der(&decoded).is_ok() {
-        return Some(decoded);
-    }
-    let content_info = rasn::ber::decode::<RasnContentInfo>(input).ok()?;
-    let signed_data = rasn::ber::decode::<RasnSignedData>(content_info.content.as_bytes()).ok()?;
-    let signed_data_der = rasn::der::encode(&signed_data).ok()?;
-    let fresh = RasnContentInfo {
-        content_type: content_info.content_type,
-        content: rasn::types::Any::new(signed_data_der),
-    };
-    rasn::der::encode(&fresh).ok()
-}
-
-/// The `CMS` certificates embedded in `input`, when the structure parses.
+/// The `CMS` certificates embedded in `input`, when the structure parses,
+/// read the way the `signed` module reads them.
 fn external_embedded_certs(input: &[u8]) -> Vec<Certificate> {
+    use base64::Engine;
     use cms::cert::CertificateChoices;
     use cms::content_info::ContentInfo;
     use cms::signed_data::SignedData;
     use const_oid::db;
-    use der::{Decode, Encode};
+    use der::{Decode, EncodingRules};
 
-    let Some(der) = external_cms_der(input) else {
+    let content_info = ContentInfo::from_ber(input).ok().or_else(|| {
+        let stripped: Vec<u8> = input
+            .iter()
+            .copied()
+            .filter(|byte| !matches!(byte, b' ' | b'\t' | b'\r' | b'\n'))
+            .collect();
+        let decoded = base64::engine::general_purpose::STANDARD
+            .decode(&stripped)
+            .or_else(|_| base64::engine::general_purpose::STANDARD_NO_PAD.decode(&stripped))
+            .ok()?;
+        ContentInfo::from_ber(&decoded).ok()
+    });
+    let Some(content_info) = content_info else {
         return Vec::new();
     };
-    let content_info = ContentInfo::from_der(&der).expect("the content info decodes");
     if content_info.content_type != db::rfc5911::ID_SIGNED_DATA {
         return Vec::new();
     }
-    let signed_data_der = content_info.content.to_der().expect("the content encodes");
-    let signed_data = SignedData::from_der(&signed_data_der).expect("the signed data decodes");
+    let Ok(signed_data) = content_info
+        .content
+        .decode_as_encoding::<SignedData>(EncodingRules::Ber)
+    else {
+        return Vec::new();
+    };
     let mut certs = Vec::new();
-    if let Some(set) = &signed_data.certificates {
-        for choice in set.0.iter() {
+    if let Some(set) = signed_data.certificates {
+        for choice in set.0.into_vec() {
             if let CertificateChoices::Certificate(cert) = choice {
-                certs.push(cert.clone());
+                certs.push(cert);
             }
         }
     }
@@ -93,8 +77,8 @@ const UNWRAP_OUTCOMES: &[(&str, u8, &str)] = &[
     ),
     (
         "tests/fixtures/external/dss/cades/validation/cades-b-copied-cnttst.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
+        0,
+        "11",
     ),
     (
         "tests/fixtures/external/dss/cades/validation/cades-bes-signeddata-detached.p7s",
@@ -178,8 +162,8 @@ const UNWRAP_OUTCOMES: &[(&str, u8, &str)] = &[
     ),
     (
         "tests/fixtures/external/dss/cades/validation/cades-t-duplicated-sigtst.p7m",
-        3,
-        "the CMS SignedData structure is malformed",
+        0,
+        "11",
     ),
     (
         "tests/fixtures/external/dss/cades/validation/cades-two-sig-copied-tst.p7m",
@@ -224,12 +208,12 @@ const UNWRAP_OUTCOMES: &[(&str, u8, &str)] = &[
     (
         "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpLTA_modified_ats_hash_element.p7m",
         3,
-        "the input is not a CMS structure",
+        "the CMS SignedData structure is malformed",
     ),
     (
         "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpLTA_removed_ocsp.p7m",
         3,
-        "the input is not a CMS structure",
+        "the CMS SignedData structure is malformed",
     ),
     (
         "tests/fixtures/external/dss/cades/validation/dss-1220/CAdES-BpT_modified_ts_hash.p7m",

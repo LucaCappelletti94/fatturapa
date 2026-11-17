@@ -4,8 +4,7 @@
 //! (RFC 5652) around the `XML`. The input is raw `DER` or `base64` text, the
 //! two forms SDI and mailers deliver. Real signers also write the structure
 //! in `BER`, with indefinite length constructs and an `eContent` split into
-//! chunks, which the module re-encodes as `DER` with `rasn` before the
-//! verification.
+//! fragments, which the module reads with the `BER` rules of `der`.
 //!
 //! [`verify`] checks every `SignerInfo` of the structure. For each one it
 //! checks that the signed attributes carry a `content-type` matching the
@@ -40,7 +39,6 @@
 //! needs it performs it itself, for example against the `CRL` distribution
 //! points of the chain.
 
-use std::borrow::Cow;
 use std::time::Duration;
 
 use base64::Engine;
@@ -49,7 +47,7 @@ use cms::content_info::ContentInfo;
 use cms::signed_data::{SignedData, SignerIdentifier, SignerInfo};
 use const_oid::db;
 use der::asn1::{AnyRef, ObjectIdentifier, OctetString};
-use der::{Any, Decode, Encode, Tag, Tagged};
+use der::{Any, Decode, Encode, EncodingRules, Tag, Tagged};
 use digest::Digest;
 use jiff::Timestamp;
 use rustls_pki_types::{CertificateDer, SignatureVerificationAlgorithm, TrustAnchor, UnixTime};
@@ -373,24 +371,19 @@ pub fn verify(
     })
 }
 
-/// Parses the input as the `DER` of a `CMS ContentInfo` of `SignedData`.
+/// Parses the input as a `CMS ContentInfo` of `SignedData`, in `BER` or
+/// `DER`.
 fn parse_signed_data(input: &[u8]) -> Result<SignedData, SignedError> {
-    let der = cms_bytes(input)?;
-    let content_info = ContentInfo::from_der(der.as_ref())
-        .map_err(|_| SignedError::NotCms("the input is not a CMS structure".to_owned()))?;
+    let content_info = content_info(input)?;
     if content_info.content_type != db::rfc5911::ID_SIGNED_DATA {
         return Err(SignedError::NotCms(format!(
             "the content type {} is not SignedData",
             content_info.content_type
         )));
     }
-    // The `Any` content holds the `SignedData` value without its outer
-    // `SEQUENCE` header, so re-encode the full `TLV` before decoding.
-    let signed_data_der = content_info
+    content_info
         .content
-        .to_der()
-        .map_err(|_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned()))?;
-    SignedData::from_der(&signed_data_der)
+        .decode_as_encoding::<SignedData>(EncodingRules::Ber)
         .map_err(|_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned()))
 }
 
@@ -407,13 +400,11 @@ fn cms_certificates(signed_data: &SignedData) -> Vec<Certificate> {
     certificates
 }
 
-/// The `DER` of the `CMS` structure in `input`, with any `BER` form
-/// normalized to `DER`. The input is the raw bytes of the structure or
-/// `base64` text, and the bytes are borrowed when they are already strict
-/// `DER`.
-fn cms_bytes(input: &[u8]) -> Result<Cow<'_, [u8]>, SignedError> {
-    if let Some(der) = cms_structure(input) {
-        return Ok(der);
+/// The `CMS ContentInfo` in `input`, which holds the raw bytes of the
+/// structure or `base64` text.
+fn content_info(input: &[u8]) -> Result<ContentInfo, SignedError> {
+    if let Ok(content_info) = ContentInfo::from_ber(input) {
+        return Ok(content_info);
     }
     // The bytes are not a `CMS` structure: read them as `base64` text.
     let stripped: Vec<u8> = input
@@ -430,43 +421,8 @@ fn cms_bytes(input: &[u8]) -> Result<Cow<'_, [u8]>, SignedError> {
         .decode(&stripped)
         .or_else(|_| base64::engine::general_purpose::STANDARD_NO_PAD.decode(&stripped))
         .map_err(|_| SignedError::NotCms("the base64 text does not decode".to_owned()))?;
-    match cms_structure(&decoded) {
-        // The bytes need no rewrite, but they are owned here, so copy them.
-        Some(Cow::Borrowed(_)) => Ok(Cow::Owned(decoded)),
-        Some(Cow::Owned(der)) => Ok(Cow::Owned(der)),
-        None => Err(SignedError::NotCms(
-            "the input is not a CMS structure".to_owned(),
-        )),
-    }
-}
-
-/// The `DER` of `input` as a `CMS` structure, with any `BER` form normalized
-/// to `DER`, or `None` when the input is not a `CMS` structure.
-fn cms_structure(input: &[u8]) -> Option<Cow<'_, [u8]>> {
-    // The `cms` crate reads only strict `DER`, but real signers write `BER`.
-    let strict = ContentInfo::from_der(input).ok();
-    if strict.as_ref().is_some_and(signed_data_parses) {
-        return Some(Cow::Borrowed(input));
-    }
-    // `rasn` reads `BER`; re-encode the `SignedData` as `DER`.
-    let content_info = rasn::ber::decode::<rasn_cms::ContentInfo>(input).ok()?;
-    let signed_data =
-        rasn::ber::decode::<rasn_cms::SignedData>(content_info.content.as_bytes()).ok()?;
-    let signed_data_der = rasn::der::encode(&signed_data).ok()?;
-    let fresh = rasn_cms::ContentInfo {
-        content_type: content_info.content_type,
-        content: rasn::types::Any::new(signed_data_der),
-    };
-    Some(Cow::Owned(rasn::der::encode(&fresh).ok()?))
-}
-
-/// Whether the `SignedData` of `content_info` reads as strict `DER`, with a
-/// primitive `eContent`.
-fn signed_data_parses(content_info: &ContentInfo) -> bool {
-    content_info
-        .content
-        .to_der()
-        .is_ok_and(|signed_data_der| SignedData::from_der(&signed_data_der).is_ok())
+    ContentInfo::from_ber(&decoded)
+        .map_err(|_| SignedError::NotCms("the input is not a CMS structure".to_owned()))
 }
 
 /// A character of the `base64` alphabet, padding included.
@@ -511,8 +467,8 @@ fn verify_signer_info(
     let signer = cms_certs
         .iter()
         .find(|certificate| {
-            names_match(&certificate.tbs_certificate.issuer, &sid.issuer)
-                && certificate.tbs_certificate.serial_number == sid.serial_number
+            names_match(certificate.tbs_certificate().issuer(), &sid.issuer)
+                && *certificate.tbs_certificate().serial_number() == sid.serial_number
         })
         .cloned()
         .ok_or(SignedError::SignerCertificateNotFound)?;
@@ -614,7 +570,7 @@ fn parse_time(value: &Any) -> Result<Timestamp, SignedError> {
 
 /// The `EC` curve of the certificate's public key, when it is an `EC` key.
 fn ecdsa_curve(certificate: &Certificate) -> Option<ObjectIdentifier> {
-    let spki = &certificate.tbs_certificate.subject_public_key_info;
+    let spki = certificate.tbs_certificate().subject_public_key_info();
     if spki.algorithm.oid != db::rfc5912::ID_EC_PUBLIC_KEY {
         return None;
     }
@@ -720,7 +676,7 @@ fn signature_algorithm(
 /// The signer certificate's `keyUsage` extension, when present, must permit
 /// signing.
 fn key_usage_permits_signing(signer: &Certificate) -> Result<(), SignedError> {
-    match signer.tbs_certificate.get::<KeyUsage>() {
+    match signer.tbs_certificate().get_extension::<KeyUsage>() {
         Ok(None) => Ok(()),
         Ok(Some((_, key_usage))) => {
             if key_usage.digital_signature() || key_usage.non_repudiation() {
@@ -814,11 +770,11 @@ fn ess_v2_references(value: &Any, signer_der: &[u8], signer: &Certificate) -> bo
 /// issuer and serial number of `signer`.
 fn issuer_serial_matches(issuer_serial: Option<&IssuerSerial>, signer: &Certificate) -> bool {
     issuer_serial.is_none_or(|issuer_serial| {
-        issuer_serial.serial_number == signer.tbs_certificate.serial_number
+        issuer_serial.serial_number == *signer.tbs_certificate().serial_number()
             && matches!(
                 issuer_serial.issuer.as_slice(),
                 [GeneralName::DirectoryName(issuer)]
-                    if names_match(issuer, &signer.tbs_certificate.issuer)
+                    if names_match(issuer, signer.tbs_certificate().issuer())
             )
     })
 }
@@ -826,24 +782,27 @@ fn issuer_serial_matches(issuer_serial: Option<&IssuerSerial>, signer: &Certific
 /// Whether `left` and `right` name the same entity per RFC 5280 section 7.1, with `PrintableString` and `UTF8String` values compared without regard to case or white space runs.
 fn names_match(left: &Name, right: &Name) -> bool {
     left == right
-        || (left.0.len() == right.0.len()
-            && left.0.iter().zip(&right.0).all(|(left_rdn, right_rdn)| {
-                left_rdn.0.len() == right_rdn.0.len()
-                    && left_rdn.0.iter().zip(right_rdn.0.iter()).all(
-                        |(left_attribute, right_attribute)| {
-                            left_attribute.oid == right_attribute.oid
-                                && (left_attribute.value == right_attribute.value
-                                    || matches!(
-                                        (
-                                            directory_text(&left_attribute.value),
-                                            directory_text(&right_attribute.value),
-                                        ),
-                                        (Some(left_text), Some(right_text))
-                                            if folded(left_text).eq(folded(right_text))
-                                    ))
-                        },
-                    )
-            }))
+        || (left.len() == right.len()
+            && left
+                .iter_rdn()
+                .zip(right.iter_rdn())
+                .all(|(left_rdn, right_rdn)| {
+                    left_rdn.len() == right_rdn.len()
+                        && left_rdn.iter().zip(right_rdn.iter()).all(
+                            |(left_attribute, right_attribute)| {
+                                left_attribute.oid == right_attribute.oid
+                                    && (left_attribute.value == right_attribute.value
+                                        || matches!(
+                                            (
+                                                directory_text(&left_attribute.value),
+                                                directory_text(&right_attribute.value),
+                                            ),
+                                            (Some(left_text), Some(right_text))
+                                                if folded(left_text).eq(folded(right_text))
+                                        ))
+                            },
+                        )
+                }))
 }
 
 /// The text of a `PrintableString` or `UTF8String` attribute value.
@@ -976,8 +935,9 @@ fn verify_chain(
     let intermediates: Vec<CertificateDer<'_>> = cms_certs
         .iter()
         .filter(|certificate| {
-            !(certificate.tbs_certificate.issuer == leaf.tbs_certificate.issuer
-                && certificate.tbs_certificate.serial_number == leaf.tbs_certificate.serial_number)
+            !(certificate.tbs_certificate().issuer() == leaf.tbs_certificate().issuer()
+                && certificate.tbs_certificate().serial_number()
+                    == leaf.tbs_certificate().serial_number())
         })
         .map(Certificate::to_der)
         .collect::<Result<Vec<Vec<u8>>, _>>()
@@ -1027,8 +987,8 @@ fn verify_chain(
         .iter()
         .find(|certificate| {
             certificate
-                .tbs_certificate
-                .subject_public_key_info
+                .tbs_certificate()
+                .subject_public_key_info()
                 .to_der()
                 .ok()
                 .as_deref()
@@ -1048,7 +1008,7 @@ fn issuers_may_sign_certificates(path: &VerifiedPath<'_>) -> Result<(), WebpkiEr
     for certificate in path.intermediate_certificates() {
         let certificate =
             Certificate::from_der(certificate.der().as_ref()).map_err(|_| WebpkiError::BadDer)?;
-        match certificate.tbs_certificate.get::<KeyUsage>() {
+        match certificate.tbs_certificate().get_extension::<KeyUsage>() {
             Ok(None) => {}
             Ok(Some((_, key_usage))) if key_usage.key_cert_sign() => {}
             _ => return Err(WebpkiError::EndEntityUsedAsCa),
