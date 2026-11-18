@@ -12,7 +12,7 @@
 mod support;
 
 use fatturapa::generated::fpr12 as g;
-use fatturapa::ids::{Natura, Provincia, RegimeFiscale, RiferimentoNormativo};
+use fatturapa::ids::{BolloExemption, Natura, Provincia, RegimeFiscale, RiferimentoNormativo};
 use fatturapa::invoice::{
     BuildError, Invoice, InvoiceCurrency, Line, Recipient, Sconto, SelfInvoice, VatTreatment,
 };
@@ -207,7 +207,6 @@ fn stamp_duty_applies_strictly_above_the_threshold() {
                 .build()
                 .expect("the line builds"),
         )
-        .bollo(true)
         .progressivo("00001")
         .date("2026-11-04")
         .numero("00021")
@@ -620,9 +619,8 @@ fn us_dollars() -> InvoiceCurrency {
     }
 }
 
-/// Builds a domestic invoice of `lines` in `currency`, with the stamp duty
-/// requested when `bollo` is set.
-fn domestic(lines: Vec<Line>, currency: InvoiceCurrency, bollo: bool) -> FatturaElettronica {
+/// Builds a domestic invoice of `lines` in `currency`.
+fn domestic(lines: Vec<Line>, currency: InvoiceCurrency) -> FatturaElettronica {
     let mut lines = lines.into_iter();
     let first = lines.next().expect("at least one line");
     Invoice::domestic(&support::seller(), &support::buyer(), code(), first)
@@ -631,7 +629,6 @@ fn domestic(lines: Vec<Line>, currency: InvoiceCurrency, bollo: bool) -> Fattura
         .numero("00030")
         .lines(lines.collect::<Vec<_>>())
         .currency(currency)
-        .bollo(bollo)
         .build()
         .expect("the invoice passes every check")
 }
@@ -643,7 +640,6 @@ fn eight_decimal_price_times_quantity_validates_against_the_schema() {
     let doc = domestic(
         vec![taxed_line("SERVIZIO", "0.12345678", "1.50", "22.00")],
         InvoiceCurrency::Eur,
-        false,
     );
     let bytes = doc.to_xml_vec().expect("the invoice serialises");
     support::validate(&support::fpr12_schema(), &bytes)
@@ -657,7 +653,6 @@ fn integer_foreign_price_validates_against_the_schema() {
     let doc = domestic(
         vec![taxed_line("SERVIZIO IN DOLLARI", "150", "1.00", "22.00")],
         us_dollars(),
-        false,
     );
     let bytes = doc.to_xml_vec().expect("the invoice serialises");
     support::validate(&support::fpr12_schema(), &bytes)
@@ -671,7 +666,6 @@ fn sub_cent_foreign_unit_price_keeps_the_line_value() {
     let doc = domestic(
         vec![taxed_line("CHIAMATA API", "0.004", "1000000", "22.00")],
         us_dollars(),
-        false,
     );
     let riep = &doc.content.fattura_elettronica_body[0]
         .content
@@ -693,7 +687,6 @@ fn stamp_duty_reads_only_the_amounts_without_vat() {
             taxed_line("SERVIZIO", "25.00", "1.00", "22.00"),
         ],
         InvoiceCurrency::Eur,
-        true,
     );
     // 100.00 exempt and a 30.00 taxed credit with its 6.60 VAT, a total of 63.40.
     let above = domestic(
@@ -702,7 +695,6 @@ fn stamp_duty_reads_only_the_amounts_without_vat() {
             taxed_line("STORNO", "-30.00", "1.00", "22.00"),
         ],
         InvoiceCurrency::Eur,
-        true,
     );
     for (doc, total, due) in [(below, "80.50", false), (above, "63.40", true)] {
         let generali = &doc.content.fattura_elettronica_body[0]
@@ -714,6 +706,41 @@ fn stamp_duty_reads_only_the_amounts_without_vat() {
         assert_eq!(generali.importo_totale_documento, Some(amount(total)));
         assert_eq!(generali.dati_bollo.is_some(), due, "total {total}");
     }
+}
+
+/// A line exempt from the stamp duty by a specific provision writes its
+/// `NB` code in the `AltriDatiGestionali` and leaves out of the stamp duty
+/// its amount, so the invoice writes no `DatiBollo` and passes the checks.
+#[test]
+fn stamp_duty_exempt_line_writes_its_code_and_no_bollo() {
+    let line = Line::builder()
+        .description("PRESTAZIONE ENTE TERZO SETTORE")
+        .quantity("1.00")
+        .unit_price("200.00")
+        .vat(VatTreatment::NotTaxed {
+            natura: Natura::N4,
+            riferimento_normativo: "ART. 10 DPR 633/72"
+                .parse::<RiferimentoNormativo>()
+                .expect("a valid reference"),
+        })
+        .bollo_exemption(BolloExemption::Nb2)
+        .build()
+        .expect("the line builds");
+    let doc = domestic(vec![line], InvoiceCurrency::Eur);
+    let body = &doc.content.fattura_elettronica_body[0].content;
+    let gestionali = &body.dati_beni_servizi.content.dettaglio_linee[0]
+        .content
+        .altri_dati_gestionali;
+    assert_eq!(gestionali.len(), 1);
+    assert_eq!(gestionali[0].content.tipo_dato, "NB2");
+    assert!(
+        body.dati_generali
+            .content
+            .dati_generali_documento
+            .content
+            .dati_bollo
+            .is_none()
+    );
 }
 
 /// A `Data` before 1970-01-01, outside the `DataFatturaType` range, does

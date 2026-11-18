@@ -108,7 +108,6 @@ proptest! {
         scenario in 0u8..4,
         recipient in 0u8..3,
         currency in 0u8..4,
-        bollo in any::<bool>(),
         lines in prop::collection::vec(
             (
                 1u32..=9_999_999,
@@ -168,7 +167,7 @@ proptest! {
                     })
                     .collect::<Vec<_>>();
                 let buyer = support::buyer();
-                let invoice = Invoice::domestic(
+                let doc = Invoice::domestic(
                     &seller,
                     &buyer,
                     recipient,
@@ -178,12 +177,8 @@ proptest! {
                 .progressivo(progressivo)
                 .date(date)
                 .numero(numero)
-                .currency(currency);
-                let doc = if bollo {
-                    invoice.bollo(true).build()
-                } else {
-                    invoice.build()
-                }
+                .currency(currency)
+                .build()
                 .expect("the typed invoice builds");
                 check(&doc);
             }
