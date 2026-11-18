@@ -40,6 +40,7 @@ fn seller() -> Seller {
     Seller::denomination(
         "ALPHA SRL".parse().expect("a valid denomination"),
         "01234567897".parse().expect("a valid partita IVA"),
+        "01234567897".parse().expect("a valid codice fiscale"),
         Address::italian(
             "VIA ROMA 1".parse().expect("a valid address"),
             "00100".parse().expect("a valid CAP"),

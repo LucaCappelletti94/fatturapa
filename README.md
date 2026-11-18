@@ -48,6 +48,7 @@ use iso_currency::Currency;
 let seller = Seller::try_denomination(
     "ALPHA SRL",
     "02222222222",
+    "02222222222",
     Address::try_italian("VIA ROMA 1", "00100", "ROMA", Provincia::Rm)?,
     RegimeFiscale::Rf01,
 )?;

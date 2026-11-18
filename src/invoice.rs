@@ -2515,6 +2515,7 @@ mod tests {
         Seller::denomination(
             "ALPHA SRL".parse().expect("a valid denomination"),
             alpha_piva(),
+            "00012345674".parse().expect("a valid codice fiscale"),
             rome(),
             RegimeFiscale::Rf01,
         )
@@ -2554,6 +2555,7 @@ mod tests {
         Company::denomination(
             "BETA SRL".parse().expect("a valid denomination"),
             beta_piva(),
+            "00076543214".parse().expect("a valid codice fiscale"),
             Address::italian(
                 "VIA MILANO 2".parse().expect("a valid address"),
                 "20100".parse().expect("a valid CAP"),
@@ -3350,7 +3352,13 @@ mod tests {
     #[test]
     fn the_generic_constructors_report_the_failing_value() {
         assert!(matches!(
-            Seller::try_denomination("ALPHA SRL", "00012345675", rome(), RegimeFiscale::Rf01),
+            Seller::try_denomination(
+                "ALPHA SRL",
+                "00012345675",
+                "00012345674",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
             Err(IdError::PartitaIva(..))
         ));
         assert!(matches!(

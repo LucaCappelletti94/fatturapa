@@ -5,6 +5,7 @@ fn main() {
     let supplier = fatturapa::party::Seller::try_denomination(
         "ALPHA SRL",
         "02222222222",
+        "02222222222",
         fatturapa::party::Address::try_italian(
             "VIA ROMA 1",
             "00100",
@@ -17,6 +18,7 @@ fn main() {
     .expect("a valid seller");
     let buyer = fatturapa::party::Company::try_denomination(
         "BETA SRL",
+        "04444444444",
         "04444444444",
         fatturapa::party::Address::try_italian(
             "VIA MILANO 2",

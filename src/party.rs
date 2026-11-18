@@ -500,6 +500,14 @@ impl Party {
             })
     }
 
+    /// The `IdTrasmittente` pair of an Italian party, its codice fiscale,
+    /// which the specification asks of a transmitter established in Italy.
+    fn id_trasmittente(&self) -> Option<(String, String)> {
+        self.identity
+            .codice_fiscale()
+            .map(|codice_fiscale| ("IT".to_string(), codice_fiscale.to_string()))
+    }
+
     /// The `CedentePrestatore` element with its `RegimeFiscale`.
     pub(crate) fn cedente(&self, regime: RegimeFiscale) -> Option<CedentePrestatoreType> {
         let id_fiscale_iva = self.id_fiscale_iva()?;
@@ -558,11 +566,14 @@ pub struct Seller {
 
 impl Seller {
     /// An Italian company seller, its `Denominazione`, `partita IVA`,
-    /// seat and `RegimeFiscale`.
+    /// codice fiscale, seat and `RegimeFiscale`. The codice fiscale is
+    /// the numeric one, which differs from the `partita IVA` for a company
+    /// that held it before the `partita IVA` was assigned.
     #[must_use]
     pub const fn denomination(
         denominazione: Denomination,
         partita_iva: PartitaIva,
+        codice_fiscale: CodiceFiscale,
         address: Address,
         regime: RegimeFiscale,
     ) -> Self {
@@ -571,7 +582,7 @@ impl Seller {
                 name: Name::Denomination(denominazione),
                 identity: TaxIdentity::Italian {
                     partita_iva: Some(partita_iva),
-                    codice_fiscale: None,
+                    codice_fiscale: Some(codice_fiscale),
                 },
                 address,
             },
@@ -584,9 +595,10 @@ impl Seller {
     /// # Errors
     ///
     /// Returns `Err` with the first conversion error of the arguments.
-    pub fn try_denomination<D, P, R>(
+    pub fn try_denomination<D, P, C, R>(
         denominazione: D,
         partita_iva: P,
+        codice_fiscale: C,
         address: Address,
         regime: R,
     ) -> Result<Self, IdError>
@@ -595,12 +607,15 @@ impl Seller {
         <Denomination as TryFrom<D>>::Error: Into<IdError>,
         PartitaIva: TryFrom<P>,
         <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
         RegimeFiscale: TryFrom<R>,
         <RegimeFiscale as TryFrom<R>>::Error: Into<IdError>,
     {
         Ok(Self::denomination(
             Denomination::try_from(denominazione).map_err(Into::into)?,
             PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            CodiceFiscale::try_from(codice_fiscale).map_err(Into::into)?,
             address,
             RegimeFiscale::try_from(regime).map_err(Into::into)?,
         ))
@@ -690,18 +705,17 @@ impl Seller {
             .expect("the seller carries its IdFiscaleIVA")
     }
 
-    /// The `IdTrasmittente` pair of the seller, which transmits the
-    /// ordinary invoices it sells.
+    /// The `IdTrasmittente` pair of the seller, its codice fiscale, which
+    /// transmits the ordinary invoices it sells.
     #[must_use]
     #[expect(
         clippy::expect_used,
-        reason = "the seller carries its partita IVA by construction"
+        reason = "the seller carries its codice fiscale by construction"
     )]
     pub(crate) fn id_trasmittente(&self) -> (String, String) {
         self.party
-            .identity()
-            .id_fiscale_iva()
-            .expect("the seller carries its IdFiscaleIVA")
+            .id_trasmittente()
+            .expect("the seller carries its codice fiscale")
     }
 }
 
@@ -1010,11 +1024,15 @@ pub struct Company {
 }
 
 impl Company {
-    /// An Italian company, its `Denominazione`, `partita IVA` and seat.
+    /// An Italian company, its `Denominazione`, `partita IVA`, codice
+    /// fiscale and seat. The codice fiscale is the numeric one, which
+    /// differs from the `partita IVA` for a company that held it before the
+    /// `partita IVA` was assigned.
     #[must_use]
     pub const fn denomination(
         denominazione: Denomination,
         partita_iva: PartitaIva,
+        codice_fiscale: CodiceFiscale,
         address: Address,
     ) -> Self {
         Self {
@@ -1022,7 +1040,7 @@ impl Company {
                 name: Name::Denomination(denominazione),
                 identity: TaxIdentity::Italian {
                     partita_iva: Some(partita_iva),
-                    codice_fiscale: None,
+                    codice_fiscale: Some(codice_fiscale),
                 },
                 address,
             },
@@ -1056,9 +1074,10 @@ impl Company {
     /// # Errors
     ///
     /// Returns `Err` with the first conversion error of the arguments.
-    pub fn try_denomination<D, P>(
+    pub fn try_denomination<D, P, C>(
         denominazione: D,
         partita_iva: P,
+        codice_fiscale: C,
         address: Address,
     ) -> Result<Self, IdError>
     where
@@ -1066,10 +1085,13 @@ impl Company {
         <Denomination as TryFrom<D>>::Error: Into<IdError>,
         PartitaIva: TryFrom<P>,
         <PartitaIva as TryFrom<P>>::Error: Into<IdError>,
+        CodiceFiscale: TryFrom<C>,
+        <CodiceFiscale as TryFrom<C>>::Error: Into<IdError>,
     {
         Ok(Self::denomination(
             Denomination::try_from(denominazione).map_err(Into::into)?,
             PartitaIva::try_from(partita_iva).map_err(Into::into)?,
+            CodiceFiscale::try_from(codice_fiscale).map_err(Into::into)?,
             address,
         ))
     }
@@ -1110,18 +1132,17 @@ impl Company {
         &self.party
     }
 
-    /// The `IdTrasmittente` pair of the company, which transmits the
-    /// self-invoices it integrates as the Italian buyer.
+    /// The `IdTrasmittente` pair of the company, its codice fiscale, which
+    /// transmits the self-invoices it integrates as the Italian buyer.
     #[must_use]
     #[expect(
         clippy::expect_used,
-        reason = "the company carries its partita IVA by construction"
+        reason = "the company carries its codice fiscale by construction"
     )]
     pub(crate) fn id_trasmittente(&self) -> (String, String) {
         self.party
-            .identity()
-            .id_fiscale_iva()
-            .expect("the company carries its IdFiscaleIVA")
+            .id_trasmittente()
+            .expect("the company carries its codice fiscale")
     }
 }
 
@@ -1284,11 +1305,14 @@ impl<'de> serde::Deserialize<'de> for Seller {
         }
         let Raw { party, regime } = Raw::deserialize(deserializer)?;
         let identity = party.identity();
-        if identity.is_italian() && identity.has_partita_iva() {
+        if identity.is_italian()
+            && identity.has_partita_iva()
+            && identity.codice_fiscale().is_some()
+        {
             Ok(Self { party, regime })
         } else {
             Err(serde::de::Error::custom(
-                "the seller must be an Italian party with its partita IVA",
+                "the seller must be an Italian party with its partita IVA and codice fiscale",
             ))
         }
     }
@@ -1351,11 +1375,14 @@ impl<'de> serde::Deserialize<'de> for Company {
         }
         let Raw { party } = Raw::deserialize(deserializer)?;
         let identity = party.identity();
-        if identity.is_italian() && identity.has_partita_iva() {
+        if identity.is_italian()
+            && identity.has_partita_iva()
+            && identity.codice_fiscale().is_some()
+        {
             Ok(Self { party })
         } else {
             Err(serde::de::Error::custom(
-                "the company must be an Italian party with its partita IVA",
+                "the company must be an Italian party with its partita IVA and codice fiscale",
             ))
         }
     }
@@ -1393,15 +1420,41 @@ mod tests {
         )
     }
 
+    /// A synthetic numeric codice fiscale of a company that held it before
+    /// its `partita IVA` was assigned, so the two differ.
+    fn numeric_codice_fiscale() -> CodiceFiscale {
+        "00076543214"
+            .parse()
+            .expect("a synthetic valid numeric codice fiscale")
+    }
+
+    /// The company seller writes its `partita IVA` in the `IdFiscaleIVA`
+    /// and its own codice fiscale in the `CodiceFiscale` and in the
+    /// `IdTrasmittente`, as the specification asks of a transmitter
+    /// established in Italy.
     #[test]
     fn seller_fills_the_header_elements() {
         let seller = Seller::denomination(
             "ALPHA SRL".parse().expect("a valid denomination"),
             alpha_piva(),
+            numeric_codice_fiscale(),
             rome(),
             RegimeFiscale::Rf01,
         );
+        assert_eq!(
+            seller.id_trasmittente(),
+            ("IT".to_string(), "00076543214".to_string())
+        );
         let cedente = seller.cedente();
+        assert_eq!(
+            cedente
+                .content
+                .dati_anagrafici
+                .content
+                .codice_fiscale
+                .as_deref(),
+            Some("00076543214")
+        );
         assert_eq!(
             cedente
                 .content
@@ -1431,6 +1484,24 @@ mod tests {
         assert_eq!(
             cedente.content.sede.content.provincia.as_deref(),
             Some("RM")
+        );
+    }
+
+    /// The sole-trader seller transmits under its personal codice fiscale,
+    /// never its `partita IVA`.
+    #[test]
+    fn the_sole_trader_transmits_under_the_codice_fiscale() {
+        let seller = Seller::sole_trader(
+            "Mario".parse().expect("a valid name"),
+            "Rossi".parse().expect("a valid name"),
+            alpha_piva(),
+            codice_fiscale(),
+            rome(),
+            RegimeFiscale::Rf01,
+        );
+        assert_eq!(
+            seller.id_trasmittente(),
+            ("IT".to_string(), "MRALNE80E05H501C".to_string())
         );
     }
 
@@ -1509,6 +1580,9 @@ mod tests {
         let company = Company::denomination(
             "BETA SRL".parse().expect("a valid denomination"),
             beta_piva(),
+            "00012345674"
+                .parse()
+                .expect("a synthetic valid numeric codice fiscale"),
             Address::italian(
                 "VIA MILANO 2".parse().expect("a valid address"),
                 "20100".parse().expect("a valid CAP"),
@@ -1517,7 +1591,20 @@ mod tests {
             ),
         );
         assert!(company.party().identity().has_partita_iva());
+        assert_eq!(
+            company.id_trasmittente(),
+            ("IT".to_string(), "00012345674".to_string())
+        );
         let cessionario = company.party().cessionario();
+        assert_eq!(
+            cessionario
+                .content
+                .dati_anagrafici
+                .content
+                .codice_fiscale
+                .as_deref(),
+            Some("00012345674")
+        );
         assert_eq!(
             cessionario
                 .content
@@ -1678,11 +1765,12 @@ mod tests {
             .expect("the seat is valid"),
         );
         assert_eq!(
-            Seller::try_denomination("ALPHA SRL", "00012345674", rome(), "RF01")
+            Seller::try_denomination("ALPHA SRL", "00012345674", "00012345674", rome(), "RF01")
                 .expect("the seller is valid"),
             Seller::denomination(
                 "ALPHA SRL".parse().expect("a valid denomination"),
                 alpha_piva(),
+                "00012345674".parse().expect("a valid codice fiscale"),
                 rome(),
                 RegimeFiscale::Rf01
             ),
@@ -1756,10 +1844,12 @@ mod tests {
             ),
         );
         assert_eq!(
-            Company::try_denomination("BETA SRL", "00076543214", rome()).expect("valid"),
+            Company::try_denomination("BETA SRL", "00076543214", "00076543214", rome())
+                .expect("valid"),
             Company::denomination(
                 "BETA SRL".parse().expect("a valid denomination"),
                 beta_piva(),
+                numeric_codice_fiscale(),
                 rome(),
             ),
         );
@@ -1834,15 +1924,37 @@ mod tests {
             Err(IdError::Comune(..))
         ));
         assert!(matches!(
-            Seller::try_denomination("A".repeat(81), "00012345674", rome(), RegimeFiscale::Rf01),
+            Seller::try_denomination(
+                "A".repeat(81),
+                "00012345674",
+                "00012345674",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
             Err(IdError::Denomination(..))
         ));
         assert!(matches!(
-            Seller::try_denomination("ALPHA SRL", "00012345675", rome(), RegimeFiscale::Rf01),
+            Seller::try_denomination(
+                "ALPHA SRL",
+                "00012345675",
+                "00012345674",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
             Err(IdError::PartitaIva(..))
         ));
         assert!(matches!(
-            Seller::try_denomination("ALPHA SRL", "00012345674", rome(), "RX99"),
+            Seller::try_denomination(
+                "ALPHA SRL",
+                "00012345674",
+                "00012345675",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
+            Err(IdError::CodiceFiscale(..))
+        ));
+        assert!(matches!(
+            Seller::try_denomination("ALPHA SRL", "00012345674", "00012345674", rome(), "RX99"),
             Err(IdError::RegimeFiscale(..))
         ));
         assert!(matches!(
@@ -1965,12 +2077,16 @@ mod tests {
             Err(IdError::ForeignTaxId(..))
         ));
         assert!(matches!(
-            Company::try_denomination("A".repeat(81), "00076543214", rome()),
+            Company::try_denomination("A".repeat(81), "00076543214", "00076543214", rome()),
             Err(IdError::Denomination(..))
         ));
         assert!(matches!(
-            Company::try_denomination("BETA SRL", "00076543215", rome()),
+            Company::try_denomination("BETA SRL", "00076543215", "00076543214", rome()),
             Err(IdError::PartitaIva(..))
+        ));
+        assert!(matches!(
+            Company::try_denomination("BETA SRL", "00076543214", "00076543215", rome()),
+            Err(IdError::CodiceFiscale(..))
         ));
         assert!(matches!(
             Company::try_sole_trader(

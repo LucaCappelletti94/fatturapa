@@ -5,6 +5,7 @@ fn main() {
     let seller = fatturapa::party::Seller::try_denomination(
         "ALPHA SRL",
         "02222222222",
+        "02222222222",
         fatturapa::party::Address::try_italian(
             "VIA ROMA 1",
             "00100",

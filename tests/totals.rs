@@ -492,9 +492,9 @@ fn sole_trader_parties_fill_the_header() {
 }
 
 /// A `TD17` self-invoice whose Italian buyer is a sole trader with its
-/// `partita IVA`: the buyer transmits the document, the foreign supplier
-/// carries the `RF01` regime, and the two roles convert into the
-/// `Party` they carry.
+/// `partita IVA`: the buyer transmits the document under its codice
+/// fiscale, the foreign supplier carries the `RF01` regime, and the two
+/// roles convert into the `Party` they carry.
 #[test]
 fn td17_self_invoice_with_a_sole_trader_buyer() {
     let company = Company::sole_trader(
@@ -539,7 +539,7 @@ fn td17_self_invoice_with_a_sole_trader_buyer() {
     assert_eq!(trasmissione.id_trasmittente.content.id_paese, "IT");
     assert_eq!(
         trasmissione.id_trasmittente.content.id_codice,
-        "04444444444"
+        "RSSMRA80A01H501U"
     );
     let cedente = &header.cedente_prestatore.content.dati_anagrafici.content;
     assert_eq!(cedente.regime_fiscale, g::RegimeFiscaleType::Rf01);
