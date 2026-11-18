@@ -42,7 +42,8 @@
         </Anagrafica>
       </DatiAnagrafici>
       <Sede>
-        <Indirizzo>FIFTH AVENUE 1 10001</Indirizzo>
+        <Indirizzo>FIFTH AVENUE 10001</Indirizzo>
+        <NumeroCivico>1</NumeroCivico>
         <CAP>00000</CAP>
         <Comune>NEW YORK</Comune>
         <Nazione>US</Nazione>
