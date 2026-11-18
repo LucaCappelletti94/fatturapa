@@ -9,7 +9,8 @@ use std::fs;
 
 use der::DecodePem;
 use fatturapa::signed::{
-    ChainError, ReferenceTarget, SignedError, VerifiedSignature, verify_xades,
+    ChainError, ReferenceTarget, SignatureDefect, SignatureElement, SignedError, VerifiedSignature,
+    verify_xades,
 };
 use fatturapa::{Document, FatturaElettronica};
 use jiff::{SignedDuration, Timestamp};
@@ -154,6 +155,36 @@ fn every_negative_case_fails_with_its_error() {
         ("issuer-serial-mismatch", |error| {
             matches!(error, SignedError::SigningCertificateMismatch)
         }),
+        ("key-info-two-certificates", |error| {
+            matches!(
+                error,
+                SignedError::MalformedSignature(SignatureDefect::Repeated(
+                    SignatureElement::X509Certificate
+                ))
+            )
+        }),
+        ("issuer-serial-v2-not-der", |error| {
+            matches!(
+                error,
+                SignedError::MalformedSignature(SignatureDefect::NotDer(
+                    SignatureElement::IssuerSerialV2
+                ))
+            )
+        }),
+        (
+            "critical-extension-signer",
+            |error| matches!(error, SignedError::UnsupportedAlgorithm(what) if what == "the signer certificate"),
+        ),
+        (
+            "ed25519-key-rsa-method",
+            |error| matches!(error, SignedError::UnsupportedAlgorithm(uri) if uri.ends_with("#rsa-sha256")),
+        ),
+        ("no-signing-time", |error| {
+            matches!(error, SignedError::MissingSigningTime)
+        }),
+        ("no-signed-signature-properties", |error| {
+            matches!(error, SignedError::MissingSigningTime)
+        }),
     ];
     for (name, expected) in cases {
         match verify_fixture(name) {
@@ -161,6 +192,170 @@ fn every_negative_case_fails_with_its_error() {
             outcome => panic!("{name}: {outcome:?}"),
         }
     }
+}
+
+/// A signature without `xades:SigningTime` is checked at the time the
+/// caller supplies, which the verified signature reports.
+#[test]
+fn a_supplied_time_stands_in_for_a_missing_signing_time() {
+    let anchors = [cert("ca"), cert("intermediate")];
+    for name in ["no-signing-time", "no-signed-signature-properties"] {
+        let input = read(&format!("tests/fixtures/xades/{name}.xml"));
+        let outcome = verify_xades(&input, &anchors, Some(fixture_signing_time()));
+        assert!(
+            matches!(&outcome, Ok(verified) if verified.signing_time() == &fixture_signing_time()),
+            "{name}: {outcome:?}"
+        );
+    }
+}
+
+/// The digest error names the reference whose content changed.
+#[test]
+fn a_digest_error_names_its_reference() {
+    for (name, message) in [
+        (
+            "invoice-changed",
+            "the digest of the document does not match the signed digest",
+        ),
+        (
+            "properties-changed",
+            "the digest of #SignedProperties1 does not match the signed digest",
+        ),
+    ] {
+        let error = verify_fixture(name).expect_err("the content changed after signing");
+        assert_eq!(error.to_string(), message, "{name}");
+    }
+}
+
+/// The `tsl-rsa-sha512` fixture with the first `from` replaced by `to`.
+/// Its document reference leaves the signature out, and its references do
+/// not cover `ds:KeyInfo` or `ds:SignedInfo`, so changes there reach the
+/// checks after the digests.
+fn changed_fixture(name: &str, from: &str, to: &str) -> Vec<u8> {
+    let input = String::from_utf8(read(&format!("tests/fixtures/xades/{name}.xml")))
+        .expect("the fixture is UTF-8");
+    assert!(input.contains(from), "{name} carries {from}");
+    input.replacen(from, to, 1).into_bytes()
+}
+
+/// Each structural defect of the unsigned parts of a signature fails with
+/// the defect, and its message names the element.
+#[test]
+fn a_defect_outside_the_signed_content_is_reported() {
+    let certificates_start = "<ds:X509Data><ds:X509Certificate>";
+    let cases = [
+        (
+            changed_fixture(
+                "tsl-rsa-sha512",
+                certificates_start,
+                "<ds:X509Data><ds:X509Certificate>AAAA</ds:X509Certificate></ds:X509Data><ds:X509Data><ds:X509Certificate>",
+            ),
+            "malformed XML signature: the X509Certificate element is not DER",
+        ),
+        (
+            changed_fixture(
+                "tsl-rsa-sha512",
+                "<ds:X509Data>",
+                "<ds:X509Data><ds:X509Certificate>@@</ds:X509Certificate>",
+            ),
+            "malformed XML signature: the X509Certificate element is not base64",
+        ),
+        (
+            changed_fixture(
+                "tsl-rsa-sha512",
+                "</ds:Signature>",
+                r#"<ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"><xades:SignedProperties/></xades:QualifyingProperties></ds:Object></ds:Signature>"#,
+            ),
+            "malformed XML signature: more than one SignedProperties element",
+        ),
+    ];
+    for (input, message) in cases {
+        let error =
+            verify_xades(&input, &[cert("ca")], None).expect_err("the signature is malformed");
+        assert_eq!(error.to_string(), message);
+    }
+    let without_certificates = String::from_utf8(read("tests/fixtures/xades/tsl-rsa-sha512.xml"))
+        .expect("the fixture is UTF-8");
+    let start = without_certificates
+        .find("<ds:X509Data>")
+        .expect("the fixture has X509Data");
+    let end = without_certificates
+        .find("</ds:X509Data>")
+        .expect("the fixture closes X509Data");
+    let mut input = without_certificates;
+    input.replace_range(start..end + "</ds:X509Data>".len(), "");
+    let outcome = verify_xades(input.as_bytes(), &[cert("ca")], None);
+    assert!(
+        matches!(
+            outcome,
+            Err(SignedError::MalformedSignature(SignatureDefect::Missing(
+                SignatureElement::X509Certificate
+            )))
+        ),
+        "{outcome:?}"
+    );
+}
+
+/// An algorithm of `ds:SignedInfo` the verifier does not support, or a
+/// signature method that does not fit the signer key, is refused.
+#[test]
+fn signed_info_algorithms_the_verifier_does_not_support_are_refused() {
+    let rsa_sha256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    let cases = [
+        (
+            changed_fixture(
+                "tsl-rsa-sha512",
+                r#"<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>"#,
+                r#"<ds:CanonicalizationMethod Algorithm="urn:unknown"/>"#,
+            ),
+            "urn:unknown",
+        ),
+        (
+            changed_fixture(
+                "inclusive-ec",
+                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+                rsa_sha256,
+            ),
+            rsa_sha256,
+        ),
+    ];
+    for (input, algorithm) in cases {
+        let outcome = verify_xades(&input, &[cert("ca")], None);
+        assert!(
+            matches!(&outcome, Err(SignedError::UnsupportedAlgorithm(uri)) if uri == algorithm),
+            "{algorithm}: {outcome:?}"
+        );
+    }
+}
+
+/// Every `ds:Signature` child of the document element must verify, not only
+/// the first.
+#[test]
+fn a_second_signature_that_does_not_verify_fails_the_document() {
+    let input = changed_fixture(
+        "foreign-signature-element",
+        "</p:FatturaElettronica>",
+        r#"<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"/></p:FatturaElettronica>"#,
+    );
+    let outcome = verify_xades(&input, &[cert("intermediate")], None);
+    assert!(
+        matches!(
+            outcome,
+            Err(SignedError::MalformedSignature(SignatureDefect::Missing(
+                SignatureElement::SignedInfo
+            )))
+        ),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn input_that_is_not_xml_is_refused() {
+    let outcome = verify_xades(b"<r><unclosed></r>", &[], None);
+    assert!(
+        matches!(outcome, Err(SignedError::NotXml(_))),
+        "{outcome:?}"
+    );
 }
 
 #[test]
@@ -348,12 +543,61 @@ fn transforms_other_than_the_supported_shapes_are_refused() {
                 r#"<ds:Transform Algorithm="{exclusive}"><ec:Other xmlns:ec="{exclusive}"/></ds:Transform>"#
             ),
         ),
+        (
+            enveloped,
+            format!(
+                r#"<ds:Transform Algorithm="{exclusive}"/><ds:Transform Algorithm="{enveloped}"/>"#
+            ),
+        ),
     ];
-    for (algorithm, transforms) in cases {
+    let subtracted = [
+        "/descendant::Signature",
+        "/descendant::xml:Signature",
+        "/descendant::z:Signature",
+    ]
+    .map(|xpath| {
+        (
+            FILTER2,
+            format!(
+                r#"<ds:Transform Algorithm="{FILTER2}"><XPath xmlns="{FILTER2}" Filter="subtract">{xpath}</XPath></ds:Transform>"#
+            ),
+        )
+    });
+    for (algorithm, transforms) in cases.into_iter().chain(subtracted) {
         let outcome = verify_xades(&reference_document("", &transforms), &[], None);
         assert!(
             matches!(&outcome, Err(SignedError::UnsupportedTransform(uri)) if uri == algorithm),
             "{transforms}: {outcome:?}"
         );
+    }
+}
+
+/// A reference the verifier cannot read fails before any digest.
+#[test]
+fn a_reference_that_cannot_be_read_is_reported() {
+    let digest_value = String::from_utf8(reference_document("", ""))
+        .expect("the document is UTF-8")
+        .replace("AAAA", "@@");
+    let cases = [
+        (
+            reference_document("", "</ds:Transforms><ds:Transforms>"),
+            "malformed XML signature: more than one Transforms element",
+        ),
+        (
+            digest_value.into_bytes(),
+            "malformed XML signature: the DigestValue element is not base64",
+        ),
+        (
+            br#"<r><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo/></ds:Signature></r>"#.to_vec(),
+            "malformed XML signature: no Reference element",
+        ),
+        (
+            reference_document("#missing", ""),
+            "no element has the referenced id missing",
+        ),
+    ];
+    for (input, message) in cases {
+        let error = verify_xades(&input, &[], None).expect_err("the reference cannot be read");
+        assert_eq!(error.to_string(), message);
     }
 }

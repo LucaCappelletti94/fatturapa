@@ -60,6 +60,16 @@ pub(crate) enum Node {
     },
 }
 
+impl Node {
+    /// The element, when the node is one.
+    const fn as_element(&self) -> Option<&Element> {
+        match self {
+            Self::Element(element) => Some(element),
+            _ => None,
+        }
+    }
+}
+
 /// An element of a [`Tree`].
 #[derive(Debug)]
 pub(crate) struct Element {
@@ -169,10 +179,7 @@ impl Tree {
 
     /// The element `id`, when the node is one.
     pub(crate) fn element(&self, id: NodeId) -> Option<&Element> {
-        match self.nodes.get(id) {
-            Some(Node::Element(element)) => Some(element),
-            _ => None,
-        }
+        self.nodes.get(id).and_then(Node::as_element)
     }
 
     /// The parent element of `id`.
@@ -180,15 +187,18 @@ impl Tree {
         self.parents.get(id).copied().flatten()
     }
 
+    /// The element `id` and its ancestors, innermost first.
+    fn lineage(&self, id: NodeId) -> impl Iterator<Item = &Element> {
+        std::iter::successors(Some(id), |&node| self.parent(node))
+            .filter_map(|node| self.element(node))
+    }
+
     /// Every element with its id, in document order.
     pub(crate) fn elements(&self) -> impl Iterator<Item = (NodeId, &Element)> {
         self.nodes
             .iter()
             .enumerate()
-            .filter_map(|(id, node)| match node {
-                Node::Element(element) => Some((id, element)),
-                _ => None,
-            })
+            .filter_map(|(id, node)| node.as_element().map(|element| (id, element)))
     }
 
     /// The child elements of the element `id` with their ids, in document
@@ -217,37 +227,25 @@ impl Tree {
         if prefix == "xml" {
             return Some(XML_NAMESPACE);
         }
-        let mut current = Some(id);
-        while let Some(node) = current {
-            if let Some(element) = self.element(node)
-                && let Some((_, uri)) = element
+        self.lineage(id)
+            .find_map(|element| {
+                element
                     .declarations
                     .iter()
                     .rev()
                     .find(|(declared, _)| declared == prefix)
-            {
-                return (!uri.is_empty()).then_some(uri.as_str());
-            }
-            current = self.parent(node);
-        }
-        None
+            })
+            .and_then(|(_, uri)| (!uri.is_empty()).then_some(uri.as_str()))
     }
 
     /// The namespaces in scope at the element `id`, by prefix, the default
     /// namespace under the empty prefix with an empty value when undeclared.
     fn in_scope(&self, id: NodeId) -> BTreeMap<&str, &str> {
-        let mut chain = Vec::new();
-        let mut current = Some(id);
-        while let Some(node) = current {
-            chain.push(node);
-            current = self.parent(node);
-        }
+        let lineage: Vec<&Element> = self.lineage(id).collect();
         let mut scope = BTreeMap::new();
-        for node in chain.into_iter().rev() {
-            if let Some(element) = self.element(node) {
-                for (prefix, uri) in &element.declarations {
-                    scope.insert(prefix.as_str(), uri.as_str());
-                }
+        for element in lineage.into_iter().rev() {
+            for (prefix, uri) in &element.declarations {
+                scope.insert(prefix.as_str(), uri.as_str());
             }
         }
         scope
@@ -318,13 +316,9 @@ impl Builder {
         let parent = self.open.last().copied();
         self.nodes.push(node);
         self.parents.push(parent);
-        match parent {
-            Some(parent) => {
-                if let Some(Node::Element(element)) = self.nodes.get_mut(parent) {
-                    element.children.push(id);
-                }
-            }
-            None => self.top.push(id),
+        match parent.and_then(|parent| self.nodes.get_mut(parent)) {
+            Some(Node::Element(element)) => element.children.push(id),
+            _ => self.top.push(id),
         }
         id
     }
@@ -336,10 +330,11 @@ impl Builder {
         let Some(&parent) = self.open.last() else {
             return;
         };
-        let last = match self.nodes.get(parent) {
-            Some(Node::Element(element)) => element.children.last().copied(),
-            _ => None,
-        };
+        let last = self
+            .nodes
+            .get(parent)
+            .and_then(Node::as_element)
+            .and_then(|element| element.children.last().copied());
         if let Some(last) = last
             && let Some(Node::Text(existing)) = self.nodes.get_mut(last)
         {
@@ -424,18 +419,16 @@ impl Builder {
             .find(|(declared, _)| declared == wanted)
             .map(|(_, uri)| uri.as_str());
         let inherited = || {
-            self.open
-                .iter()
-                .rev()
-                .find_map(|&open| match self.nodes.get(open) {
-                    Some(Node::Element(element)) => element
-                        .declarations
-                        .iter()
-                        .rev()
-                        .find(|(declared, _)| declared == wanted)
-                        .map(|(_, uri)| uri.as_str()),
-                    _ => None,
-                })
+            self.open.iter().rev().find_map(|&open| {
+                self.nodes
+                    .get(open)
+                    .and_then(Node::as_element)?
+                    .declarations
+                    .iter()
+                    .rev()
+                    .find(|(declared, _)| declared == wanted)
+                    .map(|(_, uri)| uri.as_str())
+            })
         };
         match own.or_else(inherited) {
             Some(uri) if !uri.is_empty() || wanted.is_empty() => Ok(uri.to_owned()),
@@ -545,11 +538,11 @@ pub(crate) fn canonicalize(
 }
 
 /// A step of the iterative walk of a subtree.
-enum Step {
+enum Step<'t> {
     /// Write the node and, for an element, its start tag and children.
-    Enter(NodeId),
-    /// Write the end tag of the element.
-    Leave(NodeId),
+    Enter(NodeId, &'t Node),
+    /// Write the end tag of the element with this name.
+    Leave(&'t str),
 }
 
 /// The namespace context an open element hands to its children.
@@ -583,49 +576,23 @@ impl<'t> Writer<'t> {
             if id == tree.root {
                 self.subtree(id, false);
                 before = false;
-                continue;
-            }
-            if !self.writes(id) {
-                continue;
-            }
-            if !before {
-                self.out.push('\n');
-            }
-            self.leaf(id);
-            if before {
-                self.out.push('\n');
-            }
-        }
-    }
-
-    /// Whether the node `id` is written at all.
-    fn writes(&self, id: NodeId) -> bool {
-        match self.tree.nodes.get(id) {
-            Some(Node::Comment(_)) => self.algorithm.comments,
-            Some(_) => !self.excluded.contains(&id),
-            None => false,
-        }
-    }
-
-    /// Writes a text, comment or processing instruction node.
-    fn leaf(&mut self, id: NodeId) {
-        match self.tree.nodes.get(id) {
-            Some(Node::Text(text)) => escape_text(&mut self.out, text),
-            Some(Node::Comment(comment)) => {
-                self.out.push_str("<!--");
-                self.out.push_str(comment);
-                self.out.push_str("-->");
-            }
-            Some(Node::Instruction { target, data }) => {
-                self.out.push_str("<?");
-                self.out.push_str(target);
-                if !data.is_empty() {
-                    self.out.push(' ');
-                    self.out.push_str(data);
+            } else if tree.nodes.get(id).is_some_and(|node| self.writes(id, node)) {
+                if !before {
+                    self.out.push('\n');
                 }
-                self.out.push_str("?>");
+                self.subtree(id, false);
+                if before {
+                    self.out.push('\n');
+                }
             }
-            Some(Node::Element(_)) | None => {}
+        }
+    }
+
+    /// Whether the node `node` with the id `id` is written at all.
+    fn writes(&self, id: NodeId, node: &Node) -> bool {
+        match node {
+            Node::Comment(_) => self.algorithm.comments,
+            _ => !self.excluded.contains(&id),
         }
     }
 
@@ -634,35 +601,43 @@ impl<'t> Writer<'t> {
     /// under the inclusive algorithm, as a document subset requires.
     fn subtree(&mut self, apex: NodeId, inherit: bool) {
         let tree = self.tree;
-        let mut steps = vec![Step::Enter(apex)];
+        let enter = |id: NodeId| tree.nodes.get(id).map(|node| Step::Enter(id, node));
+        let mut steps: Vec<Step<'t>> = enter(apex).into_iter().collect();
         let mut frames: Vec<Frame<'t>> = Vec::new();
         while let Some(step) = steps.pop() {
             match step {
-                Step::Enter(id) => {
-                    if !self.writes(id) {
-                        continue;
-                    }
-                    let Some(element) = tree.element(id) else {
-                        self.leaf(id);
-                        continue;
-                    };
+                Step::Enter(id, node) if !self.writes(id, node) => {}
+                Step::Enter(id, Node::Element(element)) => {
                     let frame = self.start_tag(id, element, frames.last(), inherit && id == apex);
                     frames.push(frame);
-                    steps.push(Step::Leave(id));
+                    steps.push(Step::Leave(&element.name));
                     steps.extend(
                         element
                             .children
                             .iter()
                             .rev()
-                            .map(|&child| Step::Enter(child)),
+                            .filter_map(|&child| enter(child)),
                     );
                 }
-                Step::Leave(id) => {
-                    if let Some(element) = tree.element(id) {
-                        self.out.push_str("</");
-                        self.out.push_str(&element.name);
-                        self.out.push('>');
+                Step::Enter(_, Node::Text(text)) => escape_text(&mut self.out, text),
+                Step::Enter(_, Node::Comment(comment)) => {
+                    self.out.push_str("<!--");
+                    self.out.push_str(comment);
+                    self.out.push_str("-->");
+                }
+                Step::Enter(_, Node::Instruction { target, data }) => {
+                    self.out.push_str("<?");
+                    self.out.push_str(target);
+                    if !data.is_empty() {
+                        self.out.push(' ');
+                        self.out.push_str(data);
                     }
+                    self.out.push_str("?>");
+                }
+                Step::Leave(name) => {
+                    self.out.push_str("</");
+                    self.out.push_str(name);
+                    self.out.push('>');
                     frames.pop();
                 }
             }
@@ -718,21 +693,16 @@ impl<'t> Writer<'t> {
 
         let mut attributes: Vec<&'t Attribute> = element.attributes.iter().collect();
         if inherit && self.algorithm.method == Method::Inclusive {
-            let mut ancestor = self.tree.parent(id);
-            while let Some(current) = ancestor {
-                if let Some(element) = self.tree.element(current) {
-                    for attribute in &element.attributes {
-                        if attribute.namespace == XML_NAMESPACE
-                            && !attributes.iter().any(|present| {
-                                present.namespace == XML_NAMESPACE
-                                    && present.local == attribute.local
-                            })
-                        {
-                            attributes.push(attribute);
-                        }
+            for ancestor in self.tree.lineage(id).skip(1) {
+                for attribute in &ancestor.attributes {
+                    if attribute.namespace == XML_NAMESPACE
+                        && !attributes.iter().any(|present| {
+                            present.namespace == XML_NAMESPACE && present.local == attribute.local
+                        })
+                    {
+                        attributes.push(attribute);
                     }
                 }
-                ancestor = self.tree.parent(current);
             }
         }
         attributes.sort_by(|left, right| {
@@ -1110,16 +1080,43 @@ mod tests {
     }
 
     #[test]
-    fn an_undeclared_entity_or_prefix_is_malformed() {
+    fn a_document_that_is_not_well_formed_is_malformed() {
         for input in [
             &b"<a>&e;</a>"[..],
             b"<p:a/>",
             b"<a p:x=\"1\"/>",
             b"<r xmlns:p=\"\"><p:a/></r>",
+            b"<a></b>",
+            b"<a>&#xZZ;</a>",
+            b"<a x=\"&e;\"/>",
+            b"<a/><b/>",
+            b"<!-- no element -->",
+            b"<a><b/>",
         ] {
             let error = Tree::parse(input).expect_err("the input is not well-formed");
             assert!(matches!(error, TreeError::Malformed(_)), "{error:?}");
         }
+    }
+
+    /// A declaration of the `xml` prefix binds what is already bound, so no
+    /// algorithm renders it.
+    #[test]
+    fn a_declaration_of_the_xml_prefix_is_not_rendered() {
+        for algorithm in all() {
+            assert_eq!(
+                whole(
+                    br#"<a xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="it"/>"#,
+                    algorithm
+                ),
+                r#"<a xml:lang="it"></a>"#
+            );
+        }
+    }
+
+    #[test]
+    fn the_text_of_an_element_skips_its_comments_and_child_elements() {
+        let tree = Tree::parse(b"<a>x<!--c-->y<b>w</b>z</a>").expect("the test document parses");
+        assert_eq!(tree.text(find(&tree, "a")), "xyz");
     }
 
     #[test]

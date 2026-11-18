@@ -933,11 +933,16 @@ mod tests {
                 signed_info(&tree, signature).expect("the signature has a SignedInfo");
             for reference in references(&tree, signed_info).expect("the SignedInfo has references")
             {
-                match check_reference(&tree, signature, reference) {
-                    Ok(_) => matches.push(true),
-                    Err(SignedError::ReferenceDigestMismatch(_)) => matches.push(false),
-                    Err(error) => panic!("{}: {error}", file.display()),
-                }
+                let outcome = check_reference(&tree, signature, reference);
+                assert!(
+                    matches!(
+                        outcome,
+                        Ok(_) | Err(SignedError::ReferenceDigestMismatch(_))
+                    ),
+                    "{}: {outcome:?}",
+                    file.display()
+                );
+                matches.push(outcome.is_ok());
             }
         }
         matches

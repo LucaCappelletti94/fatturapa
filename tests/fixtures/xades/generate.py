@@ -8,7 +8,7 @@ from pathlib import Path
 from lxml import etree
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding, ec
+from cryptography.hazmat.primitives.asymmetric import padding, ec, ed25519
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 
 REPO = Path(__file__).resolve().parents[3]
@@ -95,15 +95,15 @@ def build(name, *, signer="rsa-signer", method="rsa-sha256", c14n_method=EXC, c1
           props_reference=True, props_transforms=(), keyinfo_reference=False, keyinfo_certs=("signer",),
           signing_certificate=None, cert_digest="sha256", issuer_serial=True, signing_cert_of=None,
           extra_references=(), document_comment=False, mutate=None, doctype=False,
-          foreign_signature=False, serial_offset=0):
+          foreign_signature=False, serial_offset=0, signing_time=True, signed_signature_properties=True,
+          issuer_serial_v2_der=None, signer_pair=None):
     tree = etree.parse(str(INVOICE), etree.XMLParser(remove_blank_text=False))
     root = tree.getroot()
     if foreign_signature:
         etree.SubElement(root, "{urn:other}Signature", nsmap={"o": "urn:other"}).text = "signed content"
     if document_comment:
         root.insert(0, etree.Comment(" a comment the document reference does not digest "))
-    signer_cert = cert(signer)
-    signer_key = key(signer)
+    signer_cert, signer_key = signer_pair or (cert(signer), key(signer))
     certs = {"signer": signer_cert, "intermediate": cert("intermediate"), "outsider": cert("ec-signer")}
 
     signature = etree.SubElement(root, q(DS, "Signature"), nsmap={"ds": DS})
@@ -157,8 +157,9 @@ def build(name, *, signer="rsa-signer", method="rsa-sha256", c14n_method=EXC, c1
     qp = etree.SubElement(obj, q(XADES, "QualifyingProperties"), nsmap={"xades": XADES})
     qp.set("Target", "#Signature1")
     sp = sub(qp, XADES, "SignedProperties", Id="SignedProperties1")
-    ssp = sub(sp, XADES, "SignedSignatureProperties")
-    sub(ssp, XADES, "SigningTime", TIME)
+    ssp = sub(sp, XADES, "SignedSignatureProperties") if signed_signature_properties else None
+    if signing_time and ssp is not None:
+        sub(ssp, XADES, "SigningTime", TIME)
     if signing_certificate:
         referenced = certs[signing_cert_of or "signer"]
         sc = sub(ssp, XADES, "SigningCertificate" if signing_certificate == 1 else "SigningCertificateV2")
@@ -171,7 +172,7 @@ def build(name, *, signer="rsa-signer", method="rsa-sha256", c14n_method=EXC, c1
             sub(isr, DS, "X509IssuerName", ", ".join(rdn.rfc4514_string() for rdn in reversed(referenced.issuer.rdns)))
             sub(isr, DS, "X509SerialNumber", str(referenced.serial_number + serial_offset))
         elif issuer_serial:
-            sub(c, XADES, "IssuerSerialV2", b64(issuer_serial_v2(referenced)))
+            sub(c, XADES, "IssuerSerialV2", b64(issuer_serial_v2_der or issuer_serial_v2(referenced)))
 
     for reference, uri, transforms, digest in references:
         algs = [t for t in transforms if t in (INC, INC_C, EXC, EXC_C)]
@@ -268,3 +269,36 @@ build("foreign-signature-element", foreign_signature=True, keyinfo_reference=Tru
 build("issuer-serial-mismatch", signer="ec-signer", method="ecdsa-sha256", c14n_method=INC,
       doc_transforms=("enveloped", INC), keyinfo_certs=("signer", "intermediate"), signing_certificate=1,
       serial_offset=1)
+build("no-signing-time", signing_time=False, **TSL)
+build("no-signed-signature-properties", signed_signature_properties=False, keyinfo_reference=True)
+build("key-info-two-certificates", keyinfo_reference=True, keyinfo_certs=("signer", "intermediate"))
+build("issuer-serial-v2-not-der", issuer_serial_v2_der=b"\x01\x02", **TSL)
+
+
+def intermediate_issued(common_name, public_key, *extensions):
+    """A certificate for `public_key` issued by the intermediate, with the given critical extensions."""
+    issuer = cert("intermediate")
+    builder = (
+        x509.CertificateBuilder()
+        .subject_name(x509.Name.from_rfc4514_string(f"CN=fatturapa test {common_name},O=fatturapa test,C=IT"))
+        .issuer_name(issuer.subject)
+        .public_key(public_key)
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(issuer.not_valid_before_utc)
+        .not_valid_after(issuer.not_valid_after_utc)
+    )
+    for extension in extensions:
+        builder = builder.add_extension(extension, critical=True)
+    return builder.sign(key("intermediate"), hashes.SHA256())
+
+
+critical_key = ec.generate_private_key(ec.SECP256R1())
+critical_cert = intermediate_issued(
+    "critical extension signer", critical_key.public_key(),
+    x509.UnrecognizedExtension(x509.ObjectIdentifier("1.3.6.1.4.1.99999.1"), b"\x05\x00"))
+build("critical-extension-signer", signer_pair=(critical_cert, critical_key), method="ecdsa-sha256",
+      keyinfo_reference=True)
+# The certificate holds an Ed25519 key while the RSA signer signs, so the
+# rsa-sha256 method does not fit the certified key.
+ed25519_cert = intermediate_issued("ed25519 signer", ed25519.Ed25519PrivateKey.generate().public_key())
+build("ed25519-key-rsa-method", signer_pair=(ed25519_cert, key("rsa-signer")), keyinfo_reference=True)
