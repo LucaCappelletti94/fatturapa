@@ -40,6 +40,7 @@ fn seller() -> Seller {
     Seller::denomination(
         "ALPHA SRL".parse().expect("a valid denomination"),
         "01234567897".parse().expect("a valid partita IVA"),
+        "01234567897".parse().expect("a valid codice fiscale"),
         Address::italian(
             "VIA ROMA 1".parse().expect("a valid address"),
             "00100".parse().expect("a valid CAP"),
@@ -2425,4 +2426,274 @@ fn code_00460_simplified_per_body() {
     let second = first.clone();
     doc.content.fattura_elettronica_body = vec![first, second];
     assert_absent(&validate_simplified(&doc), "00460");
+}
+
+fn header(doc: &mut FatturaElettronica) -> &mut g::FatturaElettronicaHeaderTypeContent {
+    &mut doc.content.fattura_elettronica_header.content
+}
+
+fn document_data(doc: &mut FatturaElettronica) -> &mut g::DatiGeneraliDocumentoTypeContent {
+    &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+}
+
+/// RIFERIMENTO-NORMATIVO: a riepilogo with a `Natura` and no
+/// `RiferimentoNormativo` triggers it, the specification making the
+/// reference mandatory for the operations of the `Natura` element; the
+/// same riepilogo with its reference passes.
+#[test]
+fn riferimento_normativo_missing_with_a_natura() {
+    let mut doc = base();
+    riep(&mut doc).natura = Some(g::NaturaType::N4);
+    riep(&mut doc).riferimento_normativo = None;
+    assert_has(&validate(&doc), "RIFERIMENTO-NORMATIVO");
+
+    riep(&mut doc).riferimento_normativo = Some("ART. 10 DPR 633/72".to_string());
+    assert_absent(&validate(&doc), "RIFERIMENTO-NORMATIVO");
+    assert_absent(&validate(&base()), "RIFERIMENTO-NORMATIVO");
+}
+
+/// RIFERIMENTO-NORMATIVO on the simplified invoice, whose
+/// `DatiBeniServizi` carries the `Natura` and the reference.
+#[test]
+fn riferimento_normativo_missing_with_a_natura_simplified() {
+    let mut doc = doc_simplified();
+    let beni = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content;
+    beni.natura = Some(sg::NaturaType::N4);
+    assert_has(&validate_simplified(&doc), "RIFERIMENTO-NORMATIVO");
+
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content
+        .riferimento_normativo = Some("ART. 10 DPR 633/72".to_string());
+    assert_absent(&validate_simplified(&doc), "RIFERIMENTO-NORMATIVO");
+}
+
+/// CAP-ESTERO and PROVINCIA-ESTERA: a seat abroad with its own postal code
+/// in the `CAP` and a `Provincia` triggers both; the generic `00000` the
+/// Agenzia prescribes and no `Provincia` pass, and an Italian seat keeps
+/// its `CAP` and `Provincia`.
+#[test]
+fn foreign_seat_with_its_postal_code_or_a_provincia() {
+    let mut doc = base();
+    let sede = &mut header(&mut doc)
+        .cessionario_committente
+        .content
+        .sede
+        .content;
+    sede.nazione = "US".to_string();
+    sede.cap = "94720".to_string();
+    sede.provincia = Some("MI".to_string());
+    let violations = validate(&doc);
+    assert_has(&violations, "CAP-ESTERO");
+    assert_has(&violations, "PROVINCIA-ESTERA");
+
+    let sede = &mut header(&mut doc)
+        .cessionario_committente
+        .content
+        .sede
+        .content;
+    sede.cap = "00000".to_string();
+    sede.provincia = None;
+    let violations = validate(&doc);
+    assert_absent(&violations, "CAP-ESTERO");
+    assert_absent(&violations, "PROVINCIA-ESTERA");
+
+    let violations = validate(&base());
+    assert_absent(&violations, "CAP-ESTERO");
+    assert_absent(&violations, "PROVINCIA-ESTERA");
+}
+
+/// CAP-ESTERO and PROVINCIA-ESTERA on the seat of a simplified invoice.
+#[test]
+fn foreign_seat_with_its_postal_code_or_a_provincia_simplified() {
+    let mut doc = doc_simplified();
+    let sede = &mut doc
+        .content
+        .fattura_elettronica_header
+        .content
+        .cedente_prestatore
+        .content
+        .sede
+        .content;
+    sede.nazione = "DE".to_string();
+    sede.cap = "10115".to_string();
+    sede.provincia = Some("RM".to_string());
+    let violations = validate_simplified(&doc);
+    assert_has(&violations, "CAP-ESTERO");
+    assert_has(&violations, "PROVINCIA-ESTERA");
+
+    let violations = validate_simplified(&doc_simplified());
+    assert_absent(&violations, "CAP-ESTERO");
+    assert_absent(&violations, "PROVINCIA-ESTERA");
+}
+
+/// TRASMITTENTE-CF: the seller transmitting under its `partita IVA` while
+/// its `CodiceFiscale` differs triggers it; the codice fiscale as the
+/// `IdCodice` passes, and so does an intermediary transmitting under its
+/// own identifier.
+#[test]
+fn transmitter_identified_by_the_partita_iva() {
+    let mut doc = base();
+    let partita_iva = header(&mut doc)
+        .cedente_prestatore
+        .content
+        .dati_anagrafici
+        .content
+        .id_fiscale_iva
+        .content
+        .id_codice
+        .clone();
+    header(&mut doc)
+        .cedente_prestatore
+        .content
+        .dati_anagrafici
+        .content
+        .codice_fiscale = Some("RSSMRA80A01H501U".to_string());
+    header(&mut doc)
+        .dati_trasmissione
+        .content
+        .id_trasmittente
+        .content
+        .id_codice = partita_iva;
+    assert_has(&validate(&doc), "TRASMITTENTE-CF");
+
+    header(&mut doc)
+        .dati_trasmissione
+        .content
+        .id_trasmittente
+        .content
+        .id_codice = "RSSMRA80A01H501U".to_string();
+    assert_absent(&validate(&doc), "TRASMITTENTE-CF");
+
+    header(&mut doc)
+        .dati_trasmissione
+        .content
+        .id_trasmittente
+        .content
+        .id_codice = "00012345674".to_string();
+    assert_absent(&validate(&doc), "TRASMITTENTE-CF");
+}
+
+/// TRASMITTENTE-CF on the simplified invoice.
+#[test]
+fn transmitter_identified_by_the_partita_iva_simplified() {
+    let mut doc = doc_simplified();
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .cedente_prestatore
+        .content
+        .codice_fiscale = Some("RSSMRA80A01H501U".to_string());
+    assert_has(&validate_simplified(&doc), "TRASMITTENTE-CF");
+
+    doc.content
+        .fattura_elettronica_header
+        .content
+        .dati_trasmissione
+        .content
+        .id_trasmittente = sg_id("IT", "RSSMRA80A01H501U");
+    assert_absent(&validate_simplified(&doc), "TRASMITTENTE-CF");
+}
+
+/// Turns the base line into a 200.00 line of `natura` at the zero rate,
+/// its riepilogo following.
+fn not_taxed(doc: &mut FatturaElettronica, natura: g::NaturaType) {
+    let line = line(doc);
+    line.aliquota_iva = amount("0.00");
+    line.natura = Some(natura.clone());
+    let riep = riep(doc);
+    riep.aliquota_iva = amount("0.00");
+    riep.natura = Some(natura);
+    riep.imposta = amount("0.00");
+    riep.riferimento_normativo = Some("ART. 10 DPR 633/72".to_string());
+}
+
+/// BOLLO: more than 77.47 euros of an operation the Agenzia lists as
+/// subject to the stamp duty, without the `DatiBollo`, triggers it; the
+/// `DatiBollo`, an `NB` exemption on the line, an excluded document type
+/// or regime, a nature outside the list and the threshold itself pass.
+#[test]
+fn stamp_duty_missing() {
+    let mut doc = base();
+    not_taxed(&mut doc, g::NaturaType::N4);
+    assert_has(&validate(&doc), "BOLLO");
+
+    let mut with_bollo = doc.clone();
+    document_data(&mut with_bollo).dati_bollo = Some(g::DatiBolloType {
+        content: g::DatiBolloTypeContent {
+            bollo_virtuale: g::BolloVirtualeType::Si,
+            importo_bollo: Some(amount("2.00")),
+        },
+    });
+    assert_absent(&validate(&with_bollo), "BOLLO");
+
+    let mut exempt = doc.clone();
+    line(&mut exempt)
+        .altri_dati_gestionali
+        .push(g::AltriDatiGestionaliType {
+            content: g::AltriDatiGestionaliTypeContent {
+                tipo_dato: "NB2".to_string(),
+                riferimento_testo: None,
+                riferimento_numero: None,
+                riferimento_data: None,
+            },
+        });
+    assert_absent(&validate(&exempt), "BOLLO");
+
+    let mut integration = doc.clone();
+    document_data(&mut integration).tipo_documento = g::TipoDocumentoType::Td17;
+    assert_absent(&validate(&integration), "BOLLO");
+
+    let mut editoria = doc.clone();
+    header(&mut editoria)
+        .cedente_prestatore
+        .content
+        .dati_anagrafici
+        .content
+        .regime_fiscale = g::RegimeFiscaleType::Rf07;
+    assert_absent(&validate(&editoria), "BOLLO");
+
+    let mut export = base();
+    not_taxed(&mut export, g::NaturaType::N31);
+    assert_absent(&validate(&export), "BOLLO");
+
+    let mut threshold = doc;
+    line(&mut threshold).prezzo_totale = amount("77.47");
+    assert_absent(&validate(&threshold), "BOLLO");
+
+    assert_absent(&validate(&base()), "BOLLO");
+}
+
+/// BOLLO on the simplified invoice, whose `BolloVirtuale` sits in the
+/// `DatiGeneraliDocumento`.
+#[test]
+fn stamp_duty_missing_simplified() {
+    let mut doc = doc_simplified();
+    let beni = &mut doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_beni_servizi[0]
+        .content;
+    beni.natura = Some(sg::NaturaType::N4);
+    beni.riferimento_normativo = Some("ART. 10 DPR 633/72".to_string());
+    beni.dati_iva.content.aliquota = Some(amount("0.00"));
+    beni.dati_iva.content.imposta = Some(amount("0.00"));
+    assert_has(&validate_simplified(&doc), "BOLLO");
+
+    doc.content.fattura_elettronica_body[0]
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content
+        .bollo_virtuale = Some(sg::BolloVirtualeType::Si);
+    assert_absent(&validate_simplified(&doc), "BOLLO");
 }

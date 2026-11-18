@@ -223,6 +223,7 @@ fn domain_types_roundtrip() {
     let seller = Seller::denomination(
         "ACME SPA".parse().unwrap(),
         "02222222222".parse().unwrap(),
+        "02222222222".parse().unwrap(),
         Address::italian(
             "VIA ROMA 1".parse().unwrap(),
             "00100".parse().unwrap(),
@@ -259,6 +260,7 @@ fn domain_types_roundtrip() {
 
     let company = Company::denomination(
         "BETA SPA".parse().unwrap(),
+        "04444444444".parse().unwrap(),
         "04444444444".parse().unwrap(),
         Address::italian(
             "VIA MILANO 2".parse().unwrap(),
@@ -350,6 +352,30 @@ fn deserialization_rejects_invalid_values() {
     .unwrap_err();
     assert!(err.to_string().contains("seller"), "meaningful: {err}");
 
+    // A `seller` and a `company` whose codice fiscale is absent are
+    // rejected, since they transmit under it.
+    let err = serde_json::from_str::<Seller>(
+        r#"{"party":{"name":{"Denomination":"ACME SPA"},
+            "identity":{"Italian":{"partita_iva":"02222222222","codice_fiscale":null}},
+            "address":{"Italian":{"indirizzo":"VIA ROMA 1","cap":"00100","comune":"ROMA","provincia":"RM"}}},
+            "regime":"RF01"}"#,
+    )
+    .unwrap_err();
+    assert!(
+        err.to_string().contains("codice fiscale"),
+        "meaningful: {err}"
+    );
+    let err = serde_json::from_str::<Company>(
+        r#"{"party":{"name":{"Denomination":"BETA SPA"},
+            "identity":{"Italian":{"partita_iva":"04444444444","codice_fiscale":null}},
+            "address":{"Italian":{"indirizzo":"VIA MILANO 2","cap":"20100","comune":"MILANO","provincia":"MI"}}}}"#,
+    )
+    .unwrap_err();
+    assert!(
+        err.to_string().contains("codice fiscale"),
+        "meaningful: {err}"
+    );
+
     // A `business` whose party is `Italian` is rejected.
     let err = serde_json::from_str::<Business>(
         r#"{"party":{"name":{"Denomination":"ACME SPA"},
@@ -412,6 +438,7 @@ fn deserialization_rejects_invalid_values() {
 fn document_from_deserialized_parties_equals_typed() {
     let seller = Seller::denomination(
         "ACME SPA".parse().unwrap(),
+        "02222222222".parse().unwrap(),
         "02222222222".parse().unwrap(),
         Address::italian(
             "VIA ROMA 1".parse().unwrap(),

@@ -224,6 +224,9 @@ pub enum IdError {
     /// `RegimeFiscale` is not one of the codes of the XSD enumeration.
     #[error("not a valid regime fiscale code: {0}")]
     RegimeFiscale(String),
+    /// `BolloExemption` is not one of the `NB1`, `NB2` and `NB3` codes.
+    #[error("not a valid stamp duty exemption code: {0}")]
+    BolloExemption(String),
     /// The `Amount` is not a decimal number.
     #[error("not a valid amount, a decimal number: {0}")]
     Amount(String),
@@ -1957,6 +1960,81 @@ impl From<RegimeFiscale> for String {
     }
 }
 
+/// The stamp duty exemption of a line, written in its `AltriDatiGestionali`.
+///
+/// The line writes the code in the `TipoDato` when a specific provision
+/// takes its operation out of the stamp duty it would otherwise carry, per
+/// the Agenzia guide *L'imposta di bollo sulle fatture elettroniche* of
+/// June 2026.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
+pub enum BolloExemption {
+    /// `NB1`, an insurance document whose stamp duty is absorbed in the
+    /// insurance tax.
+    Nb1,
+    /// `NB2`, a document issued by an entity of the third sector.
+    Nb2,
+    /// `NB3`, a document between the bank and its account holder whose
+    /// stamp duty is absorbed in the one charged on the account statement.
+    Nb3,
+}
+
+impl BolloExemption {
+    /// The codes of the guide, one per variant.
+    pub const ALL: [Self; 3] = [Self::Nb1, Self::Nb2, Self::Nb3];
+
+    /// The code as written in the `TipoDato`.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Nb1 => "NB1",
+            Self::Nb2 => "NB2",
+            Self::Nb3 => "NB3",
+        }
+    }
+}
+
+impl fmt::Display for BolloExemption {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.code())
+    }
+}
+
+impl FromStr for BolloExemption {
+    type Err = IdError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::ALL
+            .iter()
+            .find(|exemption| exemption.code() == s)
+            .copied()
+            .ok_or_else(|| IdError::BolloExemption(s.to_string()))
+    }
+}
+
+impl TryFrom<&str> for BolloExemption {
+    type Error = IdError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Self::from_str(s)
+    }
+}
+
+impl TryFrom<String> for BolloExemption {
+    type Error = IdError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        Self::from_str(&s)
+    }
+}
+
+impl From<BolloExemption> for String {
+    fn from(value: BolloExemption) -> Self {
+        value.to_string()
+    }
+}
+
 impl FromStr for Natura {
     type Err = IdError;
 
@@ -2956,6 +3034,23 @@ mod tests {
             "RF03".parse::<RegimeFiscale>(),
             Err(IdError::RegimeFiscale("RF03".to_string())),
             "RF03 is outside the XSD enumeration"
+        );
+    }
+
+    /// Every `BolloExemption` writes its `NB` code and reads back from it
+    /// through every conversion, and a code outside the guide is refused.
+    #[test]
+    fn bollo_exemption_codes_round_trip() {
+        for exemption in BolloExemption::ALL {
+            let code = String::from(exemption);
+            assert_eq!(code, exemption.code());
+            assert_eq!(BolloExemption::try_from(code.as_str()), Ok(exemption));
+            assert_eq!(BolloExemption::try_from(code), Ok(exemption));
+        }
+        assert_eq!(
+            BolloExemption::try_from("NB4".to_string()),
+            Err(IdError::BolloExemption("NB4".to_string())),
+            "NB4 is not a code of the guide"
         );
     }
 

@@ -811,6 +811,7 @@ fn every_regime_fiscale_writes_its_code_in_the_document() {
         let seller = Seller::denomination(
             "ALPHA SRL".parse().expect("a valid denomination"),
             "02222222222".parse().expect("a valid partita IVA"),
+            "02222222222".parse().expect("a valid codice fiscale"),
             Address::italian(
                 "VIA ROMA 1".parse().expect("a valid address"),
                 "00100".parse().expect("a valid CAP"),

@@ -1,4 +1,6 @@
-//! The SDI checks a `FatturaPA` document can decide on its own.
+//! The SDI checks a `FatturaPA` document can decide on its own, and the
+//! rules of the specification and of the Agenzia guidance the SDI does not
+//! enforce.
 //!
 //! The module implements every check of the official *Elenco dei controlli
 //! effettuati sul file fattura del Sistema di Interscambio*, version 2.0,
@@ -107,21 +109,44 @@
 //! | 00475 | buyer `IdFiscaleIVA` required for the document type | implemented | out of reach |
 //! | 00476 | seller and buyer `IdPaese` both different from `IT` | implemented | implemented |
 //! | 00477 | invalidated declaration of intent | out of reach, needs the SDI declaration database | out of reach |
+//!
+//! The rules below are not SDI checks, so a document breaking them reaches
+//! the buyer, and each one carries a code of its own outside the numeric
+//! SDI namespace.
+//!
+//! | Code | Meaning | Ordinary invoice | Simplified invoice | Source |
+//! |---|---|---|---|---|
+//! | `RIFERIMENTO-NORMATIVO` | a `Natura` without its `RiferimentoNormativo` | implemented, on the `DatiRiepilogo` | implemented, on the `DatiBeniServizi` | *Allegato A* 1.9.1, the `RiferimentoNormativo` is mandatory for the operations of the `Natura` element |
+//! | `CAP-ESTERO` | a seat or permanent establishment abroad with a `CAP` other than `00000` | implemented | implemented | the Agenzia [FAQ on the compilation of the electronic invoice](https://www.agenziaentrate.gov.it/portale/schede/comunicazioni/fatture-e-corrispettivi/faq-fe/risposte-alle-domande-piu-frequenti-categoria/compilazione-della-fattura-elettronica), the generic `00000` for the address abroad |
+//! | `PROVINCIA-ESTERA` | a seat or permanent establishment abroad with a `Provincia` | implemented | implemented | *Allegato A* 1.9.1, the `Provincia` is written only for a seat in Italy |
+//! | `TRASMITTENTE-CF` | an Italian `IdTrasmittente` carrying the `partita IVA` of a party whose `CodiceFiscale` differs | implemented | implemented | *Allegato A* 1.9.1, the `IdCodice` of a transmitter established in Italy is its codice fiscale |
+//! | `BOLLO` | more than 77.47 euros of operations subject to the stamp duty without the `DatiBollo` | implemented | implemented, on the `BolloVirtuale` | the Agenzia guide [*L'imposta di bollo sulle fatture elettroniche*](https://www.agenziaentrate.gov.it/portale/documents/d/guest/l-imposta_di_bollo_sulle_fatture_elettronichegiugno2026), June 2026 |
+//!
+//! The `BOLLO` rule follows the list B of the guide. It sums the
+//! `PrezzoTotale` of the ordinary lines, or the `Importo` of the simplified
+//! `DatiBeniServizi`, whose `Natura` is `N2.1`, `N2.2`, `N3.5`, `N3.6` or
+//! `N4` and whose `AltriDatiGestionali` carry no `NB1`, `NB2` or `NB3`
+//! `TipoDato`, and it skips the `TD16`, `TD17`, `TD18`, `TD19` and `TD28`
+//! documents and the `RF05` to `RF11` regimes. The `XXXXXXX` documents stay
+//! in, since the guide leaves them out of the list B while the stamp duty
+//! on the invoice stays due.
 
 use crate::amount::Amount;
 use crate::date::Date;
 use crate::generated::fpr12::{
     DatiCassaPrevidenzialeType, DatiDocumentiCorrelatiType, DatiRiepilogoType, DatiRitenutaType,
     DettaglioLineeType, DettaglioLineeTypeContent, EsigibilitaIvaType, FatturaElettronicaBodyType,
-    FatturaElettronicaHeaderTypeContent, FormatoTrasmissioneType, NaturaType, RitenutaType,
-    ScontoMaggiorazioneType, ScontoMaggiorazioneTypeContent, TipoDocumentoType,
+    FatturaElettronicaHeaderTypeContent, FormatoTrasmissioneType, NaturaType, RegimeFiscaleType,
+    RitenutaType, ScontoMaggiorazioneType, ScontoMaggiorazioneTypeContent, TipoDocumentoType,
     TipoScontoMaggiorazioneType,
 };
 use crate::generated::fsm10::{
+    DatiBeniServiziType as DatiBeniServiziSemplificati,
     FatturaElettronicaBodyType as BodySemplificato,
     FatturaElettronicaHeaderTypeContent as HeaderSemplificato, NaturaType as NaturaSemplificata,
     RegimeFiscaleType as RegimeFiscaleSemplificata, TipoDocumentoType as TipoDocumentoSemplificato,
 };
+use crate::ids::BolloExemption;
 use crate::{FatturaElettronica, FatturaElettronicaSemplificata};
 use rust_decimal::{Decimal, RoundingStrategy};
 
@@ -129,7 +154,8 @@ use rust_decimal::{Decimal, RoundingStrategy};
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Violation {
-    /// The SDI error code, such as `00400`.
+    /// The SDI error code, such as `00400`, or the code of a rule the SDI
+    /// does not enforce, such as `BOLLO`.
     pub code: String,
     /// The path of the offending element, relative to the document root.
     pub path: String,
@@ -241,13 +267,14 @@ const fn is_n6(natura: &NaturaType) -> bool {
     )
 }
 
-/// Runs every document-local SDI check on `doc` and returns all the
-/// violations it finds.
+/// Runs every document-local SDI check and every guidance rule on `doc`
+/// and returns all the violations it finds.
 #[must_use]
 pub fn validate(doc: &FatturaElettronica) -> Vec<Violation> {
     let mut v = Vec::new();
     let header = &doc.content.fattura_elettronica_header.content;
     check_header(header, &mut v);
+    check_guidance_header(header, &mut v);
     for (bi, body) in doc.content.fattura_elettronica_body.iter().enumerate() {
         check_body(bi, body, header, &mut v);
     }
@@ -255,15 +282,17 @@ pub fn validate(doc: &FatturaElettronica) -> Vec<Violation> {
     v
 }
 
-/// Runs every document-local SDI check on the simplified invoice `doc` and
-/// returns all the violations it finds.
+/// Runs every document-local SDI check and every guidance rule on the
+/// simplified invoice `doc` and returns all the violations it finds.
 #[must_use]
 pub fn validate_simplified(doc: &FatturaElettronicaSemplificata) -> Vec<Violation> {
     let mut v = Vec::new();
     let header = &doc.content.fattura_elettronica_header.content;
     check_simplified_header(header, &mut v);
+    check_simplified_guidance_header(header, &mut v);
     for (bi, body) in doc.content.fattura_elettronica_body.iter().enumerate() {
         check_simplified_body(bi, body, header, &mut v);
+        check_simplified_guidance_body(bi, body, header, &mut v);
     }
     check_simplified_lot(&doc.content.fattura_elettronica_body, &mut v);
     v
@@ -586,6 +615,7 @@ fn check_body(
         v,
     );
     check_parties(bi, &doc_data.tipo_documento, header, v);
+    check_guidance_body(body, header, &bpath, v);
 }
 
 /// The 00425 check on `Numero`.
@@ -1187,5 +1217,379 @@ fn check_simplified_lot(bodies: &[BodySemplificato], v: &mut Vec<Violation>) {
                 ));
             }
         }
+    }
+}
+
+/// The amount the operations subject to the stamp duty must exceed for
+/// the 2.00 euros duty to fall due, art. 13 of the tariff of DPR 642/1972.
+pub(crate) const BOLLO_THRESHOLD: Decimal = Decimal::from_parts(7747, 0, 0, false, 2);
+
+/// The CAP the Agenzia prescribes for an address abroad.
+const FOREIGN_CAP: &str = "00000";
+
+/// Whether `natura` is one the Agenzia counts towards the stamp duty, the
+/// operations not subject to VAT, `N2.1` and `N2.2`, not taxable, `N3.5`
+/// and `N3.6`, and exempt, `N4`.
+const fn counts_for_bollo(natura: &NaturaType) -> bool {
+    matches!(
+        natura,
+        NaturaType::N21 | NaturaType::N22 | NaturaType::N35 | NaturaType::N36 | NaturaType::N4
+    )
+}
+
+/// Whether the line opts out of the stamp duty with an `NB1`, `NB2` or
+/// `NB3` `TipoDato`.
+fn exempt_from_bollo(line: &DettaglioLineeTypeContent) -> bool {
+    line.altri_dati_gestionali.iter().any(|dato| {
+        BolloExemption::ALL
+            .iter()
+            .any(|exemption| dato.content.tipo_dato == exemption.code())
+    })
+}
+
+/// Whether the ordinary invoice of `tipo`, issued under `regime`, owes the
+/// stamp duty on `lines`, per the list B of the Agenzia guide of June 2026.
+pub(crate) fn bollo_due<'a>(
+    tipo: &TipoDocumentoType,
+    regime: &RegimeFiscaleType,
+    lines: impl IntoIterator<Item = &'a DettaglioLineeTypeContent>,
+) -> bool {
+    let excluded_tipo = matches!(
+        tipo,
+        TipoDocumentoType::Td16
+            | TipoDocumentoType::Td17
+            | TipoDocumentoType::Td18
+            | TipoDocumentoType::Td19
+            | TipoDocumentoType::Td28
+    );
+    let excluded_regime = matches!(
+        regime,
+        RegimeFiscaleType::Rf05
+            | RegimeFiscaleType::Rf06
+            | RegimeFiscaleType::Rf07
+            | RegimeFiscaleType::Rf08
+            | RegimeFiscaleType::Rf09
+            | RegimeFiscaleType::Rf10
+            | RegimeFiscaleType::Rf11
+    );
+    if excluded_tipo || excluded_regime {
+        return false;
+    }
+    let subject: Decimal = lines
+        .into_iter()
+        .filter(|line| {
+            line.natura.as_ref().is_some_and(counts_for_bollo) && !exempt_from_bollo(line)
+        })
+        .map(|line| line.prezzo_totale.0)
+        .sum();
+    subject > BOLLO_THRESHOLD
+}
+
+/// Whether the simplified invoice issued under `regime` owes the stamp
+/// duty on `beni`, per the list B of the Agenzia guide of June 2026, which
+/// excludes none of the simplified document types.
+fn simplified_bollo_due(
+    regime: &RegimeFiscaleSemplificata,
+    beni: &[DatiBeniServiziSemplificati],
+) -> bool {
+    let excluded_regime = matches!(
+        regime,
+        RegimeFiscaleSemplificata::Rf05
+            | RegimeFiscaleSemplificata::Rf06
+            | RegimeFiscaleSemplificata::Rf07
+            | RegimeFiscaleSemplificata::Rf08
+            | RegimeFiscaleSemplificata::Rf09
+            | RegimeFiscaleSemplificata::Rf10
+            | RegimeFiscaleSemplificata::Rf11
+    );
+    let subject: Decimal = beni
+        .iter()
+        .map(|beni| &beni.content)
+        .filter(|beni| {
+            matches!(
+                beni.natura,
+                Some(
+                    NaturaSemplificata::N21
+                        | NaturaSemplificata::N22
+                        | NaturaSemplificata::N35
+                        | NaturaSemplificata::N36
+                        | NaturaSemplificata::N4
+                )
+            )
+        })
+        .map(|beni| beni.importo.0)
+        .sum();
+    !excluded_regime && subject > BOLLO_THRESHOLD
+}
+
+/// The `CAP-ESTERO` and `PROVINCIA-ESTERA` rules on the address at `path`.
+fn check_foreign_seat(
+    path: &str,
+    nazione: &str,
+    cap: &str,
+    provincia: Option<&str>,
+    v: &mut Vec<Violation>,
+) {
+    if nazione == "IT" {
+        return;
+    }
+    if cap != FOREIGN_CAP {
+        v.push(Violation::new(
+            "CAP-ESTERO",
+            format!("{path}/CAP"),
+            "an address abroad carries a CAP other than the generic 00000",
+        ));
+    }
+    if provincia.is_some() {
+        v.push(Violation::new(
+            "PROVINCIA-ESTERA",
+            format!("{path}/Provincia"),
+            "an address abroad carries a Provincia",
+        ));
+    }
+}
+
+/// The fiscal identifiers of a party, its `partita IVA` as the `IdPaese`
+/// and `IdCodice` pair and its codice fiscale.
+struct FiscalIds<'a> {
+    /// The `IdFiscaleIVA`, as `IdPaese` and `IdCodice`.
+    partita_iva: Option<(&'a str, &'a str)>,
+    /// The `CodiceFiscale`.
+    codice_fiscale: Option<&'a str>,
+}
+
+impl FiscalIds<'_> {
+    /// Whether the Italian transmitter `(paese, codice)` carries the
+    /// `partita IVA` of the party while the party codice fiscale differs.
+    fn lend_partita_iva_to(&self, (paese, codice): (&str, &str)) -> bool {
+        paese == "IT"
+            && self.partita_iva == Some(("IT", codice))
+            && self
+                .codice_fiscale
+                .is_some_and(|codice_fiscale| codice_fiscale != codice)
+    }
+}
+
+/// The `TRASMITTENTE-CF` rule on the transmitter and the two parties.
+fn check_trasmittente(
+    trasmittente: (&str, &str),
+    parties: &[FiscalIds<'_>],
+    v: &mut Vec<Violation>,
+) {
+    if parties
+        .iter()
+        .any(|party| party.lend_partita_iva_to(trasmittente))
+    {
+        v.push(Violation::new(
+            "TRASMITTENTE-CF",
+            "FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice".to_string(),
+            "the transmitter is identified by the partita IVA of a party whose CodiceFiscale differs",
+        ));
+    }
+}
+
+/// The `CAP-ESTERO`, `PROVINCIA-ESTERA` and `TRASMITTENTE-CF` rules on the
+/// header of the ordinary invoice.
+fn check_guidance_header(header: &FatturaElettronicaHeaderTypeContent, v: &mut Vec<Violation>) {
+    let cedente = &header.cedente_prestatore.content;
+    let cessionario = &header.cessionario_committente.content;
+    let seats = [
+        ("CedentePrestatore/Sede", Some(&cedente.sede)),
+        (
+            "CedentePrestatore/StabileOrganizzazione",
+            cedente.stabile_organizzazione.as_ref(),
+        ),
+        ("CessionarioCommittente/Sede", Some(&cessionario.sede)),
+        (
+            "CessionarioCommittente/StabileOrganizzazione",
+            cessionario.stabile_organizzazione.as_ref(),
+        ),
+    ];
+    for (path, seat) in seats {
+        if let Some(seat) = seat {
+            let seat = &seat.content;
+            check_foreign_seat(
+                &format!("FatturaElettronicaHeader/{path}"),
+                &seat.nazione,
+                &seat.cap,
+                seat.provincia.as_deref(),
+                v,
+            );
+        }
+    }
+    let trasmittente = &header.dati_trasmissione.content.id_trasmittente.content;
+    let seller = &cedente.dati_anagrafici.content;
+    let buyer = &cessionario.dati_anagrafici.content;
+    check_trasmittente(
+        (&trasmittente.id_paese, &trasmittente.id_codice),
+        &[
+            FiscalIds {
+                partita_iva: Some((
+                    &seller.id_fiscale_iva.content.id_paese,
+                    &seller.id_fiscale_iva.content.id_codice,
+                )),
+                codice_fiscale: seller.codice_fiscale.as_deref(),
+            },
+            FiscalIds {
+                partita_iva: buyer.id_fiscale_iva.as_ref().map(|iva| {
+                    (
+                        iva.content.id_paese.as_str(),
+                        iva.content.id_codice.as_str(),
+                    )
+                }),
+                codice_fiscale: buyer.codice_fiscale.as_deref(),
+            },
+        ],
+        v,
+    );
+}
+
+/// The `RIFERIMENTO-NORMATIVO` and `BOLLO` rules on one body of the
+/// ordinary invoice.
+fn check_guidance_body(
+    body: &FatturaElettronicaBodyType,
+    header: &FatturaElettronicaHeaderTypeContent,
+    bpath: &str,
+    v: &mut Vec<Violation>,
+) {
+    let beni = &body.content.dati_beni_servizi.content;
+    for (ri, riep) in beni.dati_riepilogo.iter().enumerate() {
+        if riep.content.natura.is_some() && riep.content.riferimento_normativo.is_none() {
+            v.push(Violation::new(
+                "RIFERIMENTO-NORMATIVO",
+                format!(
+                    "{bpath}/DatiBeniServizi/DatiRiepilogo[{}]/RiferimentoNormativo",
+                    ri + 1
+                ),
+                "RiferimentoNormativo is missing in a DatiRiepilogo with a Natura",
+            ));
+        }
+    }
+    let doc_data = &body
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content;
+    if doc_data.dati_bollo.is_none()
+        && bollo_due(
+            &doc_data.tipo_documento,
+            &header
+                .cedente_prestatore
+                .content
+                .dati_anagrafici
+                .content
+                .regime_fiscale,
+            beni.dettaglio_linee.iter().map(|line| &line.content),
+        )
+    {
+        v.push(Violation::new(
+            "BOLLO",
+            format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/DatiBollo"),
+            "DatiBollo is missing while the operations subject to the stamp duty exceed 77.47 euros",
+        ));
+    }
+}
+
+/// The `CAP-ESTERO`, `PROVINCIA-ESTERA` and `TRASMITTENTE-CF` rules on the
+/// header of the simplified invoice.
+fn check_simplified_guidance_header(header: &HeaderSemplificato, v: &mut Vec<Violation>) {
+    let cedente = &header.cedente_prestatore.content;
+    let altri = header
+        .cessionario_committente
+        .content
+        .altri_dati_identificativi
+        .as_ref()
+        .map(|altri| &altri.content);
+    let seats = [
+        ("CedentePrestatore/Sede", Some(&cedente.sede)),
+        (
+            "CedentePrestatore/StabileOrganizzazione",
+            cedente.stabile_organizzazione.as_ref(),
+        ),
+        (
+            "CessionarioCommittente/AltriDatiIdentificativi/Sede",
+            altri.map(|altri| &altri.sede),
+        ),
+        (
+            "CessionarioCommittente/AltriDatiIdentificativi/StabileOrganizzazione",
+            altri.and_then(|altri| altri.stabile_organizzazione.as_ref()),
+        ),
+    ];
+    for (path, seat) in seats {
+        if let Some(seat) = seat {
+            let seat = &seat.content;
+            check_foreign_seat(
+                &format!("FatturaElettronicaHeader/{path}"),
+                &seat.nazione,
+                &seat.cap,
+                seat.provincia.as_deref(),
+                v,
+            );
+        }
+    }
+    let trasmittente = &header.dati_trasmissione.content.id_trasmittente.content;
+    let buyer = &header
+        .cessionario_committente
+        .content
+        .identificativi_fiscali
+        .content;
+    check_trasmittente(
+        (&trasmittente.id_paese, &trasmittente.id_codice),
+        &[
+            FiscalIds {
+                partita_iva: Some((
+                    &cedente.id_fiscale_iva.content.id_paese,
+                    &cedente.id_fiscale_iva.content.id_codice,
+                )),
+                codice_fiscale: cedente.codice_fiscale.as_deref(),
+            },
+            FiscalIds {
+                partita_iva: buyer.id_fiscale_iva.as_ref().map(|iva| {
+                    (
+                        iva.content.id_paese.as_str(),
+                        iva.content.id_codice.as_str(),
+                    )
+                }),
+                codice_fiscale: buyer.codice_fiscale.as_deref(),
+            },
+        ],
+        v,
+    );
+}
+
+/// The `RIFERIMENTO-NORMATIVO` and `BOLLO` rules on one body of the
+/// simplified invoice.
+fn check_simplified_guidance_body(
+    bi: usize,
+    body: &BodySemplificato,
+    header: &HeaderSemplificato,
+    v: &mut Vec<Violation>,
+) {
+    let bpath = format!("FatturaElettronicaBody[{}]", bi + 1);
+    let beni = &body.content.dati_beni_servizi;
+    for (si, item) in beni.iter().enumerate() {
+        if item.content.natura.is_some() && item.content.riferimento_normativo.is_none() {
+            v.push(Violation::new(
+                "RIFERIMENTO-NORMATIVO",
+                format!("{bpath}/DatiBeniServizi[{}]/RiferimentoNormativo", si + 1),
+                "RiferimentoNormativo is missing in a DatiBeniServizi with a Natura",
+            ));
+        }
+    }
+    let doc_data = &body
+        .content
+        .dati_generali
+        .content
+        .dati_generali_documento
+        .content;
+    if doc_data.bollo_virtuale.is_none()
+        && simplified_bollo_due(&header.cedente_prestatore.content.regime_fiscale, beni)
+    {
+        v.push(Violation::new(
+            "BOLLO",
+            format!("{bpath}/DatiGenerali/DatiGeneraliDocumento/BolloVirtuale"),
+            "BolloVirtuale is missing while the operations subject to the stamp duty exceed 77.47 euros",
+        ));
     }
 }

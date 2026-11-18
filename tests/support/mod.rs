@@ -216,6 +216,7 @@ pub(crate) fn seller() -> Seller {
     Seller::denomination(
         "ALPHA SRL".parse().expect("a valid denomination"),
         "02222222222".parse().expect("a valid partita IVA"),
+        "02222222222".parse().expect("a valid codice fiscale"),
         Address::italian(
             "VIA ROMA 1".parse().expect("a valid address"),
             "00100".parse().expect("a valid CAP"),
@@ -240,12 +241,13 @@ pub(crate) fn buyer() -> Buyer {
     )
 }
 
-/// The Italian buyer company of the self-invoice fixtures, whose
-/// `partita IVA` transmits the document.
+/// The Italian buyer company of the self-invoice fixtures, whose codice
+/// fiscale transmits the document.
 pub(crate) fn buyer_company() -> Company {
     Company::denomination(
         "BETA SRL".parse().expect("a valid denomination"),
         "04444444444".parse().expect("a valid partita IVA"),
+        "04444444444".parse().expect("a valid codice fiscale"),
         Address::italian(
             "VIA MILANO 2".parse().expect("a valid address"),
             "20100".parse().expect("a valid CAP"),

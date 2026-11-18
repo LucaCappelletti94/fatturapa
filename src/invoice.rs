@@ -36,12 +36,14 @@ use crate::generated::fpr12::{
     DettaglioPagamentoTypeContent, FatturaElettronica, FatturaElettronicaBodyType,
     FatturaElettronicaBodyTypeContent, FatturaElettronicaHeaderType,
     FatturaElettronicaHeaderTypeContent, FatturaElettronicaTypeContent, FormatoTrasmissioneType,
-    IdFiscaleType, IdFiscaleTypeContent, ModalitaPagamentoType, ScontoMaggiorazioneType,
-    ScontoMaggiorazioneTypeContent, TipoDocumentoType, TipoScontoMaggiorazioneType,
+    IdFiscaleType, IdFiscaleTypeContent, ModalitaPagamentoType, RegimeFiscaleType,
+    ScontoMaggiorazioneType, ScontoMaggiorazioneTypeContent, TipoDocumentoType,
+    TipoScontoMaggiorazioneType,
 };
 use crate::ids::{
-    Aliquota, Causale, CodiceDestinatario, Description, ExchangeRate, IdDocumento, IdError, Natura,
-    Numero, Pec, ProgressivoInvio, RegimeFiscale, RiferimentoNormativo, UnitaMisura,
+    Aliquota, BolloExemption, Causale, CodiceDestinatario, Description, ExchangeRate, IdDocumento,
+    IdError, Natura, Numero, Pec, ProgressivoInvio, RegimeFiscale, RiferimentoNormativo,
+    UnitaMisura,
 };
 use crate::party::{Business, Buyer, Company, Party, Seller};
 use crate::validate::{self, Violation};
@@ -106,10 +108,6 @@ const FOREIGN_CODICE_DESTINATARIO: &str = "XXXXXXX";
 /// The `CodiceDestinatario` written with a `PECDestinatario` or an unknown
 /// channel.
 const PEC_CODICE_DESTINATARIO: &str = "0000000";
-
-/// The 77.47 EUR stamp duty threshold of the DPR 642/72, the `DatiBollo`
-/// block written only when the amounts not subject to VAT exceed it.
-const BOLLO_THRESHOLD: Decimal = Decimal::from_parts(7747, 0, 0, false, 2);
 
 /// The 2.00 EUR amount of the virtual stamp duty.
 const BOLLO_IMPORT: Decimal = Decimal::from_parts(200, 0, 0, false, 2);
@@ -548,6 +546,9 @@ pub struct Line {
     sconti: Vec<Sconto>,
     /// The `AliquotaIVA` or the `Natura` of the line.
     vat: VatTreatment,
+    /// The stamp duty exemption the line writes in its
+    /// `AltriDatiGestionali`.
+    bollo_exemption: Option<BolloExemption>,
 }
 
 /// The optional fields of a document line, embedded by the
@@ -562,6 +563,9 @@ struct LineOptionals {
     unit_of_measure: Option<UnitaMisura>,
     /// The `ScontoMaggiorazione` blocks, in document order.
     sconti: Option<Vec<Sconto>>,
+    /// The stamp duty exemption the line writes in its
+    /// `AltriDatiGestionali`.
+    bollo_exemption: Option<BolloExemption>,
     /// The first conversion error of the setters, if any.
     error: Option<BuildError>,
 }
@@ -573,6 +577,7 @@ impl LineOptionals {
             quantity: None,
             unit_of_measure: None,
             sconti: None,
+            bollo_exemption: None,
             error: None,
         }
     }
@@ -643,6 +648,18 @@ impl LineOptionals {
             self.sconti = Some(sconti);
         }
     }
+
+    /// The stamp duty exemption, converted from `value`, which the line
+    /// writes as the `TipoDato` of an `AltriDatiGestionali` block.
+    pub(crate) fn bollo_exemption<G>(&mut self, value: G)
+    where
+        BolloExemption: TryFrom<G>,
+        <BolloExemption as TryFrom<G>>::Error: Into<IdError>,
+    {
+        if let Some(exemption) = convert(&mut self.error, "bollo_exemption", value) {
+            self.bollo_exemption = Some(exemption);
+        }
+    }
 }
 
 /// The builder of a [`Line`], which checks the required fields at compile
@@ -653,8 +670,8 @@ impl LineOptionals {
 /// `Set` marker once its setter was called, so a line missing a required
 /// field does not compile and the `build` is available only when every
 /// required field is set. The optional fields, the `quantity`, the
-/// `unit_of_measure` and the `sconti`, carry plain slots with their
-/// setters available in every state.
+/// `unit_of_measure`, the `sconti` and the `bollo_exemption`, carry plain
+/// slots with their setters available in every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LineBuilder<D = typestate::Unset, P = typestate::Unset, V = typestate::Unset> {
@@ -741,6 +758,18 @@ impl<D, P, V> LineBuilder<D, P, V> {
         self.optional.sconti(value);
         self
     }
+
+    /// The stamp duty exemption, converted from `value`, for a line whose
+    /// operation a specific provision takes out of the stamp duty, which
+    /// the line writes as the `TipoDato` of an `AltriDatiGestionali` block.
+    pub fn bollo_exemption<G>(mut self, value: G) -> Self
+    where
+        BolloExemption: TryFrom<G>,
+        <BolloExemption as TryFrom<G>>::Error: Into<IdError>,
+    {
+        self.optional.bollo_exemption(value);
+        self
+    }
 }
 
 impl<P, V> LineBuilder<typestate::Unset, P, V> {
@@ -808,6 +837,7 @@ impl LineBuilder<typestate::Set, typestate::Set, typestate::Set> {
             unit_price: required(self.unit_price),
             sconti: self.optional.sconti.unwrap_or_default(),
             vat: required(self.vat),
+            bollo_exemption: self.optional.bollo_exemption,
         })
     }
 }
@@ -880,6 +910,16 @@ impl Line {
             riferimento_amministrazione: None,
             altri_dati_gestionali: currency.altri_dati_gestionali(&self.unit_price),
         };
+        if let Some(exemption) = self.bollo_exemption {
+            content.altri_dati_gestionali.push(AltriDatiGestionaliType {
+                content: AltriDatiGestionaliTypeContent {
+                    tipo_dato: exemption.code().to_string(),
+                    riferimento_testo: None,
+                    riferimento_numero: None,
+                    riferimento_data: None,
+                },
+            });
+        }
         content.prezzo_totale = validate::line_total(&content)
             .map(|total| Amount(fit8(total.0)))
             .ok_or(BuildError::Amount {
@@ -967,6 +1007,9 @@ pub struct SevenTerLine {
     unit_price: Amount,
     /// The `ScontoMaggiorazione` blocks, in document order.
     sconti: Vec<Sconto>,
+    /// The stamp duty exemption the line writes in its
+    /// `AltriDatiGestionali`.
+    bollo_exemption: Option<BolloExemption>,
 }
 
 /// The builder of a [`SevenTerLine`], which checks the required fields at
@@ -979,8 +1022,9 @@ pub struct SevenTerLine {
 /// not compile and the `build` is available only when every required
 /// field is set. The scenario writes the `N2.1` nature and the reference
 /// on every line, so the builder carries no `vat` setter. The optional
-/// fields, the `quantity`, the `unit_of_measure` and the `sconti`, carry
-/// plain slots with their setters available in every state.
+/// fields, the `quantity`, the `unit_of_measure`, the `sconti` and the
+/// `bollo_exemption`, carry plain slots with their setters available in
+/// every state.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SevenTerLineBuilder<D = typestate::Unset, P = typestate::Unset> {
@@ -1063,6 +1107,18 @@ impl<D, P> SevenTerLineBuilder<D, P> {
         self.optional.sconti(value);
         self
     }
+
+    /// The stamp duty exemption, converted from `value`, for a line whose
+    /// operation a specific provision takes out of the stamp duty, which
+    /// the line writes as the `TipoDato` of an `AltriDatiGestionali` block.
+    pub fn bollo_exemption<G>(mut self, value: G) -> Self
+    where
+        BolloExemption: TryFrom<G>,
+        <BolloExemption as TryFrom<G>>::Error: Into<IdError>,
+    {
+        self.optional.bollo_exemption(value);
+        self
+    }
 }
 
 impl<P> SevenTerLineBuilder<typestate::Unset, P> {
@@ -1115,6 +1171,7 @@ impl SevenTerLineBuilder<typestate::Set, typestate::Set> {
             unit_of_measure: self.optional.unit_of_measure,
             unit_price: required(self.unit_price),
             sconti: self.optional.sconti.unwrap_or_default(),
+            bollo_exemption: self.optional.bollo_exemption,
         })
     }
 }
@@ -1141,6 +1198,7 @@ impl SevenTerLine {
             unit_price: self.unit_price,
             sconti: self.sconti,
             vat: seven_ter_treatment(),
+            bollo_exemption: self.bollo_exemption,
         }
     }
 }
@@ -1184,8 +1242,9 @@ pub struct Invoice;
 /// `Set` marker once its setter was called, so a document missing a
 /// required field does not compile and the `build` is available only when
 /// every required field is set. The optional fields, the `lines`, the
-/// `causali`, the `currency` and the `bollo`, carry plain slots with
-/// their setters available in every state.
+/// `causali` and the `currency`, carry plain slots with their setters
+/// available in every state. The `DatiBollo` block is written when the
+/// lines owe the stamp duty, per `validate::bollo_due`.
 #[must_use = "the builder does nothing until you call `build()` on it to finish building"]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InvoiceDomesticBuilder<
@@ -1215,8 +1274,6 @@ pub struct InvoiceDomesticBuilder<
     causali: Option<Vec<Causale>>,
     /// The currency of the document.
     currency: Option<InvoiceCurrency>,
-    /// Whether to write the virtual stamp duty.
-    bollo: Option<bool>,
     /// The first conversion error of the setters, if any.
     error: Option<BuildError>,
     /// The typestate the builder has reached.
@@ -1237,7 +1294,6 @@ impl<'a, 'b, P, D, N> InvoiceDomesticBuilder<'a, 'b, P, D, N> {
             lines,
             causali,
             currency,
-            bollo,
             error,
             ..
         } = self;
@@ -1252,7 +1308,6 @@ impl<'a, 'b, P, D, N> InvoiceDomesticBuilder<'a, 'b, P, D, N> {
             lines,
             causali,
             currency,
-            bollo,
             error,
             _state: PhantomData,
         }
@@ -1290,22 +1345,6 @@ impl<'a, 'b, P, D, N> InvoiceDomesticBuilder<'a, 'b, P, D, N> {
     {
         if let Some(currency) = convert(&mut self.error, "currency", value) {
             self.currency = Some(currency);
-        }
-        self
-    }
-
-    /// Enables the virtual stamp duty, which writes the `DatiBollo` block
-    /// with `BolloVirtuale SI` and the 2.00 euros `ImportoBollo` when the
-    /// amounts not subject to VAT, the `ImponibileImporto` of the summaries
-    /// with a `Natura`, exceed 77.47 euros, the exclusive threshold of the
-    /// DPR 642/72, and omits the block at or below it.
-    pub fn bollo<G>(mut self, value: G) -> Self
-    where
-        bool: TryFrom<G>,
-        <bool as TryFrom<G>>::Error: Into<IdError>,
-    {
-        if let Some(bollo) = convert(&mut self.error, "bollo", value) {
-            self.bollo = Some(bollo);
         }
         self
     }
@@ -1388,7 +1427,6 @@ impl InvoiceDomesticBuilder<'_, '_, typestate::Set, typestate::Set, typestate::S
             required(self.date),
             required(self.numero),
             self.causali.unwrap_or_default(),
-            self.bollo.unwrap_or(false),
             first_lines(self.line, self.lines.unwrap_or_default()),
             self.currency.unwrap_or_default(),
             Vec::new(),
@@ -1590,7 +1628,6 @@ impl InvoiceCrossBorderServicesBuilder<'_, '_, typestate::Set, typestate::Set, t
             required(self.date),
             required(self.numero),
             self.causali.unwrap_or_default(),
-            true,
             seven_ter_lines(first_seven_ter_lines(
                 self.line,
                 self.lines.unwrap_or_default(),
@@ -1625,7 +1662,6 @@ impl Invoice {
             lines: None,
             causali: None,
             currency: None,
-            bollo: None,
             error: None,
             _state: PhantomData,
         }
@@ -1945,7 +1981,6 @@ where
             date,
             required(self.numero),
             self.causali.unwrap_or_default(),
-            false,
             first_lines(self.line, self.lines.unwrap_or_default()),
             self.currency.unwrap_or_default(),
             vec![pagamento(date)],
@@ -2023,7 +2058,6 @@ fn build_invoice(
     date: Date,
     numero: Numero,
     causali: Vec<Causale>,
-    bollo: bool,
     lines: Vec<Line>,
     currency: InvoiceCurrency,
     dati_pagamento: Vec<DatiPagamentoType>,
@@ -2035,6 +2069,12 @@ fn build_invoice(
             error: IdError::Date(date.to_string()),
         });
     }
+    let regime = cedente
+        .content
+        .dati_anagrafici
+        .content
+        .regime_fiscale
+        .clone();
     let (formato, codice_destinatario, pec_destinatario) = recipient_of(scenario);
     let header = header(
         formato.clone(),
@@ -2050,7 +2090,7 @@ fn build_invoice(
         data: date,
         numero,
         causale: causali,
-        bollo,
+        regime,
         lines,
         currency,
         dati_pagamento,
@@ -2205,8 +2245,9 @@ struct BodyInputs {
     numero: Numero,
     /// The `Causale` texts of the document.
     causale: Vec<Causale>,
-    /// Whether to write the virtual stamp duty.
-    bollo: bool,
+    /// The `RegimeFiscale` of the seller, which decides the stamp duty
+    /// with the lines.
+    regime: RegimeFiscaleType,
     /// The lines of the document, in document order.
     lines: Vec<Line>,
     /// The currency of the document.
@@ -2303,7 +2344,7 @@ fn assemble_body(inputs: BodyInputs) -> Result<FatturaElettronicaBodyType, Build
         data,
         numero,
         causale,
-        bollo,
+        regime,
         lines,
         currency,
         dati_pagamento,
@@ -2316,12 +2357,7 @@ fn assemble_body(inputs: BodyInputs) -> Result<FatturaElettronicaBodyType, Build
     } = collect_lines(lines, &currency)?;
     let (riep, totale) = riepilogo(groups, &references);
     let importo_totale = validate::round_half_2(totale);
-    let senza_iva: Decimal = riep
-        .iter()
-        .filter(|group| group.content.natura.is_some())
-        .map(|group| group.content.imponibile_importo.0)
-        .sum();
-    let bollo = if bollo && senza_iva > BOLLO_THRESHOLD {
+    let bollo = if validate::bollo_due(&tipo, &regime, &contents) {
         Some(DatiBolloType {
             content: DatiBolloTypeContent {
                 bollo_virtuale: BolloVirtualeType::Si,
@@ -2515,6 +2551,7 @@ mod tests {
         Seller::denomination(
             "ALPHA SRL".parse().expect("a valid denomination"),
             alpha_piva(),
+            "00012345674".parse().expect("a valid codice fiscale"),
             rome(),
             RegimeFiscale::Rf01,
         )
@@ -2554,6 +2591,7 @@ mod tests {
         Company::denomination(
             "BETA SRL".parse().expect("a valid denomination"),
             beta_piva(),
+            "00076543214".parse().expect("a valid codice fiscale"),
             Address::italian(
                 "VIA MILANO 2".parse().expect("a valid address"),
                 "20100".parse().expect("a valid CAP"),
@@ -2798,10 +2836,7 @@ mod tests {
             .dati_anagrafici
             .content
             .regime_fiscale;
-        assert_eq!(
-            seller_regime,
-            crate::generated::fpr12::RegimeFiscaleType::Rf01
-        );
+        assert_eq!(seller_regime, RegimeFiscaleType::Rf01);
     }
 
     #[test]
@@ -2972,7 +3007,7 @@ mod tests {
         );
         assert_eq!(
             cedente.content.dati_anagrafici.content.regime_fiscale,
-            crate::generated::fpr12::RegimeFiscaleType::Rf19
+            RegimeFiscaleType::Rf19
         );
     }
 
@@ -3350,7 +3385,13 @@ mod tests {
     #[test]
     fn the_generic_constructors_report_the_failing_value() {
         assert!(matches!(
-            Seller::try_denomination("ALPHA SRL", "00012345675", rome(), RegimeFiscale::Rf01),
+            Seller::try_denomination(
+                "ALPHA SRL",
+                "00012345675",
+                "00012345674",
+                rome(),
+                RegimeFiscale::Rf01
+            ),
             Err(IdError::PartitaIva(..))
         ));
         assert!(matches!(
@@ -3551,6 +3592,55 @@ mod tests {
         );
     }
 
+    /// The art. 7-ter line writes its stamp duty exemption in the
+    /// `AltriDatiGestionali`, and a code outside the guide fails the line.
+    #[test]
+    fn the_seven_ter_line_carries_its_bollo_exemption() {
+        let line = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .bollo_exemption("NB1")
+            .build()
+            .expect("the exempt line builds");
+        let doc = Invoice::cross_border_services(&seller(), &buyer_us(), line)
+            .progressivo("00001")
+            .date("2026-11-04")
+            .numero("00012")
+            .build()
+            .expect("the exempt invoice builds");
+        let body = &doc.content.fattura_elettronica_body[0].content;
+        let gestionali = &body.dati_beni_servizi.content.dettaglio_linee[0]
+            .content
+            .altri_dati_gestionali;
+        assert_eq!(gestionali.len(), 1);
+        assert_eq!(gestionali[0].content.tipo_dato, "NB1");
+        assert!(
+            body.dati_generali
+                .content
+                .dati_generali_documento
+                .content
+                .dati_bollo
+                .is_none(),
+            "the exempt 150.00 owes no stamp duty"
+        );
+
+        let failing = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .bollo_exemption("NB4")
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "bollo_exemption",
+                    error: IdError::BolloExemption(..)
+                })
+            ),
+            "{failing:?}"
+        );
+    }
+
     /// A failing `progressivo` is reported by the `build` of every
     /// document builder, and the later setters skip their conversion.
     #[test]
@@ -3562,7 +3652,6 @@ mod tests {
             .lines(vec![taxed_line(5000)])
             .causali(vec!["SERVIZI".parse().expect("a valid causale")])
             .currency(InvoiceCurrency::Eur)
-            .bollo(true)
             .build();
         assert!(
             matches!(

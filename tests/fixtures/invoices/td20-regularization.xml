@@ -78,6 +78,7 @@
         <Natura>N6.4</Natura>
         <ImponibileImporto>100.00</ImponibileImporto>
         <Imposta>0.00</Imposta>
+        <RiferimentoNormativo>ART. 17 C. 6 LETT. A-BIS DPR 633/72</RiferimentoNormativo>
       </DatiRiepilogo>
     </DatiBeniServizi>
   </FatturaElettronicaBody>
