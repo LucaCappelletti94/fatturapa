@@ -46,8 +46,8 @@ use cms::cert::CertificateChoices;
 use cms::content_info::ContentInfo;
 use cms::signed_data::{SignedData, SignerIdentifier, SignerInfo};
 use const_oid::db;
-use der::asn1::{AnyRef, ObjectIdentifier, OctetString};
-use der::{Any, Decode, Encode, EncodingRules, Tag, Tagged};
+use der::asn1::{AnyRef, ContextSpecific, ObjectIdentifier, OctetString};
+use der::{Any, Decode, Encode, EncodingRules, Reader, SliceReader, Tag, TagNumber, Tagged};
 use digest::Digest;
 use jiff::Timestamp;
 use rustls_pki_types::{CertificateDer, SignatureVerificationAlgorithm, TrustAnchor, UnixTime};
@@ -320,8 +320,7 @@ impl VerifiedSignature {
 /// Fails with [`SignedError`] when the input is not a `CMS SignedData`
 /// structure or carries no encapsulated content.
 pub fn unwrap(input: &[u8]) -> Result<Vec<u8>, SignedError> {
-    let signed_data = parse_signed_data(input)?;
-    encapsulated_content(&signed_data)
+    parse_signed_data(input).map(|(_, content)| content)
 }
 
 /// Verifies a `CAdES` signed file and returns its content, signer, chain and
@@ -343,8 +342,7 @@ pub fn verify(
     anchors: &[Certificate],
     signing_time: Option<Timestamp>,
 ) -> Result<VerifiedSignature, SignedError> {
-    let signed_data = parse_signed_data(input)?;
-    let content = encapsulated_content(&signed_data)?;
+    let (signed_data, content) = parse_signed_data(input)?;
     let cms_certs = cms_certificates(&signed_data);
     let signer_infos = &signed_data.signer_infos.0;
     if signer_infos.is_empty() {
@@ -372,8 +370,8 @@ pub fn verify(
 }
 
 /// Parses the input as a `CMS ContentInfo` of `SignedData`, in `BER` or
-/// `DER`.
-fn parse_signed_data(input: &[u8]) -> Result<SignedData, SignedError> {
+/// `DER`, and returns it with its encapsulated content.
+fn parse_signed_data(input: &[u8]) -> Result<(SignedData, Vec<u8>), SignedError> {
     let content_info = content_info(input)?;
     if content_info.content_type != db::rfc5911::ID_SIGNED_DATA {
         return Err(SignedError::NotCms(format!(
@@ -381,10 +379,40 @@ fn parse_signed_data(input: &[u8]) -> Result<SignedData, SignedError> {
             content_info.content_type
         )));
     }
-    content_info
+    let malformed = |_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned());
+    let signed_data = content_info
         .content
         .decode_as_encoding::<SignedData>(EncodingRules::Ber)
-        .map_err(|_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned()))
+        .map_err(malformed)?;
+    let econtent_type = &signed_data.encap_content_info.econtent_type;
+    if *econtent_type != db::rfc5911::ID_DATA {
+        return Err(SignedError::UnsupportedContentType(
+            econtent_type.to_string(),
+        ));
+    }
+    let content = econtent(&content_info.content)
+        .map_err(malformed)?
+        .ok_or(SignedError::DetachedContent)?;
+    Ok((signed_data, content.into_bytes().into_vec()))
+}
+
+/// The `eContent` of the `SignedData` in `signed_data`, its `BER` fragments
+/// joined.
+///
+/// `cms` holds `eContent` as an `Any`, which drops the constructed bit of a
+/// fragmented `OCTET STRING`, so the string is read again from the bytes.
+fn econtent(signed_data: &Any) -> der::Result<Option<OctetString>> {
+    let mut reader = SliceReader::new_with_encoding_rules(signed_data.value(), EncodingRules::Ber)?;
+    // Skips the version, the digest algorithms and then the content type.
+    AnyRef::decode(&mut reader)?;
+    AnyRef::decode(&mut reader)?;
+    reader.sequence(|encapsulated| {
+        AnyRef::decode(encapsulated)?;
+        Ok(
+            ContextSpecific::<OctetString>::decode_explicit(encapsulated, TagNumber(0))?
+                .map(|field| field.value),
+        )
+    })
 }
 
 /// The certificates of the `CMS`, in their declared order.
@@ -431,22 +459,6 @@ const fn is_base64_char(byte: u8) -> bool {
         byte,
         b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'+' | b'/' | b'='
     )
-}
-
-/// The encapsulated content of the `SignedData`, or the detached-content
-/// error.
-fn encapsulated_content(signed_data: &SignedData) -> Result<Vec<u8>, SignedError> {
-    let encapsulated = &signed_data.encap_content_info;
-    if encapsulated.econtent_type != db::rfc5911::ID_DATA {
-        return Err(SignedError::UnsupportedContentType(
-            encapsulated.econtent_type.to_string(),
-        ));
-    }
-    encapsulated
-        .econtent
-        .as_ref()
-        .map(|any| any.value().to_vec())
-        .ok_or(SignedError::DetachedContent)
 }
 
 /// Verifies one `SignerInfo` and returns the signer certificate, the chain
