@@ -1,0 +1,62 @@
+rate.gov.it/jocs/xsd/fatturvere/v1.sion='1.0' en2"<?xml <?xml(vers/jocs/xsd/aatturvere/v1.sion='1.0' en2"<?xml <?xml(version="0.0" en~coding="UTF-8"?>-8"?
+<>ns3:FatnsraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2014-12-18</Data>
+        <Numero>123</Numero>
+        <Causale>LA FATTURA FA RIFERIMENTO AD UNA OPERAZIONE AAAA BBBBBBBBBBBBBBBBBB CCC DDDDDDDDDDDDDDD E FFFFFFFFFFFFFFFFFFFF GGGGGGGGGG HHHHHHH II LLLLLLLLLLLLLLLLL MMM NNNNN OO PPPPPPPPPPP QQQQ RRRR SSSSSSSSSSSSSS</Causale>
+        <Causale>SEGUE DESCRIZIONE CAUSALE NEL CASO IN CUI NON SIANO STATI SUFFICIENTI 200 CARATTERI AAAAAAAAAAA BBBBBBBBBBBBBBBBB</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>66685</IdDocumento>
+        <NumItem>1</NumItem>
+      </DatiOrdineAcquisto>
+      <DatiContratto>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>123</IdDocumento>
+	    <Data>2012-09-01</Data>
+	    <NumItem>5</NumItem>
+	    <CodiceCUP>123abc</CodiceCUP>
+	    <CodiceCIG>456def</CodiceCIG>
+      </DatiContratto>
+      <DatiTrasporto>
+	    <DatiAnagraficiVettore>				
+	      <IdFiscaleIVA>
+	        <IdPaese>IT</IdPaese>
+	        <IdCodice>24681012141</IdCodice>
+	      </IdFiscaleIVA>
+    	  <Anagrafica>
+	        <Denominazione>Trasporto spa</Denominazione>
+	      </Anagrafica>
+	    </DatiAnagraficiVettore>
+	    <DataOraConsegna>2012-10-22T16:46:12.000+02:00</DataOraConsegna>
+      </DatiTrasporto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>DESCRIZIONE DELLA FORNITURA</Descrizione>
+        <Quantita>5.00</Quantita>
+        <PrezzoUnitario>1.00</PrezzoUnitario>
+        <PrezzoTotale>5.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>5.00</ImponibileImporto>
+        <Imposta>1.10</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP01</CondizioniPagamento>
+    IIxRDLCMn7+VwEShz78DCdIE4SvbtJpljAznVJXQ==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties1"><xades:SignedSignatureProperties><xades:SigningTime>2026-11-17T10:00:00Z</xades:SigningTime><xades:SigningCertificateV2><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>glc02LO/0/d5vOA+DU3MsLjFv/NLOK8wGNW3vPIJ/7Y=</ds:DigestValue></xades:CertDigest></xades:Cert></xades:SigningCertificateV2></xades:SignedSignatureProperties></xades:Signe8YbHy4qkXK/okE1ZhQBY/5B2tjJingP3="h"?
+<>ns3:Fat8"?
+<>ns3:Fatns3="hrate.gov.it/jocs/xsd/fatturvere/v1.sion='1.0' en2"<?xml <?xml(vers/jocs/xsd/fatturvere/v1.sion='1.0' en1"<?xml <?xml(version="0.0" en~coding="UTF-8"?>-8"?
+<>ns3:Fatns3xad="h"?
+3:Fat8"?
+<>ns3:Fatns3="h"?
+<>ns3:Fatns3="http://s/xsd/faxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxion="0.0" en~condig="UTF-8"?>-8"?
+<>ns3:Fatns2="h"?
+<>ns3:Fatns3="http://ivaservizi.agens/xsd/faxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxere/v1.sion='1.0' en2" c

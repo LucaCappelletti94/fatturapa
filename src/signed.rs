@@ -1,4 +1,5 @@
-//! Unwrapping and verification of signed `.xml.p7m` files.
+//! Unwrapping and verification of signed `.xml.p7m` files, and verification
+//! of `XAdES` signed `.xml` files.
 //!
 //! A signed `FatturaPA` document is a `CAdES` `CMS SignedData` structure
 //! (RFC 5652) around the `XML`. The input is raw `DER` or `base64` text, the
@@ -15,6 +16,20 @@
 //! certificate's `keyUsage` and `ESS signing-certificate` and
 //! `signing-certificate-v2` signed attributes when present, and builds the
 //! chain from the signer certificate to one of the trust anchors.
+//!
+//! [`verify_xades`] checks every `XAdES-BES` enveloped `ds:Signature` child
+//! of the document element. Each reference is a same-document `""` or
+//! `#id` URI, transformed by `enveloped-signature`, the `xmldsig-filter2`
+//! subtraction of the signatures and canonical `XML` 1.0 or exclusive
+//! canonicalization 1.0, and digested with `SHA-256`, `SHA-384` or
+//! `SHA-512`. One reference must cover the whole document and one the
+//! `xades:SignedProperties` of the signature. The signer certificate is the
+//! `ds:KeyInfo` certificate that the `SigningCertificate` or
+//! `SigningCertificateV2` property references, or the only one when a
+//! reference signs the `ds:KeyInfo` instead. The `ds:SignatureValue` is
+//! checked over the canonical `ds:SignedInfo` with the algorithms of
+//! [`verify`], and the time, key usage and chain checks are the same. A
+//! document with a `DOCTYPE` is refused.
 //!
 //! The hash of the signed attributes and of the content is taken from the
 //! `digestAlgorithm` of the `SignerInfo`. When the signature algorithm names
@@ -67,6 +82,11 @@ use x509_cert::serial_number::SerialNumber;
 use x509_cert::time::Time;
 
 use crate::Document;
+
+mod c14n;
+mod xades;
+
+pub use xades::verify_xades;
 
 /// The named curve `P-384`.
 const SECP_384_R_1: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.132.0.34");
@@ -204,9 +224,157 @@ pub enum SignedError {
     #[error("the signer certificate keyUsage does not permit signing")]
     KeyUsage,
 
+    /// The input is not a well-formed `XML` document in a supported
+    /// encoding.
+    #[error("not an XML document: {0}")]
+    NotXml(String),
+
+    /// The document carries a `DOCTYPE` declaration, refused so that no
+    /// entity or attribute default can change what was signed.
+    #[error("the document carries a DOCTYPE declaration")]
+    DoctypeRefused,
+
+    /// The document element has no `ds:Signature` child.
+    #[error("the document carries no XML signature")]
+    NotSigned,
+
+    /// No `ds:Reference` covers the whole document.
+    #[error("no reference covers the whole document")]
+    DocumentNotCovered,
+
+    /// No `ds:Reference` covers the `xades:SignedProperties` of the
+    /// signature, or the signature has none.
+    #[error("the signature does not sign its XAdES SignedProperties")]
+    MissingSignedProperties,
+
+    /// Neither a signing certificate property nor a signed `ds:KeyInfo`
+    /// protects the signer certificate.
+    #[error(
+        "neither a signing certificate property nor a signed KeyInfo protects the signer certificate"
+    )]
+    SignerCertificateNotProtected,
+
+    /// A `ds:Signature` lacks a required part or carries an unreadable one.
+    #[error("malformed XML signature: {0}")]
+    MalformedSignature(SignatureDefect),
+
+    /// A `ds:Reference` names a transform the verifier does not process.
+    #[error("unsupported transform {0}")]
+    UnsupportedTransform(String),
+
+    /// A `ds:Reference` URI is neither `""` nor `#id`, `None` when the
+    /// reference has no URI.
+    #[error("unsupported reference URI {0:?}")]
+    UnsupportedReference(Option<String>),
+
+    /// No element carries the id a `ds:Reference` URI names.
+    #[error("no element has the referenced id {0}")]
+    UnresolvedReference(String),
+
+    /// More than one element carries the id a `ds:Reference` URI names.
+    #[error("more than one element has the referenced id {0}")]
+    AmbiguousId(String),
+
+    /// The digest of a reference does not match its `ds:DigestValue`.
+    #[error("the digest of {0} does not match the signed digest")]
+    ReferenceDigestMismatch(ReferenceTarget),
+
     /// The certificate chain does not verify.
     #[error("the certificate chain does not verify: {0}")]
     Chain(#[from] ChainError),
+}
+
+/// The content a `ds:Reference` names.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ReferenceTarget {
+    /// `URI=""`, the whole document.
+    Document,
+    /// `URI="#id"`, the element carrying the id.
+    Element(String),
+}
+
+impl std::fmt::Display for ReferenceTarget {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Document => formatter.write_str("the document"),
+            Self::Element(id) => write!(formatter, "#{id}"),
+        }
+    }
+}
+
+/// What is wrong with the structure of a `ds:Signature`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum SignatureDefect {
+    /// A required element is absent.
+    #[error("no {0} element")]
+    Missing(SignatureElement),
+    /// An element allowed once appears more than once.
+    #[error("more than one {0} element")]
+    Repeated(SignatureElement),
+    /// An element names no `Algorithm`.
+    #[error("the {0} element names no Algorithm")]
+    MissingAlgorithm(SignatureElement),
+    /// The text of an element is not `base64`.
+    #[error("the {0} element is not base64")]
+    NotBase64(SignatureElement),
+    /// The decoded content of an element is not the `DER` structure it
+    /// carries.
+    #[error("the {0} element is not DER")]
+    NotDer(SignatureElement),
+}
+
+/// An element of a `ds:Signature` the verifier reads, each variant named
+/// as the local name of its element.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SignatureElement {
+    /// `ds:SignedInfo`.
+    SignedInfo,
+    /// `ds:CanonicalizationMethod`.
+    CanonicalizationMethod,
+    /// `ds:SignatureMethod`.
+    SignatureMethod,
+    /// `ds:Reference`.
+    Reference,
+    /// `ds:Transforms`.
+    Transforms,
+    /// `ds:Transform`.
+    Transform,
+    /// The `XPath` of an `xmldsig-filter2` transform.
+    XPath,
+    /// The `InclusiveNamespaces` of an exclusive canonicalization.
+    InclusiveNamespaces,
+    /// `ds:DigestMethod`.
+    DigestMethod,
+    /// `ds:DigestValue`.
+    DigestValue,
+    /// `ds:SignatureValue`.
+    SignatureValue,
+    /// `ds:KeyInfo`.
+    KeyInfo,
+    /// `ds:X509Certificate`.
+    X509Certificate,
+    /// `xades:SignedProperties`.
+    SignedProperties,
+    /// `xades:SigningCertificate`.
+    SigningCertificate,
+    /// `xades:SigningCertificateV2`.
+    SigningCertificateV2,
+    /// `xades:CertDigest`.
+    CertDigest,
+    /// `xades:IssuerSerial`.
+    IssuerSerial,
+    /// `ds:X509IssuerName`.
+    X509IssuerName,
+    /// `ds:X509SerialNumber`.
+    X509SerialNumber,
+    /// `xades:IssuerSerialV2`.
+    IssuerSerialV2,
+}
+
+impl std::fmt::Display for SignatureElement {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, formatter)
+    }
 }
 
 /// Why a certificate chain did not verify.

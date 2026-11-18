@@ -55,6 +55,13 @@ test = false
 doc = false
 bench = false
 
+[[bin]]
+name = "xades_verify"
+path = "fuzz_targets/xades_verify.rs"
+test = false
+doc = false
+bench = false
+
 # The round trip is the target, so an overflow in the generated amounts must
 # fail loudly instead of wrapping.
 [profile.release]

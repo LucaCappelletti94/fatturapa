@@ -3,9 +3,11 @@
 //! The input is the `XML` of a trusted list as bytes, for example the
 //! Italian list fetched over `HTTPS` from
 //! `https://eidas.agid.gov.it/TL/TSL-IT.xml`. No network access is performed
-//! in this crate, and the `XML` signature of the trusted list itself is not
-//! verified. Fetching the list over `HTTPS` from the issuing authority and
-//! validating the list's own signature are the caller's responsibility.
+//! in this crate, and [`trust_anchors`] reads the list without checking its
+//! `XML` signature. [`crate::signed::verify_xades`] verifies that signature,
+//! under the anchors the caller trusts for the list's signer. Fetching the
+//! list over `HTTPS` from the issuing authority and choosing those anchors
+//! are the caller's responsibility.
 //!
 //! The list format is the ETSI TS 102 231 style used by the current `AgID`
 //! list. The root element is `TrustServiceStatusList`, and each service is a

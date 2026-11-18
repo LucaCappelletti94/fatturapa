@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE p:FatturaElettronica>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>00001</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>ABC1234</CodiceDestinatario>
+      <ContattiTrasmittente/>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>01234567890</IdCodice>
+        </IdFiscaleIVA>
+        <Anagrafica>
+          <Denominazione>SOCIETA' ALPHA SRL</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF19</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIALE ROMA 543</Indirizzo>
+        <CAP>07100</CAP>
+        <Comune>SASSARI</Comune>
+        <Provincia>SS</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <CodiceFiscale>09876543210</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>DITTA BETA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2014-12-18</Data>
+        <Numero>123</Numero>
+        <Causale>LA FATTURA FA RIFERIMENTO AD UNA OPERAZIONE AAAA BBBBBBBBBBBBBBBBBB CCC DDDDDDDDDDDDDDD E FFFFFFFFFFFFFFFFFFFF GGGGGGGGGG HHHHHHH II LLLLLLLLLLLLLLLLL MMM NNNNN OO PPPPPPPPPPP QQQQ RRRR SSSSSSSSSSSSSS</Causale>
+        <Causale>SEGUE DESCRIZIONE CAUSALE NEL CASO IN CUI NON SIANO STATI SUFFICIENTI 200 CARATTERI AAAAAAAAAAA BBBBBBBBBBBBBBBBB</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcquisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>66685</IdDocumento>
+        <NumItem>1</NumItem>
+      </DatiOrdineAcquisto>
+      <DatiContratto>
+	    <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+	    <IdDocumento>123</IdDocumento>
+	    <Data>2012-09-01</Data>
+	    <NumItem>5</NumItem>
+	    <CodiceCUP>123abc</CodiceCUP>
+	    <CodiceCIG>456def</CodiceCIG>
+      </DatiContratto>
+      <DatiTrasporto>
+	    <DatiAnagraficiVettore>				
+	      <IdFiscaleIVA>
+	        <IdPaese>IT</IdPaese>
+	        <IdCodice>24681012141</IdCodice>
+	      </IdFiscaleIVA>
+    	  <Anagrafica>
+	        <Denominazione>Trasporto spa</Denominazione>
+	      </Anagrafica>
+	    </DatiAnagraficiVettore>
+	    <DataOraConsegna>2012-10-22T16:46:12.000+02:00</DataOraConsegna>
+      </DatiTrasporto>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>DESCRIZIONE DELLA FORNITURA</Descrizione>
+        <Quantita>5.00</Quantita>
+        <PrezzoUnitario>1.00</PrezzoUnitario>
+        <PrezzoTotale>5.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>5.00</ImponibileImporto>
+        <Imposta>1.10</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP01</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP01</ModalitaPagamento>
+        <DataScadenzaPagamento>2015-01-30</DataScadenzaPagamento>
+        <ImportoPagamento>6.10</ImportoPagamento>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+<ds:Signature Id="Signature1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/><ds:Reference Id="reference-document" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>qGIMi1MSzcEndYBRJFEEk5mNG2POs1vxntrm4BypWtCnTYnzIef+8Nx+6wpSgL4Wp8K8VdqA6WgUzJEHmjyuGw==</ds:DigestValue></ds:Reference><ds:Reference Id="reference-signedproperties" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>UZlAzjxfkw8BT4nSULE5S0jJMFdIqBv+ohYckeAk38A=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>kDqlrqcEU67duVNuLD5v/8F8t83m+SVyFiIqURQwQqZjhqjHerCwhPTPSRD266eim8EaKaytiZpdoVgKXZxEQvzAxNgbUJVoC50rYQzXST8NHyrnUT7yBGL6Kg1Tox1BVGV5hEWDxxA9sAUvrHpNBC4uunrt1d542ZY+76Eakqqsl4E8xCPxTKB3+HHuY63q5lWOxcCPscnZtYpfjMXW9VbvDQ5xB8fDh+rvrnvfLXS6KFWI8NG4fnDBl5UNKYaVd5PruDveNFbvQwSXjqCPLGPdDlnD0jNxl7nrhhd9eCL8RL2SzQ9ZDQ1iEHq8728xZZ838AeiH3dc4wpF1BowLg==</ds:SignatureValue><ds:KeyInfo Id="KeyInfo1"><ds:X509Data><ds:X509Certificate>MIID6TCCAlGgAwIBAgIUbBe7ImCEH/iWWmDDIktdWPbiuE8wDQYJKoZIhvcNAQELBQAwTzELMAkGA1UEBhMCSVQxFzAVBgNVBAoMDmZhdHR1cmFwYSB0ZXN0MScwJQYDVQQDDB5mYXR0dXJhcGEgdGVzdCBpbnRlcm1lZGlhdGUgQ0EwHhcNMjYxMTA1MjMzMTE2WhcNMzYxMTAzMDEzMTE2WjBKMQswCQYDVQQGEwJJVDEXMBUGA1UECgwOZmF0dHVyYXBhIHRlc3QxIjAgBgNVBAMMGWZhdHR1cmFwYSB0ZXN0IFJTQSBzaWduZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoQPe55wE2GlN36Egn+CuxpVp1nvFNGkqohQvTASrRSMC++zV99i//kvXkztvqLQxAhEunBDSd9bhYWDpJ1pWrHNdfUx4ARzVCN4HOJvI0cOzSRc6sPwJaLb6R+pl14mC5qCthDqF6viMxzO9gS4ha1CMeM5Qc9J2GUmyL8rlYiVAoK5hxDA+rrhHfbSIGcR4nQkGSuJLCMLQim6Mep/M2Y5A+LTkq8Wyd1PxSimr69+ywST+36CcmcPPqNklRvqh81pRySsSeq67xXqf7L+k91Tf2YyX7AkY/sVk/7yQ5+nia27EYmosQJWjXwZcCAfk3bYj+9qQOQ7YTC8dHaBWfAgMBAAGjQjBAMB0GA1UdDgQWBBS/j4MaZTdL9nSaOoxvmGPe3ziSNTAfBgNVHSMEGDAWgBTs1UhcZoBSGpN9bQN6GMhN+YiVIDANBgkqhkiG9w0BAQsFAAOCAYEAU04myZwX/CIDL1cWFUaN+WeSi3ADDZfwj+jo/7r4A4z6n9n1dL8GwAngloHbRhNUv9krm+yjSAnx+EPjfINY0AvMWXiBqru5fkP0mwQE/1QZJ0H22XCxMG1r1KE4xc7Gqxp4vKa6QxIAA3hhQAozuXDLq/pRatEfrO+HOYjW9xI7Qk/4i6KDWnWHkKT5mx+6YfbZKsQ+5OAdOlNVhiAnv6IX7TtqYzU4971CGe/Igr4lGgrqzC9nTn840ONZg9iQ8XI4lrfGz8Ut0KtDwxkey4tRa9fT97GmPUvO+uw4rNeUxzCFM26j9MYzUy5bRa3QGQbz6zb0TUMozQml78kHhKTSM0IiWIDcDdk80TPdsQ46saUNNW6H7k9sIyqv25xMkTcDtyd/tXv54ycI31hfIlt51HGiJmqCCvQBNQv/bdsG240aEzGsHvmBm4TFAj6y/pMwAI6XUoDqnd6FUusk11N5jtEuXjcjDqirJXD9BOcXnfIaRH+KDAHXbNl8yiXW</ds:X509Certificate><ds:X509Certificate>MIIEdDCCAtygAwIBAgIBATANBgkqhkiG9w0BAQsFADBHMQswCQYDVQQGEwJJVDEXMBUGA1UECgwOZmF0dHVyYXBhIHRlc3QxHzAdBgNVBAMMFmZhdHR1cmFwYSB0ZXN0IHJvb3QgQ0EwHhcNMjYxMTA1MjMzMTE2WhcNMzYxMTAzMDEzMTE2WjBPMQswCQYDVQQGEwJJVDEXMBUGA1UECgwOZmF0dHVyYXBhIHRlc3QxJzAlBgNVBAMMHmZhdHR1cmFwYSB0ZXN0IGludGVybWVkaWF0ZSBDQTCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoCggGBALLGAqd0H9ibsAaR2Tcd4+JXXgHihWR2IXZY3MgmV0nVfrzPQ9V0KyUUAx8Wrs7X3EMto3+TmLHJMbFidoapn3bCAS80L7p+tmA7mZCQYFeIEQ8ploHSxz171t8Fy8nhS1vsn14Hp9b2Eqr5M1rjXZK7iQe49SmrjQc1ilPdFCR7w+VAirBUWHucmMxKnV7FTwJGdLEW2+e8W05QEpFaz8jVYzldneeWgOa5lGOG1pFLbwMw9r2aNp9kmhABKtPs7ZTUHtC4pDntpmVtxrn6D8+7zF8a4qHBQkqkuwK9HfXe5ZBd0q0d1fnyTIJpJi4TIMHHL36H8OuzVw9yiuxTo+h9S7AbvO/PuNgRgUKG3Q4fBTlLtkpUCzqK//JN5CeJ5HAisxZzeA42TGEkKUcOE55PtUi8gYj9OdxDqxlorTmf3gcVLkxyB/ab7raTM+Yi76QzrJ8sYht9x39woIaTABC7TUirbACc8ct2fXv/HoHUkdHNsjDx8qfLwfXgiK5luQIDAQABo2MwYTAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBBjAdBgNVHQ4EFgQU7NVIXGaAUhqTfW0DehjITfmIlSAwHwYDVR0jBBgwFoAUNJMgxiWScg7BL76eSE2LZs/KbZYwDQYJKoZIhvcNAQELBQADggGBABztaBjRB3Zx3JWDzOeWKjewWobKoOHrPYlCJR7dKAA9v2F6zSh7gNjqDlWxVf8XJP/l4Ifz5Qw73bfmbC7xk2ssXYOW/v82P0AulNmB9XKLzaAsvN/P157uYL18caYJNsJDnSpKDA6R7lMi8lzn1fmJ3Qeoelu57nPtWFpZnEfsDzy3osusGOVZQQMSVk2rhvHJWvb4ymeLXZQrqSSHR8GVuu79kngHQKMFCm2xzevchLbMs81VTL0tGaDS7wdaRTY9Xqs3G/TEktSFCJ1Bi35YsjnwSuI0m6Yn0JI0phydmUMQhS01ZY2AY436MVGCK0KFbhCObD8i8862Ptv4yVSNDEFSE94qPxVxo2Rd5c0/pALJBBp80nzUzuWBiXX1DgzMwCB7fX0/QJmto+lJEXBPaVpH9u8D47ol6yQMsBL/2BYgr8AoJ+zsLkIAadwESvaJBGkQV1IgFihgzr6VyiAkTRIIxRDLCMn7+VwEShz78DCdIE4SvbtJpljAznVJXQ==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties1"><xades:SignedSignatureProperties><xades:SigningTime>2026-11-17T10:00:00Z</xades:SigningTime><xades:SigningCertificateV2><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>zjzSHRckhJVZlmMoj+qQ6ZFjcYwBjZe69JzLIpnyxOlB1rcjIrNzBNDrL4FpxY3g9A+q+JyizSeCuzyZ/qfCjg==</ds:DigestValue></xades:CertDigest><xades:IssuerSerialV2>MGswU6RRME8xCzAJBgNVBAYTAklUMRcwFQYDVQQKDA5mYXR0dXJhcGEgdGVzdDEnMCUGA1UEAwweZmF0dHVyYXBhIHRlc3QgaW50ZXJtZWRpYXRlIENBAhRsF7siYIQf+JZaYMMiS11Y9uK4Tw==</xades:IssuerSerialV2></xades:Cert></xades:SigningCertificateV2></xades:SignedSignatureProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></p:FatturaElettronica>

@@ -1,8 +1,8 @@
 # fuzz
 
-`cargo fuzz` targets for the readers, the round trip and the file name
-parsers. The local corpus, crash artifacts, coverage and build output stay
-out of the repository through `.gitignore`.
+`cargo fuzz` targets for the readers, the round trip, the file name
+parsers and the `XAdES` verifier. The local corpus, crash artifacts,
+coverage and build output stay out of the repository through `.gitignore`.
 
 ## Seed Corpus
 
