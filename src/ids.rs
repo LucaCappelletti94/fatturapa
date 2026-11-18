@@ -3037,6 +3037,23 @@ mod tests {
         );
     }
 
+    /// Every `BolloExemption` writes its `NB` code and reads back from it
+    /// through every conversion, and a code outside the guide is refused.
+    #[test]
+    fn bollo_exemption_codes_round_trip() {
+        for exemption in BolloExemption::ALL {
+            let code = String::from(exemption);
+            assert_eq!(code, exemption.code());
+            assert_eq!(BolloExemption::try_from(code.as_str()), Ok(exemption));
+            assert_eq!(BolloExemption::try_from(code), Ok(exemption));
+        }
+        assert_eq!(
+            BolloExemption::try_from("NB4".to_string()),
+            Err(IdError::BolloExemption("NB4".to_string())),
+            "NB4 is not a code of the guide"
+        );
+    }
+
     /// Every variant of `Natura::ALL` carries its code and re-parses from
     /// it, and the retired generic `N2` is refused.
     #[test]

@@ -3592,6 +3592,55 @@ mod tests {
         );
     }
 
+    /// The art. 7-ter line writes its stamp duty exemption in the
+    /// `AltriDatiGestionali`, and a code outside the guide fails the line.
+    #[test]
+    fn the_seven_ter_line_carries_its_bollo_exemption() {
+        let line = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .bollo_exemption("NB1")
+            .build()
+            .expect("the exempt line builds");
+        let doc = Invoice::cross_border_services(&seller(), &buyer_us(), line)
+            .progressivo("00001")
+            .date("2026-11-04")
+            .numero("00012")
+            .build()
+            .expect("the exempt invoice builds");
+        let body = &doc.content.fattura_elettronica_body[0].content;
+        let gestionali = &body.dati_beni_servizi.content.dettaglio_linee[0]
+            .content
+            .altri_dati_gestionali;
+        assert_eq!(gestionali.len(), 1);
+        assert_eq!(gestionali[0].content.tipo_dato, "NB1");
+        assert!(
+            body.dati_generali
+                .content
+                .dati_generali_documento
+                .content
+                .dati_bollo
+                .is_none(),
+            "the exempt 150.00 owes no stamp duty"
+        );
+
+        let failing = SevenTerLine::builder()
+            .description("SERVIZIO")
+            .bollo_exemption("NB4")
+            .unit_price(Amount(Decimal::new(15000, 2)))
+            .build();
+        assert!(
+            matches!(
+                failing,
+                Err(BuildError::Id {
+                    field: "bollo_exemption",
+                    error: IdError::BolloExemption(..)
+                })
+            ),
+            "{failing:?}"
+        );
+    }
+
     /// A failing `progressivo` is reported by the `build` of every
     /// document builder, and the later setters skip their conversion.
     #[test]
