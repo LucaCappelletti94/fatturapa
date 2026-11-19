@@ -30,7 +30,7 @@ fn agid_list_parses_to_anchors() {
     );
     for anchor in &anchors {
         assert!(
-            anchor.tbs_certificate.extensions.is_some(),
+            anchor.tbs_certificate().extensions().is_some(),
             "a trust anchor carries its extensions"
         );
     }
@@ -43,8 +43,8 @@ fn banca_d_italia_is_present() {
     let mut found = false;
     for anchor in &anchors {
         let subject = anchor
-            .tbs_certificate
-            .subject
+            .tbs_certificate()
+            .subject()
             .to_der()
             .expect("the subject encodes");
         if subject
@@ -96,8 +96,8 @@ fn synthetic_list_keeps_only_the_granted_qc_ca() {
     let ca_pem = fs::read("tests/fixtures/ca.pem").expect("the fixture is readable");
     let ca = Certificate::from_pem(ca_pem.as_slice()).expect("the fixture is a PEM certificate");
     assert_eq!(
-        anchors[0].tbs_certificate.subject,
-        ca.tbs_certificate.subject
+        anchors[0].tbs_certificate().subject(),
+        ca.tbs_certificate().subject()
     );
 }
 
@@ -144,12 +144,12 @@ fn agid_list_leaves_out_the_pointer_certificates() {
     for anchor in &anchors {
         assert!(
             !anchor
-                .tbs_certificate
-                .subject
+                .tbs_certificate()
+                .subject()
                 .to_string()
                 .contains("EUROPEAN COMMISSION"),
             "{}",
-            anchor.tbs_certificate.subject
+            anchor.tbs_certificate().subject()
         );
     }
 }

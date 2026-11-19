@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12" xsi:schemaLocation="http﻿<?x&; veoirsn,,,,,,,,,,,,,,="1.0" encoding="UTF-8"?>
+<ns3:FatturaElettronica xmlns:ns3="http://ivase0rvizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/ersione="FPR12">
+  <FatturaElettronicaHeadero 																					n1e><		<dPaese>IT</IdPaese>
+        <IdCodice>01234567890</IdCodice>
+      </IdTrasmittente>
+      <ProgrFFFFFFFFFFF GGGGGGGGGG HHHHHHH II LLLLLLLLLLLLLLLLL MMM NNNNN OO PPPPPPPPPPP QQQQ RRRR SSSSSSSSSSSSSS</Causale>
+        <Causale>SEGUE DESCRIZIONE CAUSALE NEL CASO IN CUI NON SIANO STATI SUFFICIENTI 200 CARATTERI AAAAAAAAAAA BBBBBBBBBBBBBBBBB</Causale>
+      </DatiGeneraliDocumento>
+      <DatiOrdineAcuqisto>
+        <RiferimentoNumeroLinea>1</RiferimentoNumeroLinea>
+        <IdDocumento>66685</IdDocumento>
+        <NumItem>1</NumItem>
+      </DatiOrdineAcquisto>
+      <DatiContratto>
+	    <RiferimentoNumes/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/ersione="FPR12">
+  <FatturaElettronicaHeadero 																					n1e><		<dPaese>IT</IdPaese>
+        <IdCodierties></xades:QualifyingProperties></ds:Objec>/:<dstSignature></p:FatturaElettronica>

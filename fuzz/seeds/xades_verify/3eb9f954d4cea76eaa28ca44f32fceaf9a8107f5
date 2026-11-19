@@ -1,0 +1,32 @@
+þÿxml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <!-- a comment the document reference doesÿÿÿÿÿÿÿest --><FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCo     <Anagrafica>
+          <Denominazione>DITTA BETA</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+      /  <Indirizzo>VIA TORINO 38-B</Indirizzo>
+        <CAP>00145</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazionð>
+      </Sede>
+    </Cessiona45</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2014-12-18</Data>
+        <Numero>123</Numero>
+        <Causale>LA FATTURA FA RIFERIMENTO AD UNA OPERAZIONE AAAA BBBxmldsig-more#ecdsa-sha384"/><ds:Reference Id="reference-document" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/4ymeLXZQrqSSHR8GVuu79kngHQKMFCm2xzevchLbMs92VTL0tGaDS7wdaRTY9Xqs3G/TEktSFCJ1Bi35YsjnwSuI0m6Yn0JI0phydmUMQhS01ZY2AY436MVGCK0KFbhCObD8i8862Ptv4yVSNDEFSE94qPxVxo2Rd5c0/pALJBBp80nzUzuWBiXX1DgzMwCB7fX0/QJmto+lJEXBPaVpH9u8D47ol6yQMsBL/2BYgr8AoJ+zsLkIAadwESvaJBGkQV1IgFihgzr6VyiAkTRIIxRDLCMn7+VwEShz78DCdIE4SvbtJpljAznVJXQ==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#Signature1"><xades:SignedProperties Id="SignedProperties1"><xades:SignedSignatureProperties><xades:SigningTime>2026-11-17T10:00:00Z</xades:SigningTime><xades:SigningCertificateV2><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>glc02LO/0/d5vOA+DU3MsLjFv/NLOK8wGNW3vPIJ/7Y=</ds:DigestValue></xades:CertDigest></xades:Cert></xades:SigningCertificateV2></xades:SignedSignatureProperties></xades:SignedProperties></xades:re><ds:Sign`tureettronica>

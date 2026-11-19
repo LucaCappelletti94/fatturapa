@@ -1,11 +1,11 @@
-//! Unwrapping and verification of signed `.xml.p7m` files.
+//! Unwrapping and verification of signed `.xml.p7m` files, and verification
+//! of `XAdES` signed `.xml` files.
 //!
 //! A signed `FatturaPA` document is a `CAdES` `CMS SignedData` structure
 //! (RFC 5652) around the `XML`. The input is raw `DER` or `base64` text, the
 //! two forms SDI and mailers deliver. Real signers also write the structure
 //! in `BER`, with indefinite length constructs and an `eContent` split into
-//! chunks, which the module re-encodes as `DER` with `rasn` before the
-//! verification.
+//! fragments, which the module reads with the `BER` rules of `der`.
 //!
 //! [`verify`] checks every `SignerInfo` of the structure. For each one it
 //! checks that the signed attributes carry a `content-type` matching the
@@ -16,6 +16,20 @@
 //! certificate's `keyUsage` and `ESS signing-certificate` and
 //! `signing-certificate-v2` signed attributes when present, and builds the
 //! chain from the signer certificate to one of the trust anchors.
+//!
+//! [`verify_xades`] checks every `XAdES-BES` enveloped `ds:Signature` child
+//! of the document element. Each reference is a same-document `""` or
+//! `#id` URI, transformed by `enveloped-signature`, the `xmldsig-filter2`
+//! subtraction of the signatures and canonical `XML` 1.0 or exclusive
+//! canonicalization 1.0, and digested with `SHA-256`, `SHA-384` or
+//! `SHA-512`. One reference must cover the whole document and one the
+//! `xades:SignedProperties` of the signature. The signer certificate is the
+//! `ds:KeyInfo` certificate that the `SigningCertificate` or
+//! `SigningCertificateV2` property references, or the only one when a
+//! reference signs the `ds:KeyInfo` instead. The `ds:SignatureValue` is
+//! checked over the canonical `ds:SignedInfo` with the algorithms of
+//! [`verify`], and the time, key usage and chain checks are the same. A
+//! document with a `DOCTYPE` is refused.
 //!
 //! The hash of the signed attributes and of the content is taken from the
 //! `digestAlgorithm` of the `SignerInfo`. When the signature algorithm names
@@ -40,7 +54,6 @@
 //! needs it performs it itself, for example against the `CRL` distribution
 //! points of the chain.
 
-use std::borrow::Cow;
 use std::time::Duration;
 
 use base64::Engine;
@@ -48,8 +61,8 @@ use cms::cert::CertificateChoices;
 use cms::content_info::ContentInfo;
 use cms::signed_data::{SignedData, SignerIdentifier, SignerInfo};
 use const_oid::db;
-use der::asn1::{AnyRef, ObjectIdentifier, OctetString};
-use der::{Any, Decode, Encode, Tag, Tagged};
+use der::asn1::{AnyRef, ContextSpecific, ObjectIdentifier, OctetString};
+use der::{Any, Decode, Encode, EncodingRules, Reader, SliceReader, Tag, TagNumber, Tagged};
 use digest::Digest;
 use jiff::Timestamp;
 use rustls_pki_types::{CertificateDer, SignatureVerificationAlgorithm, TrustAnchor, UnixTime};
@@ -69,6 +82,11 @@ use x509_cert::serial_number::SerialNumber;
 use x509_cert::time::Time;
 
 use crate::Document;
+
+mod c14n;
+mod xades;
+
+pub use xades::verify_xades;
 
 /// The named curve `P-384`.
 const SECP_384_R_1: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.132.0.34");
@@ -206,9 +224,157 @@ pub enum SignedError {
     #[error("the signer certificate keyUsage does not permit signing")]
     KeyUsage,
 
+    /// The input is not a well-formed `XML` document in a supported
+    /// encoding.
+    #[error("not an XML document: {0}")]
+    NotXml(String),
+
+    /// The document carries a `DOCTYPE` declaration, refused so that no
+    /// entity or attribute default can change what was signed.
+    #[error("the document carries a DOCTYPE declaration")]
+    DoctypeRefused,
+
+    /// The document element has no `ds:Signature` child.
+    #[error("the document carries no XML signature")]
+    NotSigned,
+
+    /// No `ds:Reference` covers the whole document.
+    #[error("no reference covers the whole document")]
+    DocumentNotCovered,
+
+    /// No `ds:Reference` covers the `xades:SignedProperties` of the
+    /// signature, or the signature has none.
+    #[error("the signature does not sign its XAdES SignedProperties")]
+    MissingSignedProperties,
+
+    /// Neither a signing certificate property nor a signed `ds:KeyInfo`
+    /// protects the signer certificate.
+    #[error(
+        "neither a signing certificate property nor a signed KeyInfo protects the signer certificate"
+    )]
+    SignerCertificateNotProtected,
+
+    /// A `ds:Signature` lacks a required part or carries an unreadable one.
+    #[error("malformed XML signature: {0}")]
+    MalformedSignature(SignatureDefect),
+
+    /// A `ds:Reference` names a transform the verifier does not process.
+    #[error("unsupported transform {0}")]
+    UnsupportedTransform(String),
+
+    /// A `ds:Reference` URI is neither `""` nor `#id`, `None` when the
+    /// reference has no URI.
+    #[error("unsupported reference URI {0:?}")]
+    UnsupportedReference(Option<String>),
+
+    /// No element carries the id a `ds:Reference` URI names.
+    #[error("no element has the referenced id {0}")]
+    UnresolvedReference(String),
+
+    /// More than one element carries the id a `ds:Reference` URI names.
+    #[error("more than one element has the referenced id {0}")]
+    AmbiguousId(String),
+
+    /// The digest of a reference does not match its `ds:DigestValue`.
+    #[error("the digest of {0} does not match the signed digest")]
+    ReferenceDigestMismatch(ReferenceTarget),
+
     /// The certificate chain does not verify.
     #[error("the certificate chain does not verify: {0}")]
     Chain(#[from] ChainError),
+}
+
+/// The content a `ds:Reference` names.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ReferenceTarget {
+    /// `URI=""`, the whole document.
+    Document,
+    /// `URI="#id"`, the element carrying the id.
+    Element(String),
+}
+
+impl std::fmt::Display for ReferenceTarget {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Document => formatter.write_str("the document"),
+            Self::Element(id) => write!(formatter, "#{id}"),
+        }
+    }
+}
+
+/// What is wrong with the structure of a `ds:Signature`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum SignatureDefect {
+    /// A required element is absent.
+    #[error("no {0} element")]
+    Missing(SignatureElement),
+    /// An element allowed once appears more than once.
+    #[error("more than one {0} element")]
+    Repeated(SignatureElement),
+    /// An element names no `Algorithm`.
+    #[error("the {0} element names no Algorithm")]
+    MissingAlgorithm(SignatureElement),
+    /// The text of an element is not `base64`.
+    #[error("the {0} element is not base64")]
+    NotBase64(SignatureElement),
+    /// The decoded content of an element is not the `DER` structure it
+    /// carries.
+    #[error("the {0} element is not DER")]
+    NotDer(SignatureElement),
+}
+
+/// An element of a `ds:Signature` the verifier reads, each variant named
+/// as the local name of its element.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SignatureElement {
+    /// `ds:SignedInfo`.
+    SignedInfo,
+    /// `ds:CanonicalizationMethod`.
+    CanonicalizationMethod,
+    /// `ds:SignatureMethod`.
+    SignatureMethod,
+    /// `ds:Reference`.
+    Reference,
+    /// `ds:Transforms`.
+    Transforms,
+    /// `ds:Transform`.
+    Transform,
+    /// The `XPath` of an `xmldsig-filter2` transform.
+    XPath,
+    /// The `InclusiveNamespaces` of an exclusive canonicalization.
+    InclusiveNamespaces,
+    /// `ds:DigestMethod`.
+    DigestMethod,
+    /// `ds:DigestValue`.
+    DigestValue,
+    /// `ds:SignatureValue`.
+    SignatureValue,
+    /// `ds:KeyInfo`.
+    KeyInfo,
+    /// `ds:X509Certificate`.
+    X509Certificate,
+    /// `xades:SignedProperties`.
+    SignedProperties,
+    /// `xades:SigningCertificate`.
+    SigningCertificate,
+    /// `xades:SigningCertificateV2`.
+    SigningCertificateV2,
+    /// `xades:CertDigest`.
+    CertDigest,
+    /// `xades:IssuerSerial`.
+    IssuerSerial,
+    /// `ds:X509IssuerName`.
+    X509IssuerName,
+    /// `ds:X509SerialNumber`.
+    X509SerialNumber,
+    /// `xades:IssuerSerialV2`.
+    IssuerSerialV2,
+}
+
+impl std::fmt::Display for SignatureElement {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, formatter)
+    }
 }
 
 /// Why a certificate chain did not verify.
@@ -322,8 +488,7 @@ impl VerifiedSignature {
 /// Fails with [`SignedError`] when the input is not a `CMS SignedData`
 /// structure or carries no encapsulated content.
 pub fn unwrap(input: &[u8]) -> Result<Vec<u8>, SignedError> {
-    let signed_data = parse_signed_data(input)?;
-    encapsulated_content(&signed_data)
+    parse_signed_data(input).map(|(_, content)| content)
 }
 
 /// Verifies a `CAdES` signed file and returns its content, signer, chain and
@@ -345,8 +510,7 @@ pub fn verify(
     anchors: &[Certificate],
     signing_time: Option<Timestamp>,
 ) -> Result<VerifiedSignature, SignedError> {
-    let signed_data = parse_signed_data(input)?;
-    let content = encapsulated_content(&signed_data)?;
+    let (signed_data, content) = parse_signed_data(input)?;
     let cms_certs = cms_certificates(&signed_data);
     let signer_infos = &signed_data.signer_infos.0;
     if signer_infos.is_empty() {
@@ -373,25 +537,50 @@ pub fn verify(
     })
 }
 
-/// Parses the input as the `DER` of a `CMS ContentInfo` of `SignedData`.
-fn parse_signed_data(input: &[u8]) -> Result<SignedData, SignedError> {
-    let der = cms_bytes(input)?;
-    let content_info = ContentInfo::from_der(der.as_ref())
-        .map_err(|_| SignedError::NotCms("the input is not a CMS structure".to_owned()))?;
+/// Parses the input as a `CMS ContentInfo` of `SignedData`, in `BER` or
+/// `DER`, and returns it with its encapsulated content.
+fn parse_signed_data(input: &[u8]) -> Result<(SignedData, Vec<u8>), SignedError> {
+    let content_info = content_info(input)?;
     if content_info.content_type != db::rfc5911::ID_SIGNED_DATA {
         return Err(SignedError::NotCms(format!(
             "the content type {} is not SignedData",
             content_info.content_type
         )));
     }
-    // The `Any` content holds the `SignedData` value without its outer
-    // `SEQUENCE` header, so re-encode the full `TLV` before decoding.
-    let signed_data_der = content_info
+    let malformed = |_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned());
+    let signed_data = content_info
         .content
-        .to_der()
-        .map_err(|_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned()))?;
-    SignedData::from_der(&signed_data_der)
-        .map_err(|_| SignedError::NotCms("the CMS SignedData structure is malformed".to_owned()))
+        .decode_as_encoding::<SignedData>(EncodingRules::Ber)
+        .map_err(malformed)?;
+    let econtent_type = &signed_data.encap_content_info.econtent_type;
+    if *econtent_type != db::rfc5911::ID_DATA {
+        return Err(SignedError::UnsupportedContentType(
+            econtent_type.to_string(),
+        ));
+    }
+    let content = econtent(&content_info.content)
+        .map_err(malformed)?
+        .ok_or(SignedError::DetachedContent)?;
+    Ok((signed_data, content.into_bytes().into_vec()))
+}
+
+/// The `eContent` of the `SignedData` in `signed_data`, its `BER` fragments
+/// joined.
+///
+/// `cms` holds `eContent` as an `Any`, which drops the constructed bit of a
+/// fragmented `OCTET STRING`, so the string is read again from the bytes.
+fn econtent(signed_data: &Any) -> der::Result<Option<OctetString>> {
+    let mut reader = SliceReader::new_with_encoding_rules(signed_data.value(), EncodingRules::Ber)?;
+    // Skips the version, the digest algorithms and then the content type.
+    AnyRef::decode(&mut reader)?;
+    AnyRef::decode(&mut reader)?;
+    reader.sequence(|encapsulated| {
+        AnyRef::decode(encapsulated)?;
+        Ok(
+            ContextSpecific::<OctetString>::decode_explicit(encapsulated, TagNumber(0))?
+                .map(|field| field.value),
+        )
+    })
 }
 
 /// The certificates of the `CMS`, in their declared order.
@@ -407,13 +596,11 @@ fn cms_certificates(signed_data: &SignedData) -> Vec<Certificate> {
     certificates
 }
 
-/// The `DER` of the `CMS` structure in `input`, with any `BER` form
-/// normalized to `DER`. The input is the raw bytes of the structure or
-/// `base64` text, and the bytes are borrowed when they are already strict
-/// `DER`.
-fn cms_bytes(input: &[u8]) -> Result<Cow<'_, [u8]>, SignedError> {
-    if let Some(der) = cms_structure(input) {
-        return Ok(der);
+/// The `CMS ContentInfo` in `input`, which holds the raw bytes of the
+/// structure or `base64` text.
+fn content_info(input: &[u8]) -> Result<ContentInfo, SignedError> {
+    if let Ok(content_info) = ContentInfo::from_ber(input) {
+        return Ok(content_info);
     }
     // The bytes are not a `CMS` structure: read them as `base64` text.
     let stripped: Vec<u8> = input
@@ -430,43 +617,8 @@ fn cms_bytes(input: &[u8]) -> Result<Cow<'_, [u8]>, SignedError> {
         .decode(&stripped)
         .or_else(|_| base64::engine::general_purpose::STANDARD_NO_PAD.decode(&stripped))
         .map_err(|_| SignedError::NotCms("the base64 text does not decode".to_owned()))?;
-    match cms_structure(&decoded) {
-        // The bytes need no rewrite, but they are owned here, so copy them.
-        Some(Cow::Borrowed(_)) => Ok(Cow::Owned(decoded)),
-        Some(Cow::Owned(der)) => Ok(Cow::Owned(der)),
-        None => Err(SignedError::NotCms(
-            "the input is not a CMS structure".to_owned(),
-        )),
-    }
-}
-
-/// The `DER` of `input` as a `CMS` structure, with any `BER` form normalized
-/// to `DER`, or `None` when the input is not a `CMS` structure.
-fn cms_structure(input: &[u8]) -> Option<Cow<'_, [u8]>> {
-    // The `cms` crate reads only strict `DER`, but real signers write `BER`.
-    let strict = ContentInfo::from_der(input).ok();
-    if strict.as_ref().is_some_and(signed_data_parses) {
-        return Some(Cow::Borrowed(input));
-    }
-    // `rasn` reads `BER`; re-encode the `SignedData` as `DER`.
-    let content_info = rasn::ber::decode::<rasn_cms::ContentInfo>(input).ok()?;
-    let signed_data =
-        rasn::ber::decode::<rasn_cms::SignedData>(content_info.content.as_bytes()).ok()?;
-    let signed_data_der = rasn::der::encode(&signed_data).ok()?;
-    let fresh = rasn_cms::ContentInfo {
-        content_type: content_info.content_type,
-        content: rasn::types::Any::new(signed_data_der),
-    };
-    Some(Cow::Owned(rasn::der::encode(&fresh).ok()?))
-}
-
-/// Whether the `SignedData` of `content_info` reads as strict `DER`, with a
-/// primitive `eContent`.
-fn signed_data_parses(content_info: &ContentInfo) -> bool {
-    content_info
-        .content
-        .to_der()
-        .is_ok_and(|signed_data_der| SignedData::from_der(&signed_data_der).is_ok())
+    ContentInfo::from_ber(&decoded)
+        .map_err(|_| SignedError::NotCms("the input is not a CMS structure".to_owned()))
 }
 
 /// A character of the `base64` alphabet, padding included.
@@ -475,22 +627,6 @@ const fn is_base64_char(byte: u8) -> bool {
         byte,
         b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'+' | b'/' | b'='
     )
-}
-
-/// The encapsulated content of the `SignedData`, or the detached-content
-/// error.
-fn encapsulated_content(signed_data: &SignedData) -> Result<Vec<u8>, SignedError> {
-    let encapsulated = &signed_data.encap_content_info;
-    if encapsulated.econtent_type != db::rfc5911::ID_DATA {
-        return Err(SignedError::UnsupportedContentType(
-            encapsulated.econtent_type.to_string(),
-        ));
-    }
-    encapsulated
-        .econtent
-        .as_ref()
-        .map(|any| any.value().to_vec())
-        .ok_or(SignedError::DetachedContent)
 }
 
 /// Verifies one `SignerInfo` and returns the signer certificate, the chain
@@ -511,8 +647,8 @@ fn verify_signer_info(
     let signer = cms_certs
         .iter()
         .find(|certificate| {
-            names_match(&certificate.tbs_certificate.issuer, &sid.issuer)
-                && certificate.tbs_certificate.serial_number == sid.serial_number
+            names_match(certificate.tbs_certificate().issuer(), &sid.issuer)
+                && *certificate.tbs_certificate().serial_number() == sid.serial_number
         })
         .cloned()
         .ok_or(SignedError::SignerCertificateNotFound)?;
@@ -614,7 +750,7 @@ fn parse_time(value: &Any) -> Result<Timestamp, SignedError> {
 
 /// The `EC` curve of the certificate's public key, when it is an `EC` key.
 fn ecdsa_curve(certificate: &Certificate) -> Option<ObjectIdentifier> {
-    let spki = &certificate.tbs_certificate.subject_public_key_info;
+    let spki = certificate.tbs_certificate().subject_public_key_info();
     if spki.algorithm.oid != db::rfc5912::ID_EC_PUBLIC_KEY {
         return None;
     }
@@ -720,7 +856,7 @@ fn signature_algorithm(
 /// The signer certificate's `keyUsage` extension, when present, must permit
 /// signing.
 fn key_usage_permits_signing(signer: &Certificate) -> Result<(), SignedError> {
-    match signer.tbs_certificate.get::<KeyUsage>() {
+    match signer.tbs_certificate().get_extension::<KeyUsage>() {
         Ok(None) => Ok(()),
         Ok(Some((_, key_usage))) => {
             if key_usage.digital_signature() || key_usage.non_repudiation() {
@@ -814,11 +950,11 @@ fn ess_v2_references(value: &Any, signer_der: &[u8], signer: &Certificate) -> bo
 /// issuer and serial number of `signer`.
 fn issuer_serial_matches(issuer_serial: Option<&IssuerSerial>, signer: &Certificate) -> bool {
     issuer_serial.is_none_or(|issuer_serial| {
-        issuer_serial.serial_number == signer.tbs_certificate.serial_number
+        issuer_serial.serial_number == *signer.tbs_certificate().serial_number()
             && matches!(
                 issuer_serial.issuer.as_slice(),
                 [GeneralName::DirectoryName(issuer)]
-                    if names_match(issuer, &signer.tbs_certificate.issuer)
+                    if names_match(issuer, signer.tbs_certificate().issuer())
             )
     })
 }
@@ -826,24 +962,27 @@ fn issuer_serial_matches(issuer_serial: Option<&IssuerSerial>, signer: &Certific
 /// Whether `left` and `right` name the same entity per RFC 5280 section 7.1, with `PrintableString` and `UTF8String` values compared without regard to case or white space runs.
 fn names_match(left: &Name, right: &Name) -> bool {
     left == right
-        || (left.0.len() == right.0.len()
-            && left.0.iter().zip(&right.0).all(|(left_rdn, right_rdn)| {
-                left_rdn.0.len() == right_rdn.0.len()
-                    && left_rdn.0.iter().zip(right_rdn.0.iter()).all(
-                        |(left_attribute, right_attribute)| {
-                            left_attribute.oid == right_attribute.oid
-                                && (left_attribute.value == right_attribute.value
-                                    || matches!(
-                                        (
-                                            directory_text(&left_attribute.value),
-                                            directory_text(&right_attribute.value),
-                                        ),
-                                        (Some(left_text), Some(right_text))
-                                            if folded(left_text).eq(folded(right_text))
-                                    ))
-                        },
-                    )
-            }))
+        || (left.len() == right.len()
+            && left
+                .iter_rdn()
+                .zip(right.iter_rdn())
+                .all(|(left_rdn, right_rdn)| {
+                    left_rdn.len() == right_rdn.len()
+                        && left_rdn.iter().zip(right_rdn.iter()).all(
+                            |(left_attribute, right_attribute)| {
+                                left_attribute.oid == right_attribute.oid
+                                    && (left_attribute.value == right_attribute.value
+                                        || matches!(
+                                            (
+                                                directory_text(&left_attribute.value),
+                                                directory_text(&right_attribute.value),
+                                            ),
+                                            (Some(left_text), Some(right_text))
+                                                if folded(left_text).eq(folded(right_text))
+                                        ))
+                            },
+                        )
+                }))
 }
 
 /// The text of a `PrintableString` or `UTF8String` attribute value.
@@ -976,8 +1115,9 @@ fn verify_chain(
     let intermediates: Vec<CertificateDer<'_>> = cms_certs
         .iter()
         .filter(|certificate| {
-            !(certificate.tbs_certificate.issuer == leaf.tbs_certificate.issuer
-                && certificate.tbs_certificate.serial_number == leaf.tbs_certificate.serial_number)
+            !(certificate.tbs_certificate().issuer() == leaf.tbs_certificate().issuer()
+                && certificate.tbs_certificate().serial_number()
+                    == leaf.tbs_certificate().serial_number())
         })
         .map(Certificate::to_der)
         .collect::<Result<Vec<Vec<u8>>, _>>()
@@ -1027,8 +1167,8 @@ fn verify_chain(
         .iter()
         .find(|certificate| {
             certificate
-                .tbs_certificate
-                .subject_public_key_info
+                .tbs_certificate()
+                .subject_public_key_info()
                 .to_der()
                 .ok()
                 .as_deref()
@@ -1048,7 +1188,7 @@ fn issuers_may_sign_certificates(path: &VerifiedPath<'_>) -> Result<(), WebpkiEr
     for certificate in path.intermediate_certificates() {
         let certificate =
             Certificate::from_der(certificate.der().as_ref()).map_err(|_| WebpkiError::BadDer)?;
-        match certificate.tbs_certificate.get::<KeyUsage>() {
+        match certificate.tbs_certificate().get_extension::<KeyUsage>() {
             Ok(None) => {}
             Ok(Some((_, key_usage))) if key_usage.key_cert_sign() => {}
             _ => return Err(WebpkiError::EndEntityUsedAsCa),

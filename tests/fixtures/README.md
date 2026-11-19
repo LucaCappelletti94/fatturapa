@@ -1,8 +1,10 @@
 # Test fixtures
 
-The `.key` files are the private keys of a throwaway test PKI that exists only to sign these fixtures. They protect nothing and are published on purpose. `generate.sh` recreates the whole PKI and every signed `.p7m` from the official sample invoice.
+The `.key` files are the private keys of a throwaway test PKI that exists only to sign these fixtures. They protect nothing and are published on purpose. `generate.sh` recreates the whole PKI, every signed `.p7m` from the official sample invoice and, through `xades/generate.py`, every `XAdES` invoice. That script needs Python with `lxml` and `cryptography`.
 
 `TSL-IT.xml` is AgID's Italian trusted list, downloaded from `https://eidas.agid.gov.it/TL/TSL-IT.xml`. `tsl-synthetic.xml` is a minimal hand-written list for the service status and type rules.
+
+The invoices in `xades/` carry `XAdES` enveloped signatures over the official sample invoice, made with the RSA, ECDSA, P-384 and expired signers of this PKI by `lxml` and `cryptography`, so their canonical bytes come from an implementation other than the crate's. `sdi-rsa.xml`, `tsl-rsa-sha512.xml`, `inclusive-ec.xml`, `comments-ec384.xml`, `inclusive-rsa-sha384.xml` and `foreign-signature-element.xml` verify, one per signature shape. Every other file changes one thing in a verifying shape and is named after it.
 
 The hand-written invoices in `invoices/` are built against the specification with fictitious parties only. Every `partita IVA` and foreign identifier is a synthetic check-valid number, never a real company's number. The foreign seats carry the `CAP` `00000` and the foreign postal code inside the `Indirizzo`, the form the Agenzia FAQ prescribes.
 

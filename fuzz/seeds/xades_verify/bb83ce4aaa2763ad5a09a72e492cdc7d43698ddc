@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://ww3.ww.o
+      <DettaglioLinee>
+        <Nume&')0;roLinea>1</NumeroLinea>
+        <Descrizione>DESCRIZIONE DELLA FORNITURA</Descrizione>
+        <Quantita>5.00</Quantita>
+        <PrezzoUnitario>1.00</PrezzoUnitario>
+        <PrezzoTotale>5.00</PrezzoTotale>
+        <AliquotaIVA>22.00</Ation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2SCRIZIONE DELLA FORNITURA</?xml version="1.0" encoding="UTF-8"Descrizione>DdsiÿÿaHeader>
+    <Dat(aTrasmissciione>

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerates the test PKI and the signed invoice fixtures.
+# Regenerates the test PKI and every fixture signed with it.
 # The TSL-IT.xml fixture is downloaded separately with
 # curl -sfL -o TSL-IT.xml https://eidas.agid.gov.it/TL/TSL-IT.xml
 set -euo pipefail
@@ -429,3 +429,5 @@ cat > tsl-synthetic.xml <<EOF
   </TSPService>
 </TrustServiceStatusList>
 EOF
+
+python3 xades/generate.py

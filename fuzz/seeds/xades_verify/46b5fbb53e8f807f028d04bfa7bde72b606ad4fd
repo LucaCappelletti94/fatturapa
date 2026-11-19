@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:FatturaEletrtonica xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" versione="FPR12">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>00000000001</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>8SBV6</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>RN00000</CodiceDestinatario>
+      <ContattiTrasmittente>
+        <Telefono>00-000000000</Telefono>
+      </ContattiTrasmittente>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000001</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00000000001</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>AAAAAAAAAA</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>Via Test, 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>Roma</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+      <IscrizioneREA>
+        <Ufficio>RM</Ufficio>
+        <NumeroREA>2222222</NumeroREA>
+        <StatoLiquidazione>LN</StatoLiquidazione>
+      </IscrizioneREA>
+      <Contatti>
+        <Email>test@mail.com</Email>
+      </Contatti>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>XXXXXX01A01H501X</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>XXXXXXXX WWW</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA YYYYYYYYYY 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000002</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>00000000002</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>BBBBBBBBBBBB</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+    </TerzoIntermediarioOSoggettoEmittente>
+    <SoggettoEmittente>TZ</SoggettoEmittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2020-12-11</Data>
+        <Numero>492/B</Numero>
+        <ImportoTotaleDocumento>20.00</ImportoTotaleDocumento>
+      </DatiGeneraliDocument o  
+> </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <CodiceArticolo>
+    essionarioCommittente>
+      <DatiAnagrafici>
+       1.2" ronicaHeader>
+    Ä»ž‰iTrasmissione>
+      <¾dTrasmittente>
+        <IdPae <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000000</IdCodice>
+        </IdFiscaleIVA>
+        <CodiceFiscale>XXXXXX01A01H501X</CodiceFiscale>
+        <Anagrafica>
+          <Denominazione>XXXXXXXX WWW</Denominazione>
+        </Anagrafica>
+      </DatiAnagrafici>
+      <Sede>
+        <Indirizzo>VIA YYYYYYYYYY 1</Indirizzo>
+        <CAP>00100</CAP>
+        <Comune>ROMA</Comune>
+        <Provincia>RM</Provincia>
+        <Nazione>IT</Nazione>
+      </Sede>
+    </CessionarioCommittente>
+    <TerzoIntermediarioOSoggettoEmittente>
+      <DatiAn¥grafici>
+        <IdFiscaleIVA>
+          <IdPaese>IT</IdPaese>
+          <IdCodice>00000000002</IdCodice>
+        cCBOViBcKEFHUEwtdmVyc2lvblwpKT4+CmVuZG9iagp4cmVmCjAgNwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNTIgMDAwMDAgbiAKMDAwMDAwMDAxNSAwMDAwMCBuIAowMDAwMDAwMzQwIDAwMDAwIG4gCjAwMDAwMDAxNDAgMDAwMDAgbiAKMDAwMDAwMDM5MSAwMDAwMCBuIAowMDAwMDAwNDM2IDAwMDAwIG4gCnRyYWlsZXIKPDwvSW5mbyA2IDAgUi9JRCBbPDU2ZDIwZWVkZGQ1YTk3MjUxNjAwNTc2ZGZhNTA0YjZhPjw1NmQyMGVlZGRkNWE5NzI1MTYwMDU3NmRmYTUwNGI2YT5dL1Jvb3QgNSAwIFIvU2l6ZSA3Pj4KJWlUZXh0LTUuNS41CnN0YXJ0eHJlZgo1OTMKJSVFT0YK</Attachment>
+    </Allegati>
+  </FatturaElettronicaBody>
+ct>
+  </ds:Signature>
+</ns3:FatturaElettronica>

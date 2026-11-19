@@ -54,7 +54,11 @@ fn cert(name: &str) -> Certificate {
 /// One hour after the start of the validity of `cert`, inside the validity
 /// of every fixture certificate.
 fn signing_time(cert: &Certificate) -> Timestamp {
-    let not_before = cert.tbs_certificate.validity.not_before.to_system_time();
+    let not_before = cert
+        .tbs_certificate()
+        .validity()
+        .not_before
+        .to_system_time();
     let secs = not_before
         .duration_since(UNIX_EPOCH)
         .expect("after 1970")
@@ -267,8 +271,8 @@ fn ess_signing_certificate_v2_custom(
         hash_algorithm,
         hash: OctetString::new(hash.digest(&der)).expect("the hash encodes"),
         issuer_serial: Some(IssuerSerial::new(
-            issuer.unwrap_or_else(|| cert.tbs_certificate.issuer.clone()),
-            serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
+            issuer.unwrap_or_else(|| cert.tbs_certificate().issuer().clone()),
+            serial.unwrap_or_else(|| cert.tbs_certificate().serial_number().clone()),
         )),
     };
     ess_attribute(
@@ -293,8 +297,8 @@ fn ess_signing_certificate_v1_custom(
     let entry = EssSigningCertificateV1 {
         hash: OctetString::new(Sha1::digest(&der).to_vec()).expect("the hash encodes"),
         issuer_serial: Some(IssuerSerial::new(
-            cert.tbs_certificate.issuer.clone(),
-            serial.unwrap_or_else(|| cert.tbs_certificate.serial_number.clone()),
+            cert.tbs_certificate().issuer().clone(),
+            serial.unwrap_or_else(|| cert.tbs_certificate().serial_number().clone()),
         )),
     };
     ess_attribute(
@@ -346,26 +350,24 @@ fn resign_cms(der: &[u8], scalar: &[u8], f: impl FnOnce(&mut Vec<Attribute>)) ->
 
 /// `name` with every `UTF8String` attribute value re-encoded as `tag` with the same text, the form some signers copy an issuer name into.
 fn retagged_name(name: &Name, tag: Tag) -> Name {
-    RdnSequence(
-        name.0
-            .iter()
-            .map(|rdn| {
-                let attributes: Vec<_> = rdn
-                    .0
-                    .iter()
-                    .map(|attribute| {
-                        let mut attribute = attribute.clone();
-                        if attribute.value.tag() == Tag::Utf8String {
-                            attribute.value = Any::new(tag, attribute.value.value().to_vec())
-                                .expect("the text fits the tag");
-                        }
-                        attribute
-                    })
-                    .collect();
-                RelativeDistinguishedName(SetOfVec::try_from(attributes).expect("the values sort"))
-            })
-            .collect(),
-    )
+    let rdns: Vec<RelativeDistinguishedName> = name
+        .iter_rdn()
+        .map(|rdn| {
+            let attributes: Vec<_> = rdn
+                .iter()
+                .map(|attribute| {
+                    let mut attribute = attribute.clone();
+                    if attribute.value.tag() == Tag::Utf8String {
+                        attribute.value = Any::new(tag, attribute.value.value().to_vec())
+                            .expect("the text fits the tag");
+                    }
+                    attribute
+                })
+                .collect();
+            RelativeDistinguishedName::try_from(attributes).expect("the values sort")
+        })
+        .collect();
+    Name::hazmat_from_rdn_sequence(RdnSequence::from(rdns))
 }
 
 /// The `CMS` in `der` with its first `sid` issuer re-encoded as `PrintableString`, the signature staying valid since the `sid` is unsigned.
@@ -414,8 +416,8 @@ fn build_cms(
 ) -> Vec<u8> {
     let signer = &chain[0];
     let sid = IssuerAndSerialNumber {
-        issuer: chain[1].tbs_certificate.subject.clone(),
-        serial_number: signer.tbs_certificate.serial_number.clone(),
+        issuer: chain[1].tbs_certificate().subject().clone(),
+        serial_number: signer.tbs_certificate().serial_number().clone(),
     };
     let key = SigningKey::<NistP256>::from_slice(scalar).expect("a valid scalar");
     let mut signed_attrs = signed_attrs(content, signing_time, algs.digest_hash());
@@ -566,8 +568,16 @@ fn valid_rsa_signature_verifies() {
     assert_eq!(verified.content(), invoice.as_slice());
     assert_eq!(verified.signer(), &signer);
     assert_eq!(verified.chain().len(), 3);
-    let not_before = signer.tbs_certificate.validity.not_before.to_system_time();
-    let not_after = signer.tbs_certificate.validity.not_after.to_system_time();
+    let not_before = signer
+        .tbs_certificate()
+        .validity()
+        .not_before
+        .to_system_time();
+    let not_after = signer
+        .tbs_certificate()
+        .validity()
+        .not_after
+        .to_system_time();
     let lo = not_before
         .duration_since(UNIX_EPOCH)
         .expect("after 1970")
@@ -1095,8 +1105,9 @@ fn move_cert_to_front(der: &[u8], cert: &Certificate) -> Vec<u8> {
     out
 }
 
-/// The `CMS` in `der` with its `eContent` wrapped in a constructed
-/// `OCTET STRING`, the form the `.NET` signer writes.
+/// The `CMS` in `der` with its `eContent` split into 1000 byte primitive
+/// fragments under an indefinite-length constructed `OCTET STRING`, the form
+/// the `.NET` runtime writes.
 fn construct_econtent(der: &[u8]) -> Vec<u8> {
     let id_data = db::rfc5911::ID_DATA.to_der().expect("the OID encodes");
     let oid = der
@@ -1121,26 +1132,29 @@ fn construct_econtent(der: &[u8]) -> Vec<u8> {
     let octet = after + 1 + e_enc;
     assert_eq!(der[octet], 0x04, "the eContent tag");
     let (c_len, c_enc) = der_length(der, octet + 1).expect("the eContent length");
-    let wrap_len = 1u32
-        + u32::try_from(c_enc).expect("a length count")
-        + u32::try_from(c_len).expect("a length");
-    debug_assert!(wrap_len <= 0xffff, "the wrap fits the long form");
-    let hi = u8::try_from(wrap_len >> 8).expect("the high byte of a `u16`");
-    let lo = (wrap_len & 0xff) as u8; // the masked low byte of the length
+    let content_start = octet + 1 + c_enc;
+    let content_end = content_start + c_len;
+    let mut constructed = vec![0x24, 0x80];
+    for fragment in der[content_start..content_end].chunks(1000) {
+        let length = u16::try_from(fragment.len()).expect("a fragment fits a `u16`");
+        constructed.extend([0x04, 0x82]);
+        constructed.extend(length.to_be_bytes());
+        constructed.extend_from_slice(fragment);
+    }
+    constructed.extend([0x00, 0x00]);
+    let growth = u32::try_from(constructed.len() - (content_end - octet)).expect("a length");
     let mut out = der.to_vec();
-    // The five enclosing long-form lengths gain the four wrapper bytes.
+    // The five enclosing long-form lengths grow by the added headers.
     let encap_seq = oid - 4;
     assert_eq!(out[encap_seq], 0x30, "the EncapsulatedContentInfo tag");
     for pos in [0usize, wrapper, signed_data, encap_seq, after] {
         assert_eq!(out[pos + 1], 0x82, "a long-form length");
-        let value = (u32::from(out[pos + 2]) * 256 + u32::from(out[pos + 3]))
-            .checked_add(4)
-            .expect("a length");
-        assert!(value <= 0xffff, "the length stays in the long form");
-        out[pos + 2] = u8::try_from(value >> 8).expect("the high byte of a `u16`");
-        out[pos + 3] = (value & 0xff) as u8; // the masked low byte of the length
+        let value =
+            u16::try_from(u32::from(u16::from_be_bytes([out[pos + 2], out[pos + 3]])) + growth)
+                .expect("the length stays in the long form");
+        out[pos + 2..pos + 4].copy_from_slice(&value.to_be_bytes());
     }
-    out.splice(octet..octet, [0x24, 0x82, hi, lo]);
+    out.splice(octet..content_end, constructed);
     out
 }
 
@@ -1312,7 +1326,11 @@ fn boundary_future_signer_checked_at_validity_edges() {
     let invoice = invoice();
     let signer = cert("boundary-future.pem");
     let scalar = ec_signer_scalar();
-    let not_before = signer.tbs_certificate.validity.not_before.to_system_time();
+    let not_before = signer
+        .tbs_certificate()
+        .validity()
+        .not_before
+        .to_system_time();
     let t = Timestamp::from_second(
         i64::try_from(
             not_before
@@ -1364,7 +1382,11 @@ fn boundary_past_signer_checked_at_validity_edges() {
     let invoice = invoice();
     let signer = cert("boundary-past.pem");
     let scalar = ec_signer_scalar();
-    let not_after = signer.tbs_certificate.validity.not_after.to_system_time();
+    let not_after = signer
+        .tbs_certificate()
+        .validity()
+        .not_after
+        .to_system_time();
     let t = Timestamp::from_second(
         i64::try_from(
             not_after
@@ -1534,8 +1556,8 @@ fn ess_v2_matching_hash_wrong_issuer_serial_fails() {
     let v2 = ess_signing_certificate_v2_custom(
         &signer,
         Prehash::Sha256,
-        Some(other.tbs_certificate.issuer.clone()),
-        Some(other.tbs_certificate.serial_number),
+        Some(other.tbs_certificate().issuer().clone()),
+        Some(other.tbs_certificate().serial_number().clone()),
     );
     let scalar = ec_signer_scalar();
     let p7m = build_cms(
@@ -1567,8 +1589,8 @@ fn ess_v2_wrong_hash_matching_issuer_serial_fails() {
     let v2 = ess_signing_certificate_v2_custom(
         &other,
         Prehash::Sha256,
-        Some(signer.tbs_certificate.issuer.clone()),
-        Some(signer.tbs_certificate.serial_number.clone()),
+        Some(signer.tbs_certificate().issuer().clone()),
+        Some(signer.tbs_certificate().serial_number().clone()),
     );
     let scalar = ec_signer_scalar();
     let p7m = build_cms(
@@ -1628,7 +1650,7 @@ fn ess_v2_printable_issuer_verifies() {
         &signer,
         Prehash::Sha256,
         Some(retagged_name(
-            &signer.tbs_certificate.issuer,
+            signer.tbs_certificate().issuer(),
             Tag::PrintableString,
         )),
         None,
@@ -1657,7 +1679,7 @@ fn ess_v2_ia5_issuer_fails() {
         &signer,
         Prehash::Sha256,
         Some(retagged_name(
-            &signer.tbs_certificate.issuer,
+            signer.tbs_certificate().issuer(),
             Tag::Ia5String,
         )),
         None,
@@ -1681,8 +1703,9 @@ fn ess_v2_ia5_issuer_fails() {
     );
 }
 
-/// A `CMS` whose `eContent` is a constructed `OCTET STRING`, the form the
-/// `.NET` signer writes, unwraps and verifies.
+/// A `CMS` whose `eContent` is split into fragments under an
+/// indefinite-length constructed `OCTET STRING`, the form the `.NET` runtime
+/// writes, unwraps and verifies.
 #[test]
 fn constructed_econtent_unwraps_and_verifies() {
     let invoice = invoice();
@@ -1839,8 +1862,8 @@ fn ess_v2_with_hash_algorithm(
         hash_algorithm,
         hash: OctetString::new(hash).expect("the hash encodes"),
         issuer_serial: Some(IssuerSerial::new(
-            cert.tbs_certificate.issuer.clone(),
-            cert.tbs_certificate.serial_number.clone(),
+            cert.tbs_certificate().issuer().clone(),
+            cert.tbs_certificate().serial_number().clone(),
         )),
     };
     ess_attribute(
