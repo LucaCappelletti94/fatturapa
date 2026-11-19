@@ -1,5 +1,5 @@
 //! The schema-aware round trip. The seed of the fuzz input builds an
-//! arbitrary document of one of the eleven root types through the generator
+//! arbitrary document of one of the fifteen root types through the generator
 //! the property tests share, which keeps every value inside the facets of
 //! the schemas. The document is written, validated against its official
 //! `XSD` with `xmllint` when the tool is on `PATH`, re-read and compared
@@ -32,10 +32,14 @@ const SDI_SCHEMA: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../spec/MessaggiTypes_v1.1.xsd"
 );
+const MESSAGGI_FATTURA_SCHEMA: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../spec/MessaggiFatturaTypes_v1.0.xsd"
+);
 const CATALOG: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../spec/catalog.xml");
 
 fuzz_target!(|seed: u64| {
-    match seed % 11 {
+    match seed % 15 {
         0 => round_trip(
             generator::invoice_from_seed(seed),
             FPR12_SCHEMA,
@@ -66,7 +70,27 @@ fuzz_target!(|seed: u64| {
         7 => round_trip(generator::ne_from_seed(seed), SDI_SCHEMA, "the NE message"),
         8 => round_trip(generator::ns_from_seed(seed), SDI_SCHEMA, "the NS message"),
         9 => round_trip(generator::rc_from_seed(seed), SDI_SCHEMA, "the RC message"),
-        _ => round_trip(generator::se_from_seed(seed), SDI_SCHEMA, "the SE message"),
+        10 => round_trip(generator::se_from_seed(seed), SDI_SCHEMA, "the SE message"),
+        11 => round_trip(
+            generator::file_metadati_from_seed(seed),
+            MESSAGGI_FATTURA_SCHEMA,
+            "the private-party MT message",
+        ),
+        12 => round_trip(
+            generator::ricevuta_consegna_from_seed(seed),
+            MESSAGGI_FATTURA_SCHEMA,
+            "the private-party RC message",
+        ),
+        13 => round_trip(
+            generator::ricevuta_scarto_from_seed(seed),
+            MESSAGGI_FATTURA_SCHEMA,
+            "the private-party NS message",
+        ),
+        _ => round_trip(
+            generator::ricevuta_impossibilita_recapito_from_seed(seed),
+            MESSAGGI_FATTURA_SCHEMA,
+            "the private-party MC message",
+        ),
     };
 });
 

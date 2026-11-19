@@ -15,6 +15,10 @@ mod support;
 mod generator;
 
 use fatturapa::Document;
+use fatturapa::generated::messaggi_fattura::{
+    FileMetadati, RicevutaConsegna as RicevutaConsegnaPrivati, RicevutaImpossibilitaRecapito,
+    RicevutaScarto,
+};
 use fatturapa::{
     AttestazioneTrasmissioneFattura, FatturaElettronica, FatturaElettronicaSemplificata,
     MetadatiInvioFile, NotificaDecorrenzaTermini, NotificaEsito, NotificaEsitoCommittente,
@@ -241,4 +245,64 @@ fn sdi_identifier_round_trips_twelve_digits() {
         bytes.windows(12).any(|window| window == b"990000000012"),
         "the written message keeps the twelve-digit identifier"
     );
+}
+
+/// A random `MT` message for an invoice between private parties writes,
+/// validates against `MessaggiFatturaTypes_v1.0.xsd`, re-reads and compares
+/// equal.
+#[property_test(config = ProptestConfig {
+    cases: 64,
+    ..ProptestConfig::default()
+})]
+fn round_trip_file_metadati(seed: u64) {
+    let doc = generator::file_metadati_from_seed(seed);
+    let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::messaggi_fattura_schema(), &bytes).expect("the message validates");
+    let reread = FileMetadati::from_xml_slice(&bytes).expect("the message reads");
+    assert_eq!(doc, reread);
+}
+
+/// A random `RC` receipt for an invoice between private parties writes,
+/// validates against `MessaggiFatturaTypes_v1.0.xsd`, re-reads and compares
+/// equal.
+#[property_test(config = ProptestConfig {
+    cases: 64,
+    ..ProptestConfig::default()
+})]
+fn round_trip_ricevuta_consegna_privati(seed: u64) {
+    let doc = generator::ricevuta_consegna_from_seed(seed);
+    let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::messaggi_fattura_schema(), &bytes).expect("the message validates");
+    let reread = RicevutaConsegnaPrivati::from_xml_slice(&bytes).expect("the message reads");
+    assert_eq!(doc, reread);
+}
+
+/// A random `NS` receipt for an invoice between private parties writes,
+/// validates against `MessaggiFatturaTypes_v1.0.xsd`, re-reads and compares
+/// equal.
+#[property_test(config = ProptestConfig {
+    cases: 64,
+    ..ProptestConfig::default()
+})]
+fn round_trip_ricevuta_scarto(seed: u64) {
+    let doc = generator::ricevuta_scarto_from_seed(seed);
+    let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::messaggi_fattura_schema(), &bytes).expect("the message validates");
+    let reread = RicevutaScarto::from_xml_slice(&bytes).expect("the message reads");
+    assert_eq!(doc, reread);
+}
+
+/// A random `MC` receipt for an invoice between private parties writes,
+/// validates against `MessaggiFatturaTypes_v1.0.xsd`, re-reads and compares
+/// equal.
+#[property_test(config = ProptestConfig {
+    cases: 64,
+    ..ProptestConfig::default()
+})]
+fn round_trip_ricevuta_impossibilita_recapito(seed: u64) {
+    let doc = generator::ricevuta_impossibilita_recapito_from_seed(seed);
+    let bytes = doc.to_xml_vec().expect("the message serialises");
+    support::validate(&support::messaggi_fattura_schema(), &bytes).expect("the message validates");
+    let reread = RicevutaImpossibilitaRecapito::from_xml_slice(&bytes).expect("the message reads");
+    assert_eq!(doc, reread);
 }

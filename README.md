@@ -8,7 +8,7 @@
 
 Reading and writing of every `FatturaPA` invoice and SDI message, in Rust.
 
-- the ordinary invoice (`FPR12`, `FPA12`), the simplified invoice (`FSM10`) and the nine SDI messages
+- the ordinary invoice (`FPR12`, `FPA12`), the simplified invoice (`FSM10`), the nine SDI messages of `MessaggiTypes_v1.1` and the four of `MessaggiFatturaTypes_v1.0`, which carry the `Hash` of the invoice file
 - types generated from the official XSD schemas, so a document round-trips through the schema it was written for
 - a typed construction API whose `build` runs the official SDI checks and the specification rules the SDI does not enforce, writing the stamp duty when the lines owe it
 - signed `.xml.p7m` files unwrapped and verified, `XAdES` signed `.xml` files verified, with the `trust-list` feature reading the `AgID` trust anchors

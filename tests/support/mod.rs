@@ -156,6 +156,12 @@ pub(crate) fn sdi_schema() -> PathBuf {
     Path::new("spec/MessaggiTypes_v1.1.xsd").to_path_buf()
 }
 
+/// The schema `MessaggiFatturaTypes_v1.0.xsd` of the SDI messages for
+/// invoices between private parties.
+pub(crate) fn messaggi_fattura_schema() -> PathBuf {
+    Path::new("spec/MessaggiFatturaTypes_v1.0.xsd").to_path_buf()
+}
+
 /// The path of the official sample with file name `file`.
 pub(crate) fn sample(file: &str) -> PathBuf {
     Path::new("spec/samples").join(file)

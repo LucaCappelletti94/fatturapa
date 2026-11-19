@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:RicevutaConsegna xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fattura/messaggi/v1.0" versione="1.0" FlussoSemplificato="Si">
+    <IdentificativoSdI>99000000001</IdentificativoSdI>
+    <NomeFile>IT01234567890_FPR01.xml</NomeFile>
+    <Hash>bcfabace608de074f7987904684a27245feb9488f21e2e8455284eefa973ff66</Hash>
+    <DataOraRicezione>2026-11-19T17:50:12.000+01:00</DataOraRicezione>
+    <DataOraConsegna>2026-11-19T17:52:59.000+01:00</DataOraConsegna>
+    <Destinatario>
+        <Codice>ABC1234</Codice>
+        <Descrizione>Destinatario di prova</Descrizione>
+    </Destinatario>
+    <MessageId>99000000003</MessageId>
+    <PecMessageId>99000000003.0000000000000@pec.fatturapa.it</PecMessageId>
+    <Note>Ricevuta di prova</Note>
+    <ns2:Signature Id="Signature1"><ns2:SignedInfo><ns2:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ns2:Reference URI=""><ns2:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ns2:DigestValue>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</ns2:DigestValue></ns2:Reference></ns2:SignedInfo><ns2:SignatureValue>AAAA</ns2:SignatureValue></ns2:Signature>
+</ns3:RicevutaConsegna>

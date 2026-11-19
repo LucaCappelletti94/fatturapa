@@ -10,10 +10,11 @@ const SCHEMAS: &[&str] = &[
     "Schema_VFPR12_v1.2.3.xsd",
     "Schema_VFSM10v_1.0.2.xsd",
     "MessaggiTypes_v1.1.xsd",
+    "MessaggiFatturaTypes_v1.0.xsd",
 ];
 
 /// The module each schema feeds, in the order of `SCHEMAS`.
-const MODULES: &[&str] = &["fpr12", "fsm10", "sdi"];
+const MODULES: &[&str] = &["fpr12", "fsm10", "sdi", "messaggi_fattura"];
 
 fn workspace() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))

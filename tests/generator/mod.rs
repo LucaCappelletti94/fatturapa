@@ -11,7 +11,11 @@
 
 use fatturapa::amount::Amount;
 use fatturapa::date::{Date, DateTime};
-use fatturapa::generated::{fpr12, fsm10, sdi};
+use fatturapa::generated::messaggi_fattura::{
+    FileMetadati, RicevutaConsegna as RicevutaConsegnaPrivati, RicevutaImpossibilitaRecapito,
+    RicevutaScarto,
+};
+use fatturapa::generated::{fpr12, fsm10, messaggi_fattura, sdi};
 use fatturapa::{
     AttestazioneTrasmissioneFattura, FatturaElettronica, FatturaElettronicaSemplificata,
     MetadatiInvioFile, NotificaDecorrenzaTermini, NotificaEsito, NotificaEsitoCommittente,
@@ -570,55 +574,70 @@ pub(crate) fn semplificata_from_seed(seed: u64) -> FatturaElettronicaSemplificat
     }
 }
 
+/// A syntactically complete `ds:Signature` of the generated module
+/// `$module`, whose own copy of the `XML-DSig` types it builds.
+macro_rules! signature_in {
+    ($module:ident) => {
+        $module::SignatureType {
+            id: None,
+            content: $module::SignatureTypeContent {
+                signed_info: $module::SignedInfoType {
+                    id: Some("sig".to_string()),
+                    content: $module::SignedInfoTypeContent {
+                        canonicalization_method: $module::CanonicalizationMethodType {
+                            algorithm:
+                                "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"
+                                    .to_string(),
+                            content: $module::CanonicalizationMethodTypeContent { any: Vec::new() },
+                        },
+                        signature_method: $module::SignatureMethodType {
+                            algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1".to_string(),
+                            content: $module::SignatureMethodTypeContent {
+                                hmac_output_length: None,
+                                any: Vec::new(),
+                            },
+                        },
+                        reference: vec![$module::ReferenceType {
+                            id: None,
+                            uri: Some("#-".to_string()),
+                            type_: None,
+                            content: $module::ReferenceTypeContent {
+                                transforms: None,
+                                digest_method: $module::DigestMethodType {
+                                    algorithm: "http://www.w3.org/2000/09/xmldsig#sha1".to_string(),
+                                    content: $module::DigestMethodTypeContent { any: Vec::new() },
+                                },
+                                digest_value: Base64String("QVFBQVFBVQ==".to_string()),
+                            },
+                        }],
+                    },
+                },
+                signature_value: $module::SignatureValueType {
+                    id: None,
+                    content: Base64String("c2lnbmF0dXJl".to_string()),
+                },
+                key_info: Some($module::KeyInfoType {
+                    id: None,
+                    content: vec![$module::KeyInfoTypeContent::KeyName(
+                        "signer@provider.it".to_string(),
+                    )],
+                }),
+                object: vec![],
+            },
+        }
+    };
+}
+
 /// A syntactically complete `ds:Signature`, carried by the seven SDI message
 /// types that make it mandatory.
 pub(crate) fn signature() -> sdi::Signature {
-    sdi::SignatureType {
-        id: None,
-        content: sdi::SignatureTypeContent {
-            signed_info: sdi::SignedInfoType {
-                id: Some("sig".to_string()),
-                content: sdi::SignedInfoTypeContent {
-                    canonicalization_method: sdi::CanonicalizationMethodType {
-                        algorithm: "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"
-                            .to_string(),
-                        content: sdi::CanonicalizationMethodTypeContent { any: Vec::new() },
-                    },
-                    signature_method: sdi::SignatureMethodType {
-                        algorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1".to_string(),
-                        content: sdi::SignatureMethodTypeContent {
-                            hmac_output_length: None,
-                            any: Vec::new(),
-                        },
-                    },
-                    reference: vec![sdi::ReferenceType {
-                        id: None,
-                        uri: Some("#-".to_string()),
-                        type_: None,
-                        content: sdi::ReferenceTypeContent {
-                            transforms: None,
-                            digest_method: sdi::DigestMethodType {
-                                algorithm: "http://www.w3.org/2000/09/xmldsig#sha1".to_string(),
-                                content: sdi::DigestMethodTypeContent { any: Vec::new() },
-                            },
-                            digest_value: Base64String("QVFBQVFBVQ==".to_string()),
-                        },
-                    }],
-                },
-            },
-            signature_value: sdi::SignatureValueType {
-                id: None,
-                content: Base64String("c2lnbmF0dXJl".to_string()),
-            },
-            key_info: Some(sdi::KeyInfoType {
-                id: None,
-                content: vec![sdi::KeyInfoTypeContent::KeyName(
-                    "signer@provider.it".to_string(),
-                )],
-            }),
-            object: vec![],
-        },
-    }
+    signature_in!(sdi)
+}
+
+/// A syntactically complete `ds:Signature`, carried by the three receipts of
+/// `MessaggiFatturaTypes_v1.0.xsd`, which make it mandatory.
+pub(crate) fn messaggi_fattura_signature() -> messaggi_fattura::Signature {
+    signature_in!(messaggi_fattura)
 }
 
 /// The `IdentificativoSdI` of the message, sometimes a twelve-digit value
@@ -970,6 +989,141 @@ pub(crate) fn se_from_seed(seed: u64) -> ScartoEsitoCommittente {
                 None
             },
             signature: signature(),
+        },
+    }
+}
+
+/// The `Hash` of an invoice file, 64 lowercase hexadecimal digits as the
+/// SDI writes a SHA-256.
+fn hash(rng: &mut Rng) -> String {
+    format!(
+        "{:016x}{:016x}{:016x}{:016x}",
+        rng.next(),
+        rng.next(),
+        rng.next(),
+        rng.next()
+    )
+}
+
+/// The optional `Note` of a message.
+fn note(rng: &mut Rng) -> Option<String> {
+    rng.bool().then(|| "Esempio".to_string())
+}
+
+/// The optional `RiferimentoArchivio` of a `MessaggiFatturaTypes_v1.0.xsd`
+/// receipt.
+fn riferimento_archivio(rng: &mut Rng) -> Option<messaggi_fattura::RiferimentoArchivioType> {
+    rng.bool()
+        .then(|| messaggi_fattura::RiferimentoArchivioType {
+            content: messaggi_fattura::RiferimentoArchivioTypeContent {
+                identificativo_sd_i: identificativo(rng).to_string(),
+                nome_file: nome_file(rng),
+            },
+        })
+}
+
+/// An `MT` metadata message for an invoice between private parties.
+pub(crate) fn file_metadati_from_seed(seed: u64) -> FileMetadati {
+    let mut rng = Rng::new(seed);
+    FileMetadati {
+        versione: "1.0".to_string(),
+        content: messaggi_fattura::FileMetadatiTypeContent {
+            identificativo_sd_i: identificativo(&mut rng).to_string(),
+            nome_file: nome_file(&mut rng),
+            hash: hash(&mut rng),
+            codice_destinatario: codice_destinatario(&mut rng),
+            formato: rng.pick(&["FPR12", "FPA12", "FSM10"]).to_string(),
+            tentativi_invio: i64::try_from(rng.below(3) + 1).expect("fits an i64"),
+            message_id: message_id(&mut rng),
+            note: note(&mut rng),
+        },
+    }
+}
+
+/// An `RC` delivery receipt for an invoice between private parties, with a
+/// mandatory `ds:Signature`.
+pub(crate) fn ricevuta_consegna_from_seed(seed: u64) -> RicevutaConsegnaPrivati {
+    let mut rng = Rng::new(seed);
+    RicevutaConsegnaPrivati {
+        versione: "1.0".to_string(),
+        flusso_semplificato: rng.bool().then(|| "Si".to_string()),
+        content: messaggi_fattura::RicevutaConsegnaTypeContent {
+            identificativo_sd_i: identificativo(&mut rng).to_string(),
+            nome_file: nome_file(&mut rng),
+            hash: hash(&mut rng),
+            data_ora_ricezione: datetime(&mut rng),
+            data_ora_consegna: datetime(&mut rng),
+            destinatario: messaggi_fattura::DestinatarioType {
+                content: messaggi_fattura::DestinatarioTypeContent {
+                    codice: codice_destinatario(&mut rng),
+                    descrizione: rng.bool().then(|| "Destinatario".to_string()),
+                },
+            },
+            riferimento_archivio: riferimento_archivio(&mut rng),
+            message_id: message_id(&mut rng),
+            pec_message_id: rng.bool().then(|| message_id(&mut rng)),
+            note: note(&mut rng),
+            signature: messaggi_fattura_signature(),
+        },
+    }
+}
+
+/// An `NS` rejection receipt for an invoice between private parties, with
+/// one to three errors and a mandatory `ds:Signature`.
+pub(crate) fn ricevuta_scarto_from_seed(seed: u64) -> RicevutaScarto {
+    let mut rng = Rng::new(seed);
+    let count = rng.below(3) + 1;
+    RicevutaScarto {
+        versione: "1.0".to_string(),
+        content: messaggi_fattura::RicevutaScartoTypeContent {
+            identificativo_sd_i: identificativo(&mut rng).to_string(),
+            nome_file: nome_file(&mut rng),
+            hash: hash(&mut rng),
+            data_ora_ricezione: datetime(&mut rng),
+            riferimento_archivio: riferimento_archivio(&mut rng),
+            lista_errori: messaggi_fattura::ListaErroriType {
+                content: messaggi_fattura::ListaErroriTypeContent {
+                    errore: (0..count)
+                        .map(|_| messaggi_fattura::ErroreType {
+                            content: messaggi_fattura::ErroreTypeContent {
+                                codice: rng.pick(&["00305", "00423", "00404"]).to_string(),
+                                descrizione: "Il file non e conforme al formato".to_string(),
+                                suggerimento: "Verificare il contenuto del file".to_string(),
+                            },
+                        })
+                        .collect(),
+                },
+            },
+            message_id: message_id(&mut rng),
+            pec_message_id: rng.bool().then(|| message_id(&mut rng)),
+            note: note(&mut rng),
+            signature: messaggi_fattura_signature(),
+        },
+    }
+}
+
+/// An `MC` non-delivery receipt for an invoice between private parties, with
+/// a mandatory `ds:Signature`.
+pub(crate) fn ricevuta_impossibilita_recapito_from_seed(
+    seed: u64,
+) -> RicevutaImpossibilitaRecapito {
+    let mut rng = Rng::new(seed);
+    RicevutaImpossibilitaRecapito {
+        versione: "1.0".to_string(),
+        content: messaggi_fattura::RicevutaImpossibilitaRecapitoTypeContent {
+            identificativo_sd_i: identificativo(&mut rng).to_string(),
+            nome_file: nome_file(&mut rng),
+            hash: hash(&mut rng),
+            data_ora_ricezione: datetime(&mut rng),
+            data_messa_a_disposizione: date(&mut rng),
+            riferimento_archivio: riferimento_archivio(&mut rng),
+            descrizione: rng
+                .bool()
+                .then(|| "Il file e a disposizione del destinatario".to_string()),
+            message_id: message_id(&mut rng),
+            pec_message_id: rng.bool().then(|| message_id(&mut rng)),
+            note: note(&mut rng),
+            signature: messaggi_fattura_signature(),
         },
     }
 }

@@ -8,6 +8,8 @@ The invoices in `xades/` carry `XAdES` enveloped signatures over the official sa
 
 The hand-written invoices in `invoices/` are built against the specification with fictitious parties only. Every `partita IVA` and foreign identifier is a synthetic check-valid number, never a real company's number. The foreign seats carry the `CAP` `00000` and the foreign postal code inside the `Indirizzo`, the form the Agenzia FAQ prescribes.
 
+The messages in `messaggi-fattura/` follow `MessaggiFatturaTypes_v1.0.xsd`, the schema of the SDI messages for invoices between private parties. The `MT` metadata keeps the shape of a real file the SDI delivered over PEC in November 2026, its prefixes, declaration and indentation, with every identifier replaced. The `RC`, `NS` and `MC` receipts are written by hand from the tables of *Allegato A* 1.9.1. Each `Hash` is the SHA-256 of the official sample `IT01234567890_FPR01.xml` with `LF` line ends, the form the SDI hashes. The receipts carry a minimal `ds:Signature` that satisfies the schema and verifies nothing, since the crate reads these messages and does not verify their signature.
+
 The `TD01` through `TD28` files below pin one fixture per missing document type. Each is anonymized from a public source or written by hand against the *Guida alla compilazione* 1.10, and each is covered by a test in `document_types.rs`. The anonymized parties reuse the crate's synthetic identifiers, the French and German sellers are obviously fictitious, and the foreign sellers carry the `RF18` regime, `Altro`, as in the sources.
 
 | File | Type | Source | Rules it pins |
