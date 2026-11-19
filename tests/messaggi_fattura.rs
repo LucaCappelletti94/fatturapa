@@ -110,3 +110,58 @@ fn ricevuta_impossibilita_recapito_round_trips() {
     assert_eq!(archive.content.nome_file, "IT01234567890_FPR01.zip");
     assert_eq!(content.hash, HASH);
 }
+
+/// The error the reader reports on the official sample `file`.
+fn sample_rejection<T: Document + Debug>(file: &str) -> String {
+    T::from_xml_slice(&support::sample_bytes(file))
+        .expect_err("the sample lacks an attribute the schema requires")
+        .to_string()
+}
+
+/// The Agenzia publishes four of its examples of these messages without the
+/// `versione` attribute the schema requires, and the reader refuses them,
+/// naming the attribute.
+#[test]
+fn official_samples_without_versione_rejected() {
+    for message in [
+        sample_rejection::<FileMetadati>("ITHVQWPH73P42H501Y_00022_MT_001.xml"),
+        sample_rejection::<RicevutaConsegna>("ITHVQWPH73P42H501Y_00022_RC_001.xml"),
+        sample_rejection::<RicevutaScarto>("ITHVQWPH73P42H501Y_00022_NS_001.xml"),
+        sample_rejection::<RicevutaImpossibilitaRecapito>("ITHVQWPH73P42H501Y_00022_MC_001.xml"),
+    ] {
+        assert!(
+            message.contains("versione"),
+            "the rejection names the attribute, got {message}"
+        );
+    }
+}
+
+/// The Agenzia example of a rejection receipt that carries `versione` reads
+/// with its error, writes, validates and re-reads equal. The signatures are
+/// compared with the in-scope namespaces of their `xs:any` content cleared,
+/// because the example binds its namespaces to prefixes the writer does not
+/// pick.
+#[test]
+fn official_ricevuta_scarto_sample_round_trips() {
+    let mut doc = RicevutaScarto::from_xml_slice(&support::sample_bytes(
+        "ITHVQWPH73P42H501Y_00022_NS__001.xml",
+    ))
+    .expect("the sample reads");
+    let errors = &doc.content.lista_errori.content.errore;
+    assert_eq!(errors.len(), 1);
+    assert_eq!(errors[0].content.codice, "00002");
+    assert_eq!(errors[0].content.descrizione, "Nome file duplicato");
+    assert_eq!(
+        doc.content.hash,
+        "ef912599ea43cddf0c9ee59e30e38b2a91f0793ef046e61aa120a9d3ee0b5992"
+    );
+    let written = doc.to_xml_vec().expect("the receipt serialises");
+    support::validate(&support::messaggi_fattura_schema(), &written)
+        .expect("the written receipt validates against the official schema");
+    let mut reread = RicevutaScarto::from_xml_slice(&written).expect("the written receipt reads");
+    doc.content.signature =
+        support::normalize_messaggi_fattura_signature(doc.content.signature.clone());
+    reread.content.signature =
+        support::normalize_messaggi_fattura_signature(reread.content.signature.clone());
+    assert_eq!(doc, reread);
+}

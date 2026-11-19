@@ -12,7 +12,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use fatturapa::generated::{fpr12, fsm10};
+use fatturapa::generated::{fpr12, fsm10, messaggi_fattura};
 use fatturapa::ids::{EuCountry, Provincia, RegimeFiscale};
 use fatturapa::party::{Address, Business, Buyer, Company, Seller};
 use fatturapa::validate::Violation;
@@ -135,6 +135,7 @@ macro_rules! normalize_signature_impl {
 
 normalize_signature_impl!(fpr12, normalize_fpr12_signature);
 normalize_signature_impl!(fsm10, normalize_fsm10_signature);
+normalize_signature_impl!(messaggi_fattura, normalize_messaggi_fattura_signature);
 
 /// The XML catalog that maps the W3C XML-DSig address onto the local copy.
 pub(crate) fn catalog() -> PathBuf {
