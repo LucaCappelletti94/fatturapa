@@ -25,6 +25,7 @@ include = [
     "!/tests/fixtures/external",
     "/tests/generator",
     "/tests/invoices.rs",
+    "/tests/messaggi_fattura.rs",
     "/tests/property.rs",
     "/tests/reader_xpath.rs",
     "/tests/roundtrip.proptest-regressions",
