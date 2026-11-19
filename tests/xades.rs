@@ -417,16 +417,16 @@ fn sdi_messages_verify_up_to_their_unknown_issuer() {
     }
 }
 
-/// The specification samples digest correctly but are signed with a
-/// 1024-bit `RSA` key, below the 2048-bit minimum of the accepted
-/// algorithms, which the signature check reports as invalid.
+/// The specification samples carry valid signatures made with a 1024-bit
+/// `RSA` key, below the 2048-bit minimum of the accepted algorithms, so the
+/// key is unsupported.
 #[test]
 fn the_specification_samples_carry_a_key_below_the_minimum() {
     for kind in ["AT", "DT", "MC", "NE", "NS", "RC", "SE"] {
         let file = format!("spec/samples/IT01234567890_11111_{kind}_001.xml");
         let outcome = verify_xades(&read(&file), &[], None);
         assert!(
-            matches!(outcome, Err(SignedError::SignatureInvalid)),
+            matches!(&outcome, Err(SignedError::UnsupportedAlgorithm(key)) if key == "1024-bit RSA"),
             "{file}: {outcome:?}"
         );
     }

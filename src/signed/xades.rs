@@ -32,7 +32,7 @@ use super::c14n::{Canonicalization, Method, NodeId, Subset, Tree, TreeError, can
 use super::{
     IssuerSerial, ReferenceTarget, SignatureDefect, SignatureElement, SignedError,
     VerifiedSignature, ecdsa_curve, issuer_serial_matches, key_usage_permits_signing, names_match,
-    signature_algorithm, verify_chain,
+    rsa_key_long_enough, signature_algorithm, verify_chain,
 };
 
 /// The `XMLDSig` namespace.
@@ -852,6 +852,7 @@ fn check_signature_value(
     let oid = signature_method(signature_uri).ok_or_else(unsupported)?;
     let verification =
         signature_algorithm(&oid, None, ecdsa_curve(signer).as_ref()).map_err(|_| unsupported())?;
+    rsa_key_long_enough(signer)?;
     let value_element = required_child(
         tree,
         signature,

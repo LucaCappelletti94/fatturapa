@@ -10,9 +10,13 @@ trap 'rm -rf "$work" *.srl' EXIT
 
 invoice=../../spec/samples/IT01234567890_FPR01.xml
 
+# -not_before a few hours back: the CMS signingTime is second-resolution, so a
+# certificate minted in the same second could look NotYetValid to a verifier.
+past=$(date -u -d '2 hours ago' +%Y%m%d%H%M%SZ)
+
 # Root CA and intermediate, long-lived.
 openssl req -x509 -new -newkey rsa:3072 -nodes \
-    -keyout ca.key -out ca.pem -days 3650 \
+    -keyout ca.key -out ca.pem -days 3650 -not_before "$past" \
     -subj "/C=IT/O=fatturapa test/CN=fatturapa test root CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null
@@ -20,9 +24,6 @@ openssl req -x509 -new -newkey rsa:3072 -nodes \
 openssl req -new -newkey rsa:3072 -nodes \
     -keyout intermediate.key -out "$work/intermediate.csr" \
     -subj "/C=IT/O=fatturapa test/CN=fatturapa test intermediate CA" 2>/dev/null
-# -not_before a few hours back: the CMS signingTime is second-resolution, so a
-# certificate minted in the same second could look NotYetValid to a verifier.
-past=$(date -u -d '2 hours ago' +%Y%m%d%H%M%SZ)
 openssl x509 -req -in "$work/intermediate.csr" \
     -CA ca.pem -CAkey ca.key -CAcreateserial -out intermediate.pem -days 3650 \
     -not_before "$past" -set_serial 1 \
@@ -61,7 +62,7 @@ openssl x509 -req -in "$work/p521-signer.csr" \
 
 # An unrelated root, for the wrong-anchor test.
 openssl req -x509 -new -newkey rsa:3072 -nodes \
-    -keyout other-root.key -out other-root.pem -days 3650 \
+    -keyout other-root.key -out other-root.pem -days 3650 -not_before "$past" \
     -subj "/C=IT/O=fatturapa other/CN=fatturapa other root CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null
@@ -259,7 +260,7 @@ openssl x509 -req -in "$work/signer3.csr" \
 # A root with the ca subject and a different key: an intermediate signed by
 # it matches the ca by name but not by signature.
 openssl req -x509 -new -newkey rsa:3072 -nodes \
-    -keyout ca-lookalike.key -out ca-lookalike.pem -days 3650 \
+    -keyout ca-lookalike.key -out ca-lookalike.pem -days 3650 -not_before "$past" \
     -subj "/C=IT/O=fatturapa test/CN=fatturapa test root CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null
@@ -302,6 +303,25 @@ openssl x509 -req -in "$work/ec-signer.csr" \
     -CA sha1-intermediate.pem -CAkey sha1-intermediate.key -CAcreateserial \
     -out sha1-signer.pem -days 3650 -not_before "$past" -sha1 2>/dev/null
 
+# A signer and an intermediate with 1024-bit RSA keys, below the verifier's
+# 2048-bit minimum. The intermediate certifies the ECDSA signer's key.
+openssl req -new -newkey rsa:1024 -nodes \
+    -keyout rsa1024-signer.key -out "$work/rsa1024-signer.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test RSA 1024 signer" 2>/dev/null
+openssl x509 -req -in "$work/rsa1024-signer.csr" \
+    -CA intermediate.pem -CAkey intermediate.key -CAcreateserial \
+    -out rsa1024-signer.pem -days 3650 -not_before "$past" 2>/dev/null
+openssl req -new -newkey rsa:1024 -nodes \
+    -keyout rsa1024-intermediate.key -out "$work/rsa1024-intermediate.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test RSA 1024 intermediate" 2>/dev/null
+openssl x509 -req -in "$work/rsa1024-intermediate.csr" \
+    -CA ca.pem -CAkey ca.key -CAcreateserial -out rsa1024-intermediate.pem -days 3650 \
+    -not_before "$past" \
+    -extfile <(printf 'basicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\n') 2>/dev/null
+openssl x509 -req -in "$work/ec-signer.csr" \
+    -CA rsa1024-intermediate.pem -CAkey rsa1024-intermediate.key -CAcreateserial \
+    -out rsa1024-chain-signer.pem -days 3650 -not_before "$past" 2>/dev/null
+
 chain() {
     cat intermediate.pem ca.pem
 }
@@ -324,6 +344,9 @@ openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -inkey expired-signer.key -certfile <(chain) 2>/dev/null
 openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-p521.p7m -signer p521-signer.pem -inkey p521-signer.key \
+    -certfile <(chain) 2>/dev/null
+openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
+    -out invoice-rsa1024.p7m -signer rsa1024-signer.pem -inkey rsa1024-signer.key \
     -certfile <(chain) 2>/dev/null
 openssl cms -sign -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-detached.p7m -signer rsa-signer.pem -inkey rsa-signer.key \

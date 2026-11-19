@@ -699,6 +699,22 @@ fn unsupported_curve_fails() {
     );
 }
 
+/// A valid signature made with a 1024-bit `RSA` key, below the 2048-bit
+/// minimum, is unsupported.
+#[test]
+fn rsa_1024_signer_is_unsupported() {
+    let err = verify(
+        &support::fixture_bytes("invoice-rsa1024.p7m"),
+        &[cert("ca.pem")],
+        None,
+    )
+    .expect_err("the signer key is too short");
+    assert!(
+        matches!(&err, SignedError::UnsupportedAlgorithm(key) if key == "1024-bit RSA"),
+        "{err:?}"
+    );
+}
+
 /// A detached `CMS` has no content to unwrap.
 #[test]
 fn detached_content_fails() {
@@ -2503,6 +2519,32 @@ fn sha1_signed_intermediate_fails() {
         .expect_err("the SHA-1 chain signature is unsupported");
     assert!(
         matches!(err, SignedError::Chain(ChainError::UnsupportedAlgorithm(_))),
+        "{err:?}"
+    );
+}
+
+/// An intermediate with a 1024-bit `RSA` key, below the 2048-bit minimum,
+/// makes the chain unsupported even though its signature is valid.
+#[test]
+fn rsa_1024_intermediate_is_unsupported() {
+    let invoice = invoice();
+    let signer = cert("rsa1024-chain-signer.pem");
+    let t = signing_time(&signer);
+    let scalar = ec_signer_scalar();
+    let p7m = build_cms(
+        &invoice,
+        vec![signer, cert("rsa1024-intermediate.pem"), cert("ca.pem")],
+        Some(t),
+        None,
+        None,
+        &scalar,
+        &default_algs(),
+        vec![],
+    );
+    let err =
+        verify(&p7m, &[cert("ca.pem")], Some(t)).expect_err("the intermediate key is too short");
+    assert!(
+        matches!(&err, SignedError::Chain(ChainError::UnsupportedAlgorithm(key)) if key == "1024-bit RSA"),
         "{err:?}"
     );
 }
