@@ -32,6 +32,7 @@ const SCHEMAS: &[(&str, &str)] = &[
     ("Schema_VFPR12_v1.2.3.xsd", "fpr12"),
     ("Schema_VFSM10v_1.0.2.xsd", "fsm10"),
     ("MessaggiTypes_v1.1.xsd", "sdi"),
+    ("MessaggiFatturaTypes_v1.0.xsd", "messaggi_fattura"),
 ];
 
 /// What one run of the generator does.

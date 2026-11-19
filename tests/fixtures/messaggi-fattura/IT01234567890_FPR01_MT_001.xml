@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:FileMetadati xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" xmlns:ns3="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fattura/messaggi/v1.0" versione="1.0">
+    <IdentificativoSdI>99000000001</IdentificativoSdI>
+    <NomeFile>IT01234567890_FPR01.xml</NomeFile>
+    <Hash>bcfabace608de074f7987904684a27245feb9488f21e2e8455284eefa973ff66</Hash>
+    <CodiceDestinatario>0000000</CodiceDestinatario>
+    <Formato>FPR12</Formato>
+    <TentativiInvio>1</TentativiInvio>
+    <MessageId>99000000002</MessageId>
+</ns3:FileMetadati>

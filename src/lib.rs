@@ -193,6 +193,30 @@ impl Document for ScartoEsitoCommittente {
     const ROOT: &'static str = "types:ScartoEsitoCommittente";
 }
 
+impl Document for generated::messaggi_fattura::FileMetadati {
+    /// The root element name of the `MT` message for invoices between
+    /// private parties.
+    const ROOT: &'static str = "types:FileMetadati";
+}
+
+impl Document for generated::messaggi_fattura::RicevutaConsegna {
+    /// The root element name of the `RC` message for invoices between
+    /// private parties.
+    const ROOT: &'static str = "types:RicevutaConsegna";
+}
+
+impl Document for generated::messaggi_fattura::RicevutaScarto {
+    /// The root element name of the `NS` message for invoices between
+    /// private parties.
+    const ROOT: &'static str = "types:RicevutaScarto";
+}
+
+impl Document for generated::messaggi_fattura::RicevutaImpossibilitaRecapito {
+    /// The root element name of the `MC` message for invoices between
+    /// private parties.
+    const ROOT: &'static str = "types:RicevutaImpossibilitaRecapito";
+}
+
 /// The `encoding` the XML declaration of `input` names, resolved to the
 /// `encoding_rs` encoding it names, or `UTF-8` when the declaration is absent
 /// or names no `encoding`.

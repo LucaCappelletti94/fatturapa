@@ -3,6 +3,10 @@
 #![no_main]
 
 use fatturapa::Document;
+use fatturapa::generated::messaggi_fattura::{
+    FileMetadati, RicevutaConsegna as RicevutaConsegnaPrivati, RicevutaImpossibilitaRecapito,
+    RicevutaScarto,
+};
 use fatturapa::{
     AttestazioneTrasmissioneFattura, MetadatiInvioFile, NotificaDecorrenzaTermini,
     NotificaEsito, NotificaEsitoCommittente, NotificaMancataConsegna, NotificaScarto,
@@ -20,4 +24,8 @@ fuzz_target!(|input: &[u8]| {
     let _ = NotificaScarto::from_xml_slice(input);
     let _ = RicevutaConsegna::from_xml_slice(input);
     let _ = ScartoEsitoCommittente::from_xml_slice(input);
+    let _ = FileMetadati::from_xml_slice(input);
+    let _ = RicevutaConsegnaPrivati::from_xml_slice(input);
+    let _ = RicevutaScarto::from_xml_slice(input);
+    let _ = RicevutaImpossibilitaRecapito::from_xml_slice(input);
 });
