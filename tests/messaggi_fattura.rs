@@ -13,7 +13,7 @@ mod support;
 use std::fmt::Debug;
 
 use fatturapa::generated::messaggi_fattura::{
-    FileMetadati, RicevutaConsegna, RicevutaImpossibilitaRecapito, RicevutaScarto,
+    FileMetadati, RicevutaConsegna, RicevutaImpossibilitaRecapito, RicevutaScarto, Signature,
 };
 use fatturapa::{Date, DateTime, Document};
 
@@ -21,19 +21,50 @@ use fatturapa::{Date, DateTime, Document};
 /// `IT01234567890_FPR01.xml` with `LF` line ends.
 const HASH: &str = "bcfabace608de074f7987904684a27245feb9488f21e2e8455284eefa973ff66";
 
-/// Reads the fixture `file` from `tests/fixtures/messaggi-fattura` after
-/// validating it against the schema, writes it, validates the written bytes,
-/// re-reads them and returns the first read once both reads are equal.
-fn round_trips<T: Document + Debug + PartialEq>(file: &str) -> T {
+/// Validates `bytes` against the schema, reads them, writes them, validates
+/// the written bytes and re-reads them, returning the first read and the
+/// re-read.
+fn read_and_reread<T: Document + Debug>(bytes: &[u8]) -> (T, T) {
     let schema = support::messaggi_fattura_schema();
-    let bytes = support::fixture_bytes(&format!("messaggi-fattura/{file}"));
-    support::validate(&schema, &bytes).expect("the fixture validates against the schema");
-    let doc = T::from_xml_slice(&bytes).expect("the fixture reads");
+    support::validate(&schema, bytes).expect("the message validates against the schema");
+    let doc = T::from_xml_slice(bytes).expect("the message reads");
     let written = doc.to_xml_vec().expect("the message serialises");
     support::validate(&schema, &written)
         .expect("the written message validates against the official schema");
     let reread = T::from_xml_slice(&written).expect("the written message reads");
+    (doc, reread)
+}
+
+/// The bytes of the fixture `file` in `tests/fixtures/messaggi-fattura`.
+fn fixture(file: &str) -> Vec<u8> {
+    support::fixture_bytes(&format!("messaggi-fattura/{file}"))
+}
+
+/// Reads the fixture `file` through [`read_and_reread`] and returns the
+/// first read once both reads are equal.
+fn round_trips<T: Document + Debug + PartialEq>(file: &str) -> T {
+    let (doc, reread) = read_and_reread::<T>(&fixture(file));
     assert_eq!(doc, reread);
+    doc
+}
+
+/// Reads the signed message `bytes` through [`read_and_reread`] and returns
+/// the first read once both reads are equal. The signatures are compared
+/// with the in-scope namespaces of their `xs:any` content cleared, because
+/// the Agenzia examples bind their namespaces to prefixes the writer does
+/// not pick.
+fn signed_round_trips<T, F>(bytes: &[u8], signature: F) -> T
+where
+    T: Document + Debug + PartialEq + Clone,
+    F: Fn(&mut T) -> &mut Signature,
+{
+    let (doc, mut reread) = read_and_reread::<T>(bytes);
+    let mut first = doc.clone();
+    for read in [&mut first, &mut reread] {
+        let slot = signature(read);
+        *slot = support::normalize_messaggi_fattura_signature(slot.clone());
+    }
+    assert_eq!(first, reread);
     doc
 }
 
@@ -136,32 +167,81 @@ fn official_samples_without_versione_rejected() {
     }
 }
 
+/// The `Hash` of the Agenzia examples, of their invoice
+/// `ITHVQWPH73P42H501Y_00022.xml`.
+const AGENZIA_HASH: &str = "ef912599ea43cddf0c9ee59e30e38b2a91f0793ef046e61aa120a9d3ee0b5992";
+
 /// The Agenzia example of a rejection receipt that carries `versione` reads
-/// with its error, writes, validates and re-reads equal. The signatures are
-/// compared with the in-scope namespaces of their `xs:any` content cleared,
-/// because the example binds its namespaces to prefixes the writer does not
-/// pick.
+/// with its error, writes, validates and re-reads equal.
 #[test]
 fn official_ricevuta_scarto_sample_round_trips() {
-    let mut doc = RicevutaScarto::from_xml_slice(&support::sample_bytes(
-        "ITHVQWPH73P42H501Y_00022_NS__001.xml",
-    ))
-    .expect("the sample reads");
+    let doc: RicevutaScarto = signed_round_trips(
+        &support::sample_bytes("ITHVQWPH73P42H501Y_00022_NS__001.xml"),
+        |doc: &mut RicevutaScarto| &mut doc.content.signature,
+    );
     let errors = &doc.content.lista_errori.content.errore;
     assert_eq!(errors.len(), 1);
     assert_eq!(errors[0].content.codice, "00002");
     assert_eq!(errors[0].content.descrizione, "Nome file duplicato");
-    assert_eq!(
-        doc.content.hash,
-        "ef912599ea43cddf0c9ee59e30e38b2a91f0793ef046e61aa120a9d3ee0b5992"
+    assert_eq!(doc.content.hash, AGENZIA_HASH);
+}
+
+/// The Agenzia example of the metadata, with the `versione` its publication
+/// omits, reads, writes, validates and re-reads equal.
+#[test]
+fn agenzia_file_metadati_round_trips() {
+    let doc: FileMetadati = round_trips("ITHVQWPH73P42H501Y_00022_MT_001.xml");
+    let content = &doc.content;
+    assert_eq!(content.identificativo_sd_i, "724999");
+    assert_eq!(content.hash, AGENZIA_HASH);
+    assert_eq!(content.codice_destinatario, "0000000");
+    assert_eq!(content.message_id, "918929440");
+}
+
+/// The Agenzia example of the delivery receipt, with the `versione` its
+/// publication omits, reads with its recipient and its empty `Note`, writes,
+/// validates and re-reads equal.
+#[test]
+fn agenzia_ricevuta_consegna_round_trips() {
+    let doc: RicevutaConsegna = signed_round_trips(
+        &fixture("ITHVQWPH73P42H501Y_00022_RC_001.xml"),
+        |doc: &mut RicevutaConsegna| &mut doc.content.signature,
     );
-    let written = doc.to_xml_vec().expect("the receipt serialises");
-    support::validate(&support::messaggi_fattura_schema(), &written)
-        .expect("the written receipt validates against the official schema");
-    let mut reread = RicevutaScarto::from_xml_slice(&written).expect("the written receipt reads");
-    doc.content.signature =
-        support::normalize_messaggi_fattura_signature(doc.content.signature.clone());
-    reread.content.signature =
-        support::normalize_messaggi_fattura_signature(reread.content.signature.clone());
-    assert_eq!(doc, reread);
+    let content = &doc.content;
+    assert_eq!(content.hash, AGENZIA_HASH);
+    assert_eq!(
+        content.data_ora_consegna,
+        "2018-06-16T18:35:42.000+02:00"
+            .parse::<DateTime>()
+            .expect("a valid dateTime")
+    );
+    assert_eq!(content.destinatario.content.codice, "0000000");
+    assert_eq!(
+        content.destinatario.content.descrizione.as_deref(),
+        Some("prova@pec.it")
+    );
+    assert_eq!(content.note.as_deref(), Some(""));
+}
+
+/// The Agenzia example of the non-delivery receipt, with the `versione` its
+/// publication omits, reads with its date and its non-ASCII `Descrizione`,
+/// writes, validates and re-reads equal.
+#[test]
+fn agenzia_ricevuta_impossibilita_recapito_round_trips() {
+    let doc: RicevutaImpossibilitaRecapito = signed_round_trips(
+        &fixture("ITHVQWPH73P42H501Y_00022_MC_001.xml"),
+        |doc: &mut RicevutaImpossibilitaRecapito| &mut doc.content.signature,
+    );
+    let content = &doc.content;
+    assert_eq!(content.hash, AGENZIA_HASH);
+    assert_eq!(
+        content.data_messa_a_disposizione,
+        "2018-06-17".parse::<Date>().expect("a valid date")
+    );
+    let description = content.descrizione.as_deref().expect("the description");
+    assert!(
+        description.starts_with("La fattura è disponibile in consultazione"),
+        "got {description}"
+    );
+    assert!(description.contains("“Data Messa a Disposizione”"));
 }
