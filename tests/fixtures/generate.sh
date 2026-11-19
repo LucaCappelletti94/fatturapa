@@ -10,9 +10,13 @@ trap 'rm -rf "$work" *.srl' EXIT
 
 invoice=../../spec/samples/IT01234567890_FPR01.xml
 
+# -not_before a few hours back: the CMS signingTime is second-resolution, so a
+# certificate minted in the same second could look NotYetValid to a verifier.
+past=$(date -u -d '2 hours ago' +%Y%m%d%H%M%SZ)
+
 # Root CA and intermediate, long-lived.
 openssl req -x509 -new -newkey rsa:3072 -nodes \
-    -keyout ca.key -out ca.pem -days 3650 \
+    -keyout ca.key -out ca.pem -days 3650 -not_before "$past" \
     -subj "/C=IT/O=fatturapa test/CN=fatturapa test root CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null
@@ -20,9 +24,6 @@ openssl req -x509 -new -newkey rsa:3072 -nodes \
 openssl req -new -newkey rsa:3072 -nodes \
     -keyout intermediate.key -out "$work/intermediate.csr" \
     -subj "/C=IT/O=fatturapa test/CN=fatturapa test intermediate CA" 2>/dev/null
-# -not_before a few hours back: the CMS signingTime is second-resolution, so a
-# certificate minted in the same second could look NotYetValid to a verifier.
-past=$(date -u -d '2 hours ago' +%Y%m%d%H%M%SZ)
 openssl x509 -req -in "$work/intermediate.csr" \
     -CA ca.pem -CAkey ca.key -CAcreateserial -out intermediate.pem -days 3650 \
     -not_before "$past" -set_serial 1 \
@@ -61,7 +62,7 @@ openssl x509 -req -in "$work/p521-signer.csr" \
 
 # An unrelated root, for the wrong-anchor test.
 openssl req -x509 -new -newkey rsa:3072 -nodes \
-    -keyout other-root.key -out other-root.pem -days 3650 \
+    -keyout other-root.key -out other-root.pem -days 3650 -not_before "$past" \
     -subj "/C=IT/O=fatturapa other/CN=fatturapa other root CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null
@@ -259,7 +260,7 @@ openssl x509 -req -in "$work/signer3.csr" \
 # A root with the ca subject and a different key: an intermediate signed by
 # it matches the ca by name but not by signature.
 openssl req -x509 -new -newkey rsa:3072 -nodes \
-    -keyout ca-lookalike.key -out ca-lookalike.pem -days 3650 \
+    -keyout ca-lookalike.key -out ca-lookalike.pem -days 3650 -not_before "$past" \
     -subj "/C=IT/O=fatturapa test/CN=fatturapa test root CA" \
     -addext "basicConstraints=critical,CA:TRUE" \
     -addext "keyUsage=critical,keyCertSign,cRLSign" 2>/dev/null
