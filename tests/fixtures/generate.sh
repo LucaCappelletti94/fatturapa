@@ -303,6 +303,25 @@ openssl x509 -req -in "$work/ec-signer.csr" \
     -CA sha1-intermediate.pem -CAkey sha1-intermediate.key -CAcreateserial \
     -out sha1-signer.pem -days 3650 -not_before "$past" -sha1 2>/dev/null
 
+# A signer and an intermediate with 1024-bit RSA keys, below the verifier's
+# 2048-bit minimum. The intermediate certifies the ECDSA signer's key.
+openssl req -new -newkey rsa:1024 -nodes \
+    -keyout rsa1024-signer.key -out "$work/rsa1024-signer.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test RSA 1024 signer" 2>/dev/null
+openssl x509 -req -in "$work/rsa1024-signer.csr" \
+    -CA intermediate.pem -CAkey intermediate.key -CAcreateserial \
+    -out rsa1024-signer.pem -days 3650 -not_before "$past" 2>/dev/null
+openssl req -new -newkey rsa:1024 -nodes \
+    -keyout rsa1024-intermediate.key -out "$work/rsa1024-intermediate.csr" \
+    -subj "/C=IT/O=fatturapa test/CN=fatturapa test RSA 1024 intermediate" 2>/dev/null
+openssl x509 -req -in "$work/rsa1024-intermediate.csr" \
+    -CA ca.pem -CAkey ca.key -CAcreateserial -out rsa1024-intermediate.pem -days 3650 \
+    -not_before "$past" \
+    -extfile <(printf 'basicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\n') 2>/dev/null
+openssl x509 -req -in "$work/ec-signer.csr" \
+    -CA rsa1024-intermediate.pem -CAkey rsa1024-intermediate.key -CAcreateserial \
+    -out rsa1024-chain-signer.pem -days 3650 -not_before "$past" 2>/dev/null
+
 chain() {
     cat intermediate.pem ca.pem
 }
@@ -325,6 +344,9 @@ openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -inkey expired-signer.key -certfile <(chain) 2>/dev/null
 openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-p521.p7m -signer p521-signer.pem -inkey p521-signer.key \
+    -certfile <(chain) 2>/dev/null
+openssl cms -sign -nodetach -binary -md sha256 -outform DER -in "$invoice" \
+    -out invoice-rsa1024.p7m -signer rsa1024-signer.pem -inkey rsa1024-signer.key \
     -certfile <(chain) 2>/dev/null
 openssl cms -sign -binary -md sha256 -outform DER -in "$invoice" \
     -out invoice-detached.p7m -signer rsa-signer.pem -inkey rsa-signer.key \

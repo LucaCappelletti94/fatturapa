@@ -11,11 +11,12 @@
 //! checks that the signed attributes carry a `content-type` matching the
 //! encapsulated content and a `message-digest` matching the digest of the
 //! content, verifies the signature over the `DER` of the signed attributes
-//! with the signer's public key (`RSA PKCS#1 v1.5` and `ECDSA` on `P-256`
-//! and `P-384`, with `SHA-256`, `SHA-384` and `SHA-512`), checks the signer
-//! certificate's `keyUsage` and `ESS signing-certificate` and
-//! `signing-certificate-v2` signed attributes when present, and builds the
-//! chain from the signer certificate to one of the trust anchors.
+//! with the signer's public key (`RSA PKCS#1 v1.5` with a key of at least
+//! 2048 bits, and `ECDSA` on `P-256` and `P-384`, with `SHA-256`, `SHA-384`
+//! and `SHA-512`), checks the signer certificate's `keyUsage` and `ESS
+//! signing-certificate` and `signing-certificate-v2` signed attributes when
+//! present, and builds the chain from the signer certificate to one of the
+//! trust anchors, whose `RSA` links also need keys of at least 2048 bits.
 //!
 //! [`verify_xades`] checks every `XAdES-BES` enveloped `ds:Signature` child
 //! of the document element. Each reference is a same-document `""` or
@@ -54,6 +55,7 @@
 //! needs it performs it itself, for example against the `CRL` distribution
 //! points of the chain.
 
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
 use base64::Engine;
@@ -61,11 +63,14 @@ use cms::cert::CertificateChoices;
 use cms::content_info::ContentInfo;
 use cms::signed_data::{SignedData, SignerIdentifier, SignerInfo};
 use const_oid::db;
-use der::asn1::{AnyRef, ContextSpecific, ObjectIdentifier, OctetString};
+use der::asn1::{AnyRef, ContextSpecific, ObjectIdentifier, OctetString, UintRef};
 use der::{Any, Decode, Encode, EncodingRules, Reader, SliceReader, Tag, TagNumber, Tagged};
 use digest::Digest;
 use jiff::Timestamp;
-use rustls_pki_types::{CertificateDer, SignatureVerificationAlgorithm, TrustAnchor, UnixTime};
+use rustls_pki_types::{
+    AlgorithmIdentifier, CertificateDer, InvalidSignature, SignatureVerificationAlgorithm,
+    TrustAnchor, UnixTime,
+};
 use sha1::Sha1;
 use sha2::{Sha256, Sha384, Sha512};
 use spki::AlgorithmIdentifierOwned;
@@ -104,12 +109,22 @@ const MS_DOCUMENT_SIGNING: ObjectIdentifier =
 /// The `anyExtendedKeyUsage` extended key usage.
 const ANY_EXTENDED_KEY_USAGE: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.5.29.37.0");
 
-/// The signature verification algorithms trusted for the certificate
+/// The smallest `RSA` modulus, in bits, the verification algorithms accept.
+/// `ring` refuses a shorter key with the same error as a signature that does
+/// not match, so the verifier checks the length itself.
+const MINIMUM_RSA_BITS: usize = 2048;
+
+/// The `RSA` signature verification algorithms trusted for the certificate
 /// signatures of a chain.
-static CHAIN_SIGNATURE_ALGORITHMS: &[&dyn SignatureVerificationAlgorithm] = &[
+const CHAIN_RSA_ALGORITHMS: [&dyn SignatureVerificationAlgorithm; 3] = [
     webpki::ring::RSA_PKCS1_2048_8192_SHA256,
     webpki::ring::RSA_PKCS1_2048_8192_SHA384,
     webpki::ring::RSA_PKCS1_2048_8192_SHA512,
+];
+
+/// The `ECDSA` signature verification algorithms trusted for the certificate
+/// signatures of a chain.
+const CHAIN_ECDSA_ALGORITHMS: [&dyn SignatureVerificationAlgorithm; 4] = [
     webpki::ring::ECDSA_P256_SHA256,
     webpki::ring::ECDSA_P256_SHA384,
     webpki::ring::ECDSA_P384_SHA256,
@@ -695,6 +710,7 @@ fn verify_signer_info(
         ecdsa_curve(&signer).as_ref(),
     )
     .map_err(|check| signature_check_error(&check))?;
+    rsa_key_long_enough(&signer)?;
     end_entity
         .verify_signature(
             algorithm,
@@ -758,6 +774,81 @@ fn ecdsa_curve(certificate: &Certificate) -> Option<ObjectIdentifier> {
         .parameters
         .as_ref()
         .and_then(|parameters| parameters.decode_as::<ObjectIdentifier>().ok())
+}
+
+/// Refuses a certificate whose `RSA` key is shorter than
+/// [`MINIMUM_RSA_BITS`], which the verification algorithms would report as
+/// a signature that does not match.
+///
+/// # Errors
+///
+/// [`SignedError::UnsupportedAlgorithm`] naming the key length.
+fn rsa_key_long_enough(certificate: &Certificate) -> Result<(), SignedError> {
+    let spki = certificate.tbs_certificate().subject_public_key_info();
+    if spki.algorithm.oid != db::rfc5912::RSA_ENCRYPTION {
+        return Ok(());
+    }
+    short_rsa_modulus(spki.subject_public_key.raw_bytes()).map_or(Ok(()), |bits| {
+        Err(SignedError::UnsupportedAlgorithm(short_rsa_key(bits)))
+    })
+}
+
+/// The name of an `RSA` key of `bits` bits in an unsupported-algorithm error.
+fn short_rsa_key(bits: usize) -> String {
+    format!("{bits}-bit RSA")
+}
+
+/// An `RSAPublicKey`, RFC 8017 appendix A.1.1.
+#[derive(der::Sequence)]
+struct RsaPublicKey<'a> {
+    /// The modulus `n`.
+    modulus: UintRef<'a>,
+    /// The public exponent `e`.
+    public_exponent: UintRef<'a>,
+}
+
+/// The length in bits of the modulus of an `RSAPublicKey` shorter than
+/// [`MINIMUM_RSA_BITS`], or `None` for a longer or unreadable key.
+fn short_rsa_modulus(rsa_public_key: &[u8]) -> Option<usize> {
+    let modulus = RsaPublicKey::from_der(rsa_public_key).ok()?.modulus;
+    let (first, rest) = modulus.as_bytes().split_first()?;
+    let bits = rest.len() * 8 + usize::try_from(u8::BITS - first.leading_zeros()).ok()?;
+    (bits < MINIMUM_RSA_BITS).then_some(bits)
+}
+
+/// A chain signature algorithm that refuses an `RSA` key shorter than
+/// [`MINIMUM_RSA_BITS`] and records its length, so the chain error can name
+/// the unsupported key.
+#[derive(Debug)]
+struct MinimumRsaKey<'a> {
+    /// The algorithm that verifies a key of the accepted length.
+    algorithm: &'static dyn SignatureVerificationAlgorithm,
+    /// The length in bits of the last refused key, zero when none was.
+    refused_bits: &'a AtomicUsize,
+}
+
+impl SignatureVerificationAlgorithm for MinimumRsaKey<'_> {
+    fn verify_signature(
+        &self,
+        public_key: &[u8],
+        message: &[u8],
+        signature: &[u8],
+    ) -> Result<(), InvalidSignature> {
+        if let Some(bits) = short_rsa_modulus(public_key) {
+            self.refused_bits.store(bits, Ordering::Relaxed);
+            return Err(InvalidSignature);
+        }
+        self.algorithm
+            .verify_signature(public_key, message, signature)
+    }
+
+    fn public_key_alg_id(&self) -> AlgorithmIdentifier {
+        self.algorithm.public_key_alg_id()
+    }
+
+    fn signature_alg_id(&self) -> AlgorithmIdentifier {
+        self.algorithm.signature_alg_id()
+    }
 }
 
 /// The signature verification algorithm of a `SignerInfo` signature, from
@@ -1142,9 +1233,25 @@ fn verify_chain(
     let time = UnixTime::since_unix_epoch(Duration::from_secs(
         u64::try_from(signing_time.as_second()).unwrap_or(0),
     ));
+    let refused_bits = AtomicUsize::new(0);
+    let [rsa_sha256, rsa_sha384, rsa_sha512] =
+        CHAIN_RSA_ALGORITHMS.map(|algorithm| MinimumRsaKey {
+            algorithm,
+            refused_bits: &refused_bits,
+        });
+    let [p256_sha256, p256_sha384, p384_sha256, p384_sha384] = CHAIN_ECDSA_ALGORITHMS;
+    let algorithms: [&dyn SignatureVerificationAlgorithm; 7] = [
+        &rsa_sha256,
+        &rsa_sha384,
+        &rsa_sha512,
+        p256_sha256,
+        p256_sha384,
+        p384_sha256,
+        p384_sha384,
+    ];
     let path = end_entity
         .verify_for_usage(
-            CHAIN_SIGNATURE_ALGORITHMS,
+            &algorithms,
             &trust_anchors,
             &intermediates,
             time,
@@ -1152,7 +1259,14 @@ fn verify_chain(
             None,
             Some(&issuers_may_sign_certificates),
         )
-        .map_err(chain_error)?;
+        .map_err(
+            |error| match (error, refused_bits.load(Ordering::Relaxed)) {
+                (WebpkiError::InvalidSignatureForPublicKey, bits) if bits > 0 => {
+                    ChainError::UnsupportedAlgorithm(short_rsa_key(bits))
+                }
+                (error, _) => chain_error(error),
+            },
+        )?;
     let mut chain = vec![leaf.clone()];
     for certificate in path.intermediate_certificates() {
         chain.push(
