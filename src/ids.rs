@@ -207,6 +207,9 @@ pub enum IdError {
     /// `Indirizzo` is not one to 60 Latin characters.
     #[error("not a valid address, one to 60 characters: {0}")]
     Indirizzo(String),
+    /// `NumeroCivico` is not one to 8 printable basic Latin characters.
+    #[error("not a valid numero civico, one to 8 printable characters: {0}")]
+    NumeroCivico(String),
     /// `Comune` is not one to 60 Latin characters.
     #[error("not a valid comune, one to 60 characters: {0}")]
     Comune(String),
@@ -1363,6 +1366,39 @@ impl Indirizzo {
 }
 
 id_newtype!(Indirizzo, field);
+
+/// The `NumeroCivico` of a seat, one to 8 printable basic Latin
+/// characters.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
+pub struct NumeroCivico(String);
+
+impl NumeroCivico {
+    /// Builds the `NumeroCivico` when `value` is one to 8 printable basic
+    /// Latin characters.
+    ///
+    /// # Errors
+    ///
+    /// Fails with [`IdError::NumeroCivico`] when the value is not one to 8
+    /// printable basic Latin characters.
+    pub fn try_new(value: impl Into<String>) -> Result<Self, IdError> {
+        let value = value.into();
+        if basic_latin_len(&value, 8) {
+            Ok(Self(value))
+        } else {
+            Err(IdError::NumeroCivico(value))
+        }
+    }
+
+    /// The house number as written in the document.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+id_newtype!(NumeroCivico, field);
 
 /// The `Comune` of a seat, one to 60 characters of basic Latin and the
 /// Latin-1 supplement.
@@ -2785,6 +2821,18 @@ mod tests {
     }
 
     #[test]
+    fn numero_civico_is_one_to_8_basic_latin() {
+        assert!(NumeroCivico::try_new("1").is_ok(), "one character");
+        assert!(NumeroCivico::try_new("12/A BIS").is_ok(), "8 characters");
+        for bad in ["", "123456789", "1\n", "1°"] {
+            assert!(
+                matches!(NumeroCivico::try_new(bad), Err(IdError::NumeroCivico(_))),
+                "{bad} must be rejected"
+            );
+        }
+    }
+
+    #[test]
     fn regime_fiscale_round_trips_and_rejects() {
         assert_eq!(RegimeFiscale::Rf01.code(), "RF01");
         assert_eq!("RF01".parse::<RegimeFiscale>(), Ok(RegimeFiscale::Rf01));
@@ -2941,6 +2989,7 @@ mod tests {
         round_trips::<Denomination, _>("AZIENDA SRL", &"a".repeat(81), |v| v.as_str().to_string());
         round_trips::<PersonName, _>("MARIO", &"a".repeat(61), |v| v.as_str().to_string());
         round_trips::<Indirizzo, _>("VIA ROMA 1", &"a".repeat(61), |v| v.as_str().to_string());
+        round_trips::<NumeroCivico, _>("1/A", "123456789", |v| v.as_str().to_string());
         round_trips::<Comune, _>("ROMA", &"a".repeat(61), |v| v.as_str().to_string());
         round_trips::<UnitaMisura, _>("PZ", "01234567890", |v| v.as_str().to_string());
         round_trips::<PostalCode, _>("10100", "s-09011", |v| v.as_str().to_string());

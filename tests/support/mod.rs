@@ -259,19 +259,21 @@ pub(crate) fn buyer_company() -> Company {
 
 /// The US business party of the art. 7-ter and self-invoice fixtures,
 /// without an Italian VAT number, so its `IdFiscaleIVA` carries the
-/// country of residence and the fiscal identifier assigned there.
+/// country of residence and the fiscal identifier assigned there, and
+/// with its `NumeroCivico` apart from the `Indirizzo`.
 pub(crate) fn business_us() -> Business {
     Business::foreign(
         Country::US,
         "ACME INC".parse().expect("a valid denomination"),
         "US123456789".parse().expect("a valid identifier"),
         Address::foreign(
-            "FIFTH AVENUE 1".parse().expect("a valid address"),
+            "FIFTH AVENUE".parse().expect("a valid address"),
             Some("10001".parse().expect("a valid postal code")),
             "NEW YORK".parse().expect("a valid comune"),
             Country::US,
         )
-        .expect("a valid foreign seat"),
+        .expect("a valid foreign seat")
+        .with_numero_civico("1".parse().expect("a valid numero civico")),
     )
 }
 

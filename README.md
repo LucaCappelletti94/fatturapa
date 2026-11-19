@@ -49,14 +49,16 @@ let seller = Seller::try_denomination(
     "ALPHA SRL",
     "02222222222",
     "02222222222",
-    Address::try_italian("VIA ROMA 1", "00100", "ROMA", Provincia::Rm)?,
+    Address::try_italian("VIA ROMA", "00100", "ROMA", Provincia::Rm)?
+        .with_numero_civico("1".parse()?),
     RegimeFiscale::Rf01,
 )?;
 let client = Business::try_foreign(
     Country::US,
     "ACME INC",
     "US123456789",
-    Address::try_foreign("FIFTH AVENUE 1", Some("10001"), "NEW YORK", Country::US)?,
+    Address::try_foreign("FIFTH AVENUE", Some("10001"), "NEW YORK", Country::US)?
+        .with_numero_civico("1".parse()?),
 )?;
 let line = SevenTerLine::builder()
     .description("SERVIZIO DI CONSULENZA")

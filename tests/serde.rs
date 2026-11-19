@@ -220,6 +220,16 @@ fn domain_types_roundtrip() {
     .unwrap();
     assert_eq!(roundtrip(&foreign_address), foreign_address);
 
+    let numbered_italian = Address::try_italian("VIA ROMA", "00100", "ROMA", Provincia::Rm)
+        .unwrap()
+        .with_numero_civico("1/A".parse().unwrap());
+    assert_eq!(roundtrip(&numbered_italian), numbered_italian);
+
+    let numbered_foreign = foreign_address
+        .clone()
+        .with_numero_civico("1".parse().unwrap());
+    assert_eq!(roundtrip(&numbered_foreign), numbered_foreign);
+
     let seller = Seller::denomination(
         "ACME SPA".parse().unwrap(),
         "02222222222".parse().unwrap(),

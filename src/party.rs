@@ -26,7 +26,7 @@ use crate::generated::fpr12::{
 };
 use crate::ids::{
     Cap, CodiceFiscale, Comune, Denomination, EuCountry, ForeignTaxId, IdError, Indirizzo,
-    PartitaIva, PersonName, PostalCode, Provincia, RegimeFiscale,
+    NumeroCivico, PartitaIva, PersonName, PostalCode, Provincia, RegimeFiscale,
 };
 use iso_country::Country;
 
@@ -206,6 +206,8 @@ enum Seat {
     Italian {
         /// The `Indirizzo`.
         indirizzo: Indirizzo,
+        /// The `NumeroCivico`, when given apart from the `Indirizzo`.
+        numero_civico: Option<NumeroCivico>,
         /// The `CAP`.
         cap: Cap,
         /// The `Comune`.
@@ -218,6 +220,8 @@ enum Seat {
     Foreign {
         /// The `Indirizzo`.
         indirizzo: Indirizzo,
+        /// The `NumeroCivico`, when given apart from the `Indirizzo`.
+        numero_civico: Option<NumeroCivico>,
         /// The foreign postal code, appended to the `Indirizzo`.
         postal_code: Option<PostalCode>,
         /// The `Comune`.
@@ -239,6 +243,7 @@ impl Address {
     ) -> Self {
         Self(Seat::Italian {
             indirizzo,
+            numero_civico: None,
             cap,
             comune,
             provincia,
@@ -334,6 +339,7 @@ impl Address {
         if written.chars().count() <= 60 {
             Ok(Self(Seat::Foreign {
                 indirizzo,
+                numero_civico: None,
                 postal_code,
                 comune,
                 country,
@@ -341,6 +347,23 @@ impl Address {
         } else {
             Err(IdError::Address(written))
         }
+    }
+
+    /// The seat with its `NumeroCivico` written in its own element, for
+    /// an `Indirizzo` that does not already carry it.
+    #[must_use]
+    pub fn with_numero_civico(mut self, numero_civico: NumeroCivico) -> Self {
+        match &mut self.0 {
+            Seat::Italian {
+                numero_civico: slot,
+                ..
+            }
+            | Seat::Foreign {
+                numero_civico: slot,
+                ..
+            } => *slot = Some(numero_civico),
+        }
+        self
     }
 
     /// The `Indirizzo` to write, with the foreign postal code appended
@@ -357,6 +380,16 @@ impl Address {
                 || indirizzo.as_str().to_string(),
                 |postal| format!("{} {}", indirizzo.as_str(), postal.as_str()),
             ),
+        }
+    }
+
+    /// The `NumeroCivico` to write, when given apart from the `Indirizzo`.
+    #[must_use]
+    pub fn numero_civico(&self) -> Option<&str> {
+        match &self.0 {
+            Seat::Italian { numero_civico, .. } | Seat::Foreign { numero_civico, .. } => {
+                numero_civico.as_ref().map(NumeroCivico::as_str)
+            }
         }
     }
 
@@ -479,7 +512,7 @@ impl Party {
         IndirizzoType {
             content: IndirizzoTypeContent {
                 indirizzo: self.address.indirizzo(),
-                numero_civico: None,
+                numero_civico: self.address.numero_civico().map(str::to_string),
                 cap: self.address.cap().to_string(),
                 comune: self.address.comune().to_string(),
                 provincia: self.address.provincia_code().map(str::to_string),
@@ -1160,6 +1193,8 @@ enum AddressForm {
     Italian {
         /// The `Indirizzo`.
         indirizzo: Indirizzo,
+        /// The `NumeroCivico`, when given apart from the `Indirizzo`.
+        numero_civico: Option<NumeroCivico>,
         /// The `CAP`.
         cap: Cap,
         /// The `Comune`.
@@ -1171,6 +1206,8 @@ enum AddressForm {
     Foreign {
         /// The `Indirizzo`.
         indirizzo: Indirizzo,
+        /// The `NumeroCivico`, when given apart from the `Indirizzo`.
+        numero_civico: Option<NumeroCivico>,
         /// The foreign postal code, appended to the `Indirizzo`.
         postal_code: Option<PostalCode>,
         /// The `Comune`.
@@ -1189,22 +1226,26 @@ impl serde::Serialize for Address {
         let form = match &self.0 {
             Seat::Italian {
                 indirizzo,
+                numero_civico,
                 cap,
                 comune,
                 provincia,
             } => AddressForm::Italian {
                 indirizzo: indirizzo.clone(),
+                numero_civico: numero_civico.clone(),
                 cap: *cap,
                 comune: comune.clone(),
                 provincia: *provincia,
             },
             Seat::Foreign {
                 indirizzo,
+                numero_civico,
                 postal_code,
                 comune,
                 country,
             } => AddressForm::Foreign {
                 indirizzo: indirizzo.clone(),
+                numero_civico: numero_civico.clone(),
                 postal_code: postal_code.clone(),
                 comune: comune.clone(),
                 country: *country,
@@ -1220,21 +1261,33 @@ impl<'de> serde::Deserialize<'de> for Address {
     where
         D: serde::Deserializer<'de>,
     {
-        match AddressForm::deserialize(deserializer)? {
+        let (seat, numero_civico) = match AddressForm::deserialize(deserializer)? {
             AddressForm::Italian {
                 indirizzo,
+                numero_civico,
                 cap,
                 comune,
                 provincia,
-            } => Ok(Self::italian(indirizzo, cap, comune, provincia)),
+            } => (
+                Self::italian(indirizzo, cap, comune, provincia),
+                numero_civico,
+            ),
             AddressForm::Foreign {
                 indirizzo,
+                numero_civico,
                 postal_code,
                 comune,
                 country,
-            } => Self::foreign(indirizzo, postal_code, comune, country)
-                .map_err(serde::de::Error::custom),
-        }
+            } => (
+                Self::foreign(indirizzo, postal_code, comune, country)
+                    .map_err(serde::de::Error::custom)?,
+                numero_civico,
+            ),
+        };
+        Ok(match numero_civico {
+            Some(numero_civico) => seat.with_numero_civico(numero_civico),
+            None => seat,
+        })
     }
 }
 
@@ -1656,6 +1709,44 @@ mod tests {
         assert_eq!(seat.indirizzo(), "FIFTH AVENUE 1");
         assert_eq!(seat.comune(), "NEW YORK");
         assert_eq!(seat.cap(), "00000");
+    }
+
+    /// The `NumeroCivico` fills its own element of the `Sede`, for the
+    /// Italian and the foreign seat alike, and leaves the `Indirizzo` as
+    /// given, the foreign postal code still appended to it.
+    #[test]
+    fn the_numero_civico_fills_its_own_element() {
+        let party = |address| Party {
+            name: Name::Denomination("ALPHA SRL".parse().expect("a valid denomination")),
+            identity: TaxIdentity::eu_vat(
+                EuCountry::De,
+                "DE998877665".parse().expect("a valid identifier"),
+            ),
+            address,
+        };
+        let italian = party(
+            Address::try_italian("VIA ROMA", "00100", "ROMA", Provincia::Rm)
+                .expect("the seat is valid")
+                .with_numero_civico("1/A".parse().expect("a valid numero civico")),
+        )
+        .sede()
+        .content;
+        assert_eq!(italian.indirizzo, "VIA ROMA");
+        assert_eq!(italian.numero_civico.as_deref(), Some("1/A"));
+        assert_eq!(italian.cap, "00100");
+
+        let foreign = party(
+            Address::try_foreign("FIFTH AVENUE", Some("10001"), "NEW YORK", Country::US)
+                .expect("the seat is valid")
+                .with_numero_civico("1".parse().expect("a valid numero civico")),
+        )
+        .sede()
+        .content;
+        assert_eq!(foreign.indirizzo, "FIFTH AVENUE 10001");
+        assert_eq!(foreign.numero_civico.as_deref(), Some("1"));
+        assert_eq!(foreign.cap, "00000");
+
+        assert_eq!(party(rome()).sede().content.numero_civico, None);
     }
 
     #[test]
